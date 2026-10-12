@@ -46,7 +46,10 @@ date_default_timezone_set(TIMEZONE);
 function data_dir() {
     static $dir = null;
     if ($dir !== null) return $dir;
-    foreach ([__DIR__, sys_get_temp_dir()] as $d) {
+    // 优先脚本同目录的 data/ 子目录 (跨请求/跨进程稳定一致, 防止配置"保存后丢失")
+    // 其次脚本同目录, 最后才降级系统临时目录
+    foreach ([__DIR__ . '/data', __DIR__, sys_get_temp_dir()] as $d) {
+        if (!is_dir($d)) @mkdir($d, 0777, true);
         if (is_dir($d) && is_writable($d)) { $dir = $d; return $dir; }
     }
     $dir = sys_get_temp_dir();
