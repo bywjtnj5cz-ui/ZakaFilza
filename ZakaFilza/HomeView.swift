@@ -42,6 +42,20 @@ struct HomeView: View {
 
                     // 底部信息
                     footerInfo
+
+                    // 手动刷新云控配置 (加载不出按钮时可点此重试)
+                    Button {
+                        config.loadConfig()
+                        toastMsg = "正在刷新配置…"
+                        withAnimation { showToast = true }
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                            withAnimation { showToast = false }
+                        }
+                    } label: {
+                        Label("刷新配置", systemImage: "arrow.clockwise")
+                            .font(.footnote)
+                            .foregroundColor(.secondary)
+                    }
                 }
                 .padding()
             }

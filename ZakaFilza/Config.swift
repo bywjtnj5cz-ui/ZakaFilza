@@ -111,13 +111,18 @@ final class ConfigManager: ObservableObject {
     }
 
     // 服务端管控策略: 版本封杀检查 + 锁定态自愈
+    private var lastSelfHealAt: Date = .distantPast
+
     private func applyServerPolicy(_ c: AppConfig) {
-        // 锁定态自愈: 已激活但被服务器判定未授权 (旧缓存缺 session_token / token 失效)
-        // → 静默重新验证拿 token, 验证成功后 verify 内部会自动重拉配置
+        // 锁定态自愈: 已激活但被服务器判定未授权
+        //   (旧缓存缺 session_token / token 因服务器 secret 变更而失效)
+        // → 静默重新验证拿新 token, 验证成功后 verify 内部会自动重拉配置
+        // 60 秒内只自愈一次, 防止服务器持续拒绝时无限循环请求
         if c.locked == true,
            LicenseManager.shared.isActivated,
-           LicenseManager.shared.sessionToken == nil || LicenseManager.shared.sessionToken?.isEmpty == true {
-            LicenseManager.shared.refreshIfNeeded()
+           Date().timeIntervalSince(lastSelfHealAt) > 60 {
+            lastSelfHealAt = Date()
+            LicenseManager.shared.refreshIfNeeded(force: true)
             return
         }
         if let minV = c.minVersion, !minV.isEmpty {

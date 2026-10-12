@@ -177,7 +177,8 @@ final class LicenseManager: ObservableObject {
     }
 
     // 检查是否需要重新验证（缓存过期后静默刷新）
-    func refreshIfNeeded(completion: ((Bool) -> Void)? = nil) {
+    // force=true: 即使有 token 也强制重验 (用于服务器判定 token 失效时的自愈)
+    func refreshIfNeeded(force: Bool = false, completion: ((Bool) -> Void)? = nil) {
         guard isActivated, let cardKey = cardKey else {
             completion?(false)
             return
@@ -185,7 +186,7 @@ final class LicenseManager: ObservableObject {
 
         // 自愈: 旧版本激活的缓存没有 session_token (服务器升级前的激活)
         // 新服务器要求 token 才下发云控配置 → 必须静默重新验证获取
-        if sessionToken == nil || sessionToken?.isEmpty == true {
+        if force || sessionToken == nil || sessionToken?.isEmpty == true {
             verify(cardKey: cardKey) { success, _ in
                 completion?(success)
             }
