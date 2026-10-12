@@ -95,6 +95,11 @@ final class ConfigManager: ObservableObject {
 
         URLSession.shared.dataTask(with: url) { [weak self] data, _, error in
             DispatchQueue.main.async {
+                if let error = error {
+                    self?.loadError = "网络错误: \(error.localizedDescription)"
+                    self?.loadFallback()
+                    return
+                }
                 if let data = data, let config = try? JSONDecoder().decode(AppConfig.self, from: data) {
                     self?.config = config
                     // 更新卡密验证服务器地址
@@ -104,6 +109,7 @@ final class ConfigManager: ObservableObject {
                     self?.applyServerPolicy(config)
                     self?.isLoading = false
                 } else {
+                    self?.loadError = "响应解析失败"
                     self?.loadFallback()
                 }
             }
