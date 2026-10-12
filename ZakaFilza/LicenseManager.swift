@@ -18,6 +18,8 @@ final class LicenseManager: ObservableObject {
     @Published var cardKey: String?
     @Published var isVerifying: Bool = false
     @Published var lastError: String?
+    // 服务端下发的会话凭证 (HMAC), 云控接口凭此获取完整配置
+    @Published private(set) var sessionToken: String?
 
     // 验证服务器地址（可在云端配置中覆盖）
     var verifyServerURL: String = "http://156.238.232.172/api/verify.php?action=verify"
@@ -36,6 +38,7 @@ final class LicenseManager: ObservableObject {
         let memberLevel: Int
         let uuid: String
         let verifiedAt: Date
+        var sessionToken: String?   // 旧缓存可能没有此字段
     }
 
     private func loadCache() {
@@ -48,6 +51,7 @@ final class LicenseManager: ObservableObject {
             self.isActivated = false
             return
         }
+        self.sessionToken = cache.sessionToken
 
         // 检查 UUID 是否匹配（防止卡密被复制到其他设备）
         guard cache.uuid == DeviceManager.shared.uuid else {
@@ -130,6 +134,8 @@ final class LicenseManager: ObservableObject {
                         }
                     }
                     let memberLevel = json["member_level"] as? Int ?? 1
+                    let token = json["session_token"] as? String
+                    self?.sessionToken = token
 
                     // 保存缓存
                     let cache = LicenseCache(
@@ -137,7 +143,8 @@ final class LicenseManager: ObservableObject {
                         expireAt: expireAt,
                         memberLevel: memberLevel,
                         uuid: device.uuid,
-                        verifiedAt: Date()
+                        verifiedAt: Date(),
+                        sessionToken: token
                     )
                     self?.saveCache(cache)
 
@@ -145,6 +152,9 @@ final class LicenseManager: ObservableObject {
                     self?.expireDate = expireAt
                     self?.memberLevel = memberLevel
                     self?.cardKey = cardKey
+
+                    // 激活成功后立即带 token 拉取完整云控配置
+                    ConfigManager.shared.loadConfig()
 
                     completion(true, nil)
                 } else {
@@ -163,6 +173,7 @@ final class LicenseManager: ObservableObject {
         expireDate = nil
         memberLevel = 0
         cardKey = nil
+        sessionToken = nil
     }
 
     // 检查是否需要重新验证（缓存过期后静默刷新）

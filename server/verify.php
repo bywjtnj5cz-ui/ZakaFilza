@@ -90,6 +90,7 @@ function default_config() {
         'announcement'       => "欢迎使用 Zaka 文件管理!\n\n首次使用请先选择与你系统版本匹配的漏洞利用方式, 获得文件系统访问权限后即可使用文件管理器.\n\n支持:\n• FilzaJailedDS (iOS 17-26)\n• FilzaSlop (iOS 18, 26, 27 beta)\n• Filza (越狱)",
         'config_url'         => '',  // 留空, 让 App 自行决定
         'verify_server_url'  => '',  // 留空, App 用内置默认地址
+        'min_version'        => '1.0.0',  // 最低可用版本, 低于此版本 App 启动即锁定 (版本封杀开关)
         'buttons' => [
             ['title' => '📁 文件管理', 'action' => 'open_file_manager', 'color' => '#FF6B9D'],
             ['title' => '⬇️ 下载中心', 'action' => 'open_file_manager', 'color' => '#6080FF'],
@@ -130,7 +131,7 @@ function load_config() {
 function save_config_file($cfg) {
     // 只允许已知字段
     $allowed = ['app_name','qq_group','wechat_official','version','announcement',
-                'config_url','verify_server_url','buttons','member_buttons','download_shortcuts'];
+                'config_url','verify_server_url','min_version','buttons','member_buttons','download_shortcuts'];
     $clean = [];
     foreach ($allowed as $k) {
         if (isset($cfg[$k])) $clean[$k] = $cfg[$k];
@@ -176,6 +177,27 @@ function find_card_index($cards, $cardKey) {
         if (($c['card_key'] ?? '') === $cardKey) return $i;
     }
     return -1;
+}
+
+// ==================== Session Token (服务端强制管控) ====================
+// 验证成功后下发的 token = HMAC(card_key|uuid, secret)
+// 云控配置接口 (action=config) 必须携带有效 token 才返回完整按钮/下载直链
+// 无 token / token 无效 / 卡密过期 / 设备不匹配 → 只返回锁定态基础信息
+function app_secret() {
+    static $secret = null;
+    if ($secret !== null) return $secret;
+    $f = data_file('app_secret.key');
+    if (file_exists($f)) {
+        $s = trim(file_get_contents($f));
+        if ($s !== '') { $secret = $s; return $secret; }
+    }
+    $secret = bin2hex(random_bytes(24));
+    @file_put_contents($f, $secret);
+    return $secret;
+}
+
+function session_token($cardKey, $uuid) {
+    return hash_hmac('sha256', $cardKey . '|' . $uuid, app_secret());
 }
 
 // ==================== 路由 ====================
@@ -246,17 +268,18 @@ case 'verify':
     save_cards($cards);
 
     out([
-        'success'      => true,
-        'message'      => '验证成功',
-        'expire_at'    => date('c', $expireTs),
-        'member_level' => (int)$card['member_level'],
+        'success'       => true,
+        'message'       => '验证成功',
+        'expire_at'     => date('c', $expireTs),
+        'member_level'  => (int)$card['member_level'],
+        'session_token' => session_token($cardKey, $uuid),
     ]);
     break;
 
-// -------------------- App: 拉取云端配置 (公开) --------------------
+// -------------------- App: 拉取云端配置 (带 session_token 鉴权) --------------------
 case 'config':
     $cfg = load_config();
-    // 如果服务器配置里没填 verify_server_url, 自动填上当前接口地址, 让 App 走这里验证
+    // 自动填充接口地址
     if (empty($cfg['verify_server_url'])) {
         $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
         $host = $_SERVER['HTTP_HOST'] ?? $_SERVER['SERVER_NAME'] ?? 'localhost';
@@ -269,7 +292,49 @@ case 'config':
         $script = $_SERVER['SCRIPT_NAME'] ?? '/api/verify.php';
         $cfg['config_url'] = "$protocol://$host$script?action=config";
     }
+    $cfg['min_version'] = $cfg['min_version'] ?? '1.0.0';
+
+    // ---- 鉴权: 必须携带卡密验证成功后下发的 session_token ----
+    $cardKey = trim($_GET['card_key'] ?? '');
+    $uuid    = trim($_GET['uuid'] ?? '');
+    $token   = trim($_GET['token'] ?? '');
+    $authorized = false;
+    if ($cardKey !== '' && $uuid !== '' && $token !== '') {
+        $cards = load_cards();
+        $idx = find_card_index($cards, $cardKey);
+        if ($idx >= 0) {
+            $card = $cards[$idx];
+            $expireTs = strtotime($card['expire_at'] ?? '');
+            $notExpired = ($expireTs !== false && $expireTs >= time());
+            $uuidMatch = (!empty($card['uuid']) && $card['uuid'] === $uuid);
+            $tokenOk = hash_equals(session_token($cardKey, $uuid), $token);
+            $authorized = $notExpired && $uuidMatch && $tokenOk;
+        }
+    }
+
     header('Content-Type: application/json; charset=utf-8');
+    if (!$authorized) {
+        // 锁定态: 只下发基础信息, 功能配置全部置空
+        // (破解版/未激活/被封卡密拿到的是空壳配置, 无任何可用功能)
+        $locked = [
+            'app_name'          => $cfg['app_name'],
+            'version'           => $cfg['version'],
+            'qq_group'          => $cfg['qq_group'],
+            'wechat_official'   => $cfg['wechat_official'],
+            'announcement'      => $cfg['announcement'],
+            'config_url'        => $cfg['config_url'],
+            'verify_server_url' => $cfg['verify_server_url'],
+            'min_version'       => $cfg['min_version'],
+            'locked'            => true,
+            'buttons'           => [],
+            'member_buttons'    => [],
+            'download_shortcuts'=> [],
+        ];
+        echo json_encode($locked, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+        exit;
+    }
+
+    $cfg['locked'] = false;
     echo json_encode($cfg, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
     exit;
 
@@ -557,6 +622,7 @@ textarea { width: 100%; min-height: 320px; font-family: SFMono-Regular, Menlo, m
     <h3>📝 基础信息</h3>
     <div class="row"><label style="min-width:110px">应用名</label><input id="c-app_name"></div>
     <div class="row"><label style="min-width:110px">版本号</label><input id="c-version"></div>
+    <div class="row"><label style="min-width:110px">最低可用版本</label><input id="c-min_version" placeholder="低于此版本的 App 启动即锁定, 如 1.1.0"><span style="font-size:12px;color:#e67e22">版本封杀开关</span></div>
     <div class="row"><label style="min-width:110px">QQ 群</label><input id="c-qq_group"></div>
     <div class="row"><label style="min-width:110px">微信公众号</label><input id="c-wechat_official"></div>
     <div class="row"><label style="min-width:110px">验证服务器</label><input id="c-verify_server_url" placeholder="留空则自动用本接口"></div>
@@ -721,6 +787,7 @@ async function loadConfig() {
 function renderConfigForm(cfg) {
   document.getElementById('c-app_name').value = cfg.app_name ?? '';
   document.getElementById('c-version').value = cfg.version ?? '';
+  document.getElementById('c-min_version').value = cfg.min_version ?? '1.0.0';
   document.getElementById('c-qq_group').value = cfg.qq_group ?? '';
   document.getElementById('c-wechat_official').value = cfg.wechat_official ?? '';
   document.getElementById('c-verify_server_url').value = cfg.verify_server_url ?? '';
@@ -735,6 +802,7 @@ function collectConfig() {
   const cfg = {
     app_name: document.getElementById('c-app_name').value,
     version: document.getElementById('c-version').value,
+    min_version: document.getElementById('c-min_version').value || '1.0.0',
     qq_group: document.getElementById('c-qq_group').value,
     wechat_official: document.getElementById('c-wechat_official').value,
     verify_server_url: document.getElementById('c-verify_server_url').value,

@@ -10,6 +10,8 @@ struct AppConfig: Codable {
     var announcement: String
     var configURL: String              // 云端配置地址（可被「更新地址」覆盖）
     var verifyServerURL: String?       // 卡密验证服务器地址
+    var minVersion: String?            // 最低可用版本 (版本封杀开关)
+    var locked: Bool?                  // true = 服务端未授权 (无有效卡密/token)
     var buttons: [ConfigButton]
     var memberButtons: [ConfigButton]  // 会员专属按钮
     var downloadShortcuts: [DownloadShortcut] // 一键下载直链
@@ -22,6 +24,8 @@ struct AppConfig: Codable {
         case announcement
         case configURL = "config_url"
         case verifyServerURL = "verify_server_url"
+        case minVersion = "min_version"
+        case locked
         case buttons
         case memberButtons = "member_buttons"
         case downloadShortcuts = "download_shortcuts"
@@ -55,6 +59,8 @@ final class ConfigManager: ObservableObject {
     @Published var config: AppConfig?
     @Published var isLoading = true
     @Published var loadError: String?
+    @Published var updateRequired = false      // 版本封杀: 当前版本低于服务器 min_version
+    @Published var requiredVersion: String?    // 要求的最低版本
 
     // App 启动时从此地址拉取云端配置 (按钮、下载直链、公告等)
     // 该地址由 verify.php 的 action=config 提供, 可在管理后台修改内容
@@ -68,7 +74,21 @@ final class ConfigManager: ObservableObject {
 
         // 优先用用户自定义的地址
         let urlString = AppStore.shared.customConfigURL ?? fallbackURL
-        guard let url = URL(string: urlString) else {
+
+        // 携带身份参数: 服务端校验 session_token 才下发完整云控配置
+        var components = URLComponents(string: urlString)
+        var query = components?.queryItems ?? []
+        let lm = LicenseManager.shared
+        if let ck = lm.cardKey, !ck.isEmpty {
+            query.append(URLQueryItem(name: "card_key", value: ck))
+        }
+        if let tk = lm.sessionToken, !tk.isEmpty {
+            query.append(URLQueryItem(name: "token", value: tk))
+        }
+        query.append(URLQueryItem(name: "uuid", value: DeviceManager.shared.uuid))
+        components?.queryItems = query
+
+        guard let url = components?.url else {
             loadFallback()
             return
         }
@@ -81,12 +101,30 @@ final class ConfigManager: ObservableObject {
                     if let verifyURL = config.verifyServerURL, !verifyURL.isEmpty {
                         LicenseManager.shared.verifyServerURL = verifyURL
                     }
+                    self?.applyServerPolicy(config)
                     self?.isLoading = false
                 } else {
                     self?.loadFallback()
                 }
             }
         }.resume()
+    }
+
+    // 服务端管控策略: 版本封杀检查
+    private func applyServerPolicy(_ c: AppConfig) {
+        if let minV = c.minVersion, !minV.isEmpty {
+            let current = Version(currentAppVersion())
+            if current < Version(minV) {
+                updateRequired = true
+                requiredVersion = minV
+                return
+            }
+        }
+        updateRequired = false
+    }
+
+    private func currentAppVersion() -> String {
+        Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.0"
     }
 
     // 加载内置兜底配置

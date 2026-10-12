@@ -31,6 +31,9 @@ struct RootView: View {
         Group {
             if config.isLoading {
                 LoadingView(text: "加载配置中...")
+            } else if config.updateRequired {
+                // 版本封杀: 服务器要求最低版本高于当前版本
+                UpdateRequiredView()
             } else if !license.isActivated {
                 // 卡密验证
                 LicenseView()
@@ -63,6 +66,33 @@ struct LoadingView: View {
                 .font(.headline)
                 .foregroundColor(.pink)
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(AppTheme.backgroundGradient.ignoresSafeArea())
+    }
+}
+
+// MARK: - 版本封杀锁定页 (服务器下发 min_version 高于当前版本时强制显示)
+struct UpdateRequiredView: View {
+    @EnvironmentObject var config: ConfigManager
+
+    var body: some View {
+        VStack(spacing: 20) {
+            Image(systemName: "lock.trianglefigure")
+                .font(.system(size: 56))
+                .foregroundColor(.orange)
+            Text("当前版本已停用")
+                .font(.title2.bold())
+            Text("服务器要求最低版本: v\(config.requiredVersion ?? "最新")\n请联系管理员获取最新版本")
+                .font(.subheadline)
+                .multilineTextAlignment(.center)
+                .foregroundColor(.secondary)
+            if let qq = config.config?.qqGroup, !qq.isEmpty {
+                Text("QQ群: \(qq)")
+                    .font(.callout.bold())
+                    .foregroundColor(.pink)
+            }
+        }
+        .padding(32)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(AppTheme.backgroundGradient.ignoresSafeArea())
     }
