@@ -183,6 +183,15 @@ final class LicenseManager: ObservableObject {
             return
         }
 
+        // 自愈: 旧版本激活的缓存没有 session_token (服务器升级前的激活)
+        // 新服务器要求 token 才下发云控配置 → 必须静默重新验证获取
+        if sessionToken == nil || sessionToken?.isEmpty == true {
+            verify(cardKey: cardKey) { success, _ in
+                completion?(success)
+            }
+            return
+        }
+
         // 如果过期时间小于7天，重新验证
         if let expire = expireDate, expire.timeIntervalSinceNow < 7 * 24 * 3600 {
             verify(cardKey: cardKey) { success, _ in
