@@ -171,18 +171,34 @@ def generate_pbxproj(swift_sources, objc_m_files, objc_h_files, c_files, bridgin
 
     # PBXFileReference section
     lines.append("/* Begin PBXFileReference section */")
+    def ref_path(filepath):
+        """计算文件相对于其所在 group 的路径"""
+        if 'Exploits' in filepath:
+            # Exploits 下的文件，相对于 Exploits/<subdir>/ 的路径
+            rel = os.path.relpath(filepath, ROOT / "Exploits")
+            parts = rel.split(os.sep)
+            if len(parts) > 1:
+                return os.path.join(*parts[1:])
+            return parts[0]
+        else:
+            return os.path.basename(filepath)
+
     for src in swift_sources:
         fid = file_refs[src]
-        lines.append(f"\t\t{fid} /* {os.path.basename(src)} */ = {{isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = \"{os.path.basename(src)}\"; sourceTree = \"<group>\"; }};")
+        p = ref_path(src)
+        lines.append(f"\t\t{fid} /* {os.path.basename(src)} */ = {{isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = \"{p}\"; sourceTree = \"<group>\"; }};")
     for m in objc_m_files:
         fid = file_refs[m]
-        lines.append(f"\t\t{fid} /* {os.path.basename(m)} */ = {{isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = \"{os.path.basename(m)}\"; sourceTree = \"<group>\"; }};")
+        p = ref_path(m)
+        lines.append(f"\t\t{fid} /* {os.path.basename(m)} */ = {{isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = \"{p}\"; sourceTree = \"<group>\"; }};")
     for c in c_files:
         fid = file_refs[c]
-        lines.append(f"\t\t{fid} /* {os.path.basename(c)} */ = {{isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = \"{os.path.basename(c)}\"; sourceTree = \"<group>\"; }};")
+        p = ref_path(c)
+        lines.append(f"\t\t{fid} /* {os.path.basename(c)} */ = {{isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = \"{p}\"; sourceTree = \"<group>\"; }};")
     for h in objc_h_files:
         fid = file_refs[h]
-        lines.append(f"\t\t{fid} /* {os.path.basename(h)} */ = {{isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = \"{os.path.basename(h)}\"; sourceTree = \"<group>\"; }};")
+        p = ref_path(h)
+        lines.append(f"\t\t{fid} /* {os.path.basename(h)} */ = {{isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = \"{p}\"; sourceTree = \"<group>\"; }};")
     # Bridging header
     lines.append(f"\t\t{bridge_id} /* {PROJECT_NAME}-Bridging-Header.h */ = {{isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = \"{PROJECT_NAME}-Bridging-Header.h\"; sourceTree = \"<group>\"; }};")
     for res in resources:
