@@ -5,7 +5,7 @@
   "version": "1.0.0",
   "announcement": "欢迎使用 Zaka 文件管理！\n\n首次使用请先选择与你系统版本匹配的漏洞利用方式，获得文件系统访问权限后即可使用文件管理器。\n\n支持：\n• FilzaJailedDS (iOS 17-26)\n• FilzaSlop (iOS 18, 26, 27 beta)\n• Filza (越狱)",
   "config_url": "https://raw.githubusercontent.com/yourname/ZakaFilza/main/config.json",
-  "verify_server_url": "https://api.example.com/api/verify",
+  "verify_server_url": "http://156.238.232.172/api/verify.php?action=verify",
   "buttons": [
     {
       "title": "📁 文件管理",
