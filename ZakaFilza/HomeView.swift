@@ -266,6 +266,9 @@ struct HomeView: View {
                 Text("诊断").font(.caption2.bold())
                 Text("loadError: \(config.loadError ?? "无")")
                 Text("config: \(config.config == nil ? "nil" : (config.config!.locked == true ? "锁定空壳" : "正常"))，按钮\(config.config?.buttons.count ?? -1)个")
+                if let reason = config.config?.lockedReason, !reason.isEmpty {
+                    Text("锁定原因: \(reason)")
+                }
                 Text("token: \(license.sessionToken?.isEmpty == false ? "有" : "无")")
                 Text("卡: \(license.cardKey ?? "无")")
                 Text("版本: \(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "?")")

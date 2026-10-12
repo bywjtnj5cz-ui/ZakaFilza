@@ -12,6 +12,7 @@ struct AppConfig: Codable {
     var verifyServerURL: String?       // 卡密验证服务器地址
     var minVersion: String?            // 最低可用版本 (版本封杀开关)
     var locked: Bool?                  // true = 服务端未授权 (无有效卡密/token)
+    var lockedReason: String?          // 锁定原因 (服务端诊断用, 不泄露敏感数据)
     var buttons: [ConfigButton]
     var memberButtons: [ConfigButton]  // 会员专属按钮
     var downloadShortcuts: [DownloadShortcut] // 一键下载直链
@@ -26,6 +27,7 @@ struct AppConfig: Codable {
         case verifyServerURL = "verify_server_url"
         case minVersion = "min_version"
         case locked
+        case lockedReason = "locked_reason"
         case buttons
         case memberButtons = "member_buttons"
         case downloadShortcuts = "download_shortcuts"

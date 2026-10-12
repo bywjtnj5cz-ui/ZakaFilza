@@ -302,16 +302,27 @@ case 'config':
     $uuid    = trim($_GET['uuid'] ?? '');
     $token   = trim($_GET['token'] ?? '');
     $authorized = false;
-    if ($cardKey !== '' && $uuid !== '' && $token !== '') {
+    $lockReason = '未携带有效凭证';
+    if ($cardKey === '' || $uuid === '' || $token === '') {
+        $lockReason = '缺少参数 (card_key/uuid/token)';
+    } else {
         $cards = load_cards();
         $idx = find_card_index($cards, $cardKey);
-        if ($idx >= 0) {
+        if ($idx < 0) {
+            $lockReason = '卡密不存在或已被删除';
+        } else {
             $card = $cards[$idx];
             $expireTs = strtotime($card['expire_at'] ?? '');
             $notExpired = ($expireTs !== false && $expireTs >= time());
             $uuidMatch = (!empty($card['uuid']) && $card['uuid'] === $uuid);
             $tokenOk = hash_equals(session_token($cardKey, $uuid), $token);
             $authorized = $notExpired && $uuidMatch && $tokenOk;
+            if (!$authorized) {
+                if (!$notExpired)               $lockReason = '卡密已过期';
+                elseif (empty($card['uuid']))   $lockReason = '卡密尚未激活(未绑定设备)';
+                elseif (!$uuidMatch)            $lockReason = '设备UUID不匹配(卡密已绑定其他设备)';
+                elseif (!$tokenOk)              $lockReason = '会话token失效(需重新验证卡密)';
+            }
         }
     }
 
@@ -319,6 +330,7 @@ case 'config':
     if (!$authorized) {
         // 锁定态: 只下发基础信息, 功能配置全部置空
         // (破解版/未激活/被封卡密拿到的是空壳配置, 无任何可用功能)
+        // locked_reason 仅供客户端诊断显示, 不泄露卡密/UUID 等敏感数据
         $locked = [
             'app_name'          => $cfg['app_name'],
             'version'           => $cfg['version'],
@@ -329,6 +341,7 @@ case 'config':
             'verify_server_url' => $cfg['verify_server_url'],
             'min_version'       => $cfg['min_version'],
             'locked'            => true,
+            'locked_reason'     => $lockReason,
             'buttons'           => [],
             'member_buttons'    => [],
             'download_shortcuts'=> [],
