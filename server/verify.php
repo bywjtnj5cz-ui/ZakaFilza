@@ -4,13 +4,19 @@
  * 部署路径建议: /var/www/html/api/verify.php
  * 访问地址: http://your-server-ip/api/verify.php
  *
- * 数据库: SQLite (cards.db, 与本文件同目录自动生成)
- * 云控配置: settings.json (与本文件同目录自动生成)
+ * 存储: 纯 JSON 文件 (cards.json / settings.json, 与本文件同目录自动生成)
+ *       不需要任何数据库扩展, PHP 原生即可运行
+ *       若目录不可写, 自动降级到系统临时目录
+ *
+ * 管理员 Token 优先级:
+ *   1. 同目录 admin_token.txt 文件内容 (推荐, 重新上传 verify.php 不会丢失)
+ *   2. 下方 ADMIN_TOKEN 常量
  *
  * 路由:
  *   [App 公开]
  *   POST ?action=verify       App 卡密验证
  *   GET  ?action=config        App 拉取云端配置 JSON
+ *   GET  ?action=health        部署诊断
  *
  *   [管理后台]
  *   GET  ?action=admin         HTML 管理后台首页
@@ -28,9 +34,7 @@
  */
 
 // ==================== 配置 ====================
-const ADMIN_TOKEN         = 'CHANGE_ME_TO_RANDOM_STRING';  // 必须修改!
-const DB_FILE             = __DIR__ . '/cards.db';
-const CONFIG_FILE         = __DIR__ . '/settings.json';
+const ADMIN_TOKEN         = 'CHANGE_ME_TO_RANDOM_STRING';  // 必须修改 (或用 admin_token.txt)
 const DEFAULT_EXPIRE_DAYS = 30;
 const CARD_PREFIX         = 'ZK';
 const CARD_LENGTH         = 24;
@@ -38,28 +42,42 @@ const TIMEZONE            = 'Asia/Shanghai';
 
 date_default_timezone_set(TIMEZONE);
 
-// ==================== 数据库 ====================
-function db() {
-    static $pdo = null;
-    if ($pdo === null) {
-        $pdo = new PDO('sqlite:' . DB_FILE);
-        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
-        $pdo->exec("CREATE TABLE IF NOT EXISTS cards (
-            card_key      TEXT PRIMARY KEY,
-            uuid          TEXT,
-            model         TEXT,
-            system_version TEXT,
-            system_name   TEXT,
-            member_level  INTEGER DEFAULT 1,
-            expire_at     TEXT,
-            activated_at  TEXT,
-            created_at    TEXT,
-            note          TEXT DEFAULT ''
-        )");
-        $pdo->exec("CREATE INDEX IF NOT EXISTS idx_uuid ON cards(uuid)");
+// ==================== 存储层 (纯 JSON 文件, 无数据库依赖) ====================
+function data_dir() {
+    static $dir = null;
+    if ($dir !== null) return $dir;
+    foreach ([__DIR__, sys_get_temp_dir()] as $d) {
+        if (is_dir($d) && is_writable($d)) { $dir = $d; return $dir; }
     }
-    return $pdo;
+    $dir = sys_get_temp_dir();
+    return $dir;
+}
+
+function data_file($name) { return data_dir() . '/' . $name; }
+
+function admin_token() {
+    // 同目录 admin_token.txt 优先 (更新 verify.php 不丢 token)
+    $f = __DIR__ . '/admin_token.txt';
+    if (is_readable($f)) {
+        $t = trim(file_get_contents($f));
+        if ($t !== '') return $t;
+    }
+    return ADMIN_TOKEN;
+}
+
+function load_cards() {
+    $f = data_file('cards.json');
+    if (!file_exists($f)) return [];
+    $data = json_decode(file_get_contents($f), true);
+    return is_array($data) ? $data : [];
+}
+
+function save_cards($cards) {
+    return file_put_contents(
+        data_file('cards.json'),
+        json_encode(array_values($cards), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE),
+        LOCK_EX
+    );
 }
 
 // ==================== 云控配置 ====================
@@ -93,15 +111,16 @@ function default_config() {
 }
 
 function load_config() {
-    if (!file_exists(CONFIG_FILE)) {
+    $f = data_file('settings.json');
+    if (!file_exists($f)) {
         $cfg = default_config();
-        file_put_contents(CONFIG_FILE, json_encode($cfg, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+        @file_put_contents($f, json_encode($cfg, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
         return $cfg;
     }
-    $data = json_decode(file_get_contents(CONFIG_FILE), true);
+    $data = json_decode(file_get_contents($f), true);
     if (!is_array($data)) {
         $cfg = default_config();
-        file_put_contents(CONFIG_FILE, json_encode($cfg, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+        @file_put_contents($f, json_encode($cfg, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
         return $cfg;
     }
     // 合并默认值 (防止字段缺失)
@@ -116,7 +135,11 @@ function save_config_file($cfg) {
     foreach ($allowed as $k) {
         if (isset($cfg[$k])) $clean[$k] = $cfg[$k];
     }
-    file_put_contents(CONFIG_FILE, json_encode($clean, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+    file_put_contents(
+        data_file('settings.json'),
+        json_encode($clean, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE),
+        LOCK_EX
+    );
     return $clean;
 }
 
@@ -140,7 +163,7 @@ function gen_card_key() {
 
 function check_admin() {
     $token = $_GET['admin_token'] ?? $_SERVER['HTTP_X_ADMIN_TOKEN'] ?? '';
-    if (!hash_equals(ADMIN_TOKEN, $token)) {
+    if ($token === '' || !hash_equals(admin_token(), $token)) {
         out(['success' => false, 'message' => '管理员认证失败'], 403);
     }
 }
@@ -148,10 +171,35 @@ function check_admin() {
 function now_iso() { return date('c'); }
 function add_days($days) { return date('c', time() + $days * 86400); }
 
+function find_card_index($cards, $cardKey) {
+    foreach ($cards as $i => $c) {
+        if (($c['card_key'] ?? '') === $cardKey) return $i;
+    }
+    return -1;
+}
+
 // ==================== 路由 ====================
 $action = $_GET['action'] ?? '';
 
 switch ($action) {
+
+// -------------------- 诊断 --------------------
+case 'health':
+    $testFile = data_file('.write_test');
+    $writeOk = @file_put_contents($testFile, 'ok') !== false;
+    if ($writeOk) @unlink($testFile);
+    out([
+        'success'          => true,
+        'php_version'      => PHP_VERSION,
+        'data_dir'         => data_dir(),
+        'data_dir_writable'=> $writeOk,
+        'cards_file'       => file_exists(data_file('cards.json')),
+        'settings_file'    => file_exists(data_file('settings.json')),
+        'token_source'     => is_readable(__DIR__ . '/admin_token.txt') && trim((string)@file_get_contents(__DIR__ . '/admin_token.txt')) !== ''
+                              ? 'admin_token.txt' : 'ADMIN_TOKEN constant',
+        'token_is_default' => admin_token() === 'CHANGE_ME_TO_RANDOM_STRING',
+    ]);
+    break;
 
 // -------------------- App: 卡密验证 --------------------
 case 'verify':
@@ -166,33 +214,36 @@ case 'verify':
         out(['success' => false, 'message' => '卡密或设备 UUID 不能为空']);
     }
 
-    $stmt = db()->prepare("SELECT * FROM cards WHERE card_key = ?");
-    $stmt->execute([$cardKey]);
-    $card = $stmt->fetch();
-
-    if (!$card) {
+    $cards = load_cards();
+    $idx = find_card_index($cards, $cardKey);
+    if ($idx < 0) {
         out(['success' => false, 'message' => '卡密不存在']);
     }
+    $card = $cards[$idx];
 
     if (empty($card['uuid'])) {
-        $stmt = db()->prepare("UPDATE cards SET uuid=?, model=?, system_version=?, system_name=?, activated_at=? WHERE card_key=?");
-        $stmt->execute([$uuid, $model, $sysVer, $sysName, now_iso(), $cardKey]);
-        $card['uuid'] = $uuid;
-        $card['model'] = $model;
-        $card['system_version'] = $sysVer;
-        $card['system_name'] = $sysName;
-        $card['activated_at'] = now_iso();
+        // 首次激活: 绑定设备
+        $cards[$idx]['uuid']           = $uuid;
+        $cards[$idx]['model']          = $model;
+        $cards[$idx]['system_version'] = $sysVer;
+        $cards[$idx]['system_name']    = $sysName;
+        $cards[$idx]['activated_at']   = now_iso();
+        save_cards($cards);
+        $card = $cards[$idx];
     } elseif ($card['uuid'] !== $uuid) {
         out(['success' => false, 'message' => '该卡密已绑定其他设备, 请联系管理员解绑']);
     }
 
-    $expireTs = strtotime($card['expire_at']);
+    $expireTs = strtotime($card['expire_at'] ?? '');
     if ($expireTs === false || $expireTs < time()) {
         out(['success' => false, 'message' => '卡密已过期']);
     }
 
-    $stmt = db()->prepare("UPDATE cards SET model=?, system_version=?, system_name=? WHERE card_key=?");
-    $stmt->execute([$model, $sysVer, $sysName, $cardKey]);
+    // 更新设备信息 (即使已绑定也刷新机型/系统)
+    $cards[$idx]['model']          = $model;
+    $cards[$idx]['system_version'] = $sysVer;
+    $cards[$idx]['system_name']    = $sysName;
+    save_cards($cards);
 
     out([
         'success'      => true,
@@ -212,7 +263,6 @@ case 'config':
         $script = $_SERVER['SCRIPT_NAME'] ?? '/api/verify.php';
         $cfg['verify_server_url'] = "$protocol://$host$script?action=verify";
     }
-    // config_url 也自动指向自己 (App 通过这个地址再拉就是循环, 但不影响)
     if (empty($cfg['config_url'])) {
         $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
         $host = $_SERVER['HTTP_HOST'] ?? $_SERVER['SERVER_NAME'] ?? 'localhost';
@@ -234,20 +284,36 @@ case 'gen':
     $expireAt    = add_days($days);
     $now         = now_iso();
 
+    $cards = load_cards();
+    $existing = [];
+    foreach ($cards as $c) $existing[$c['card_key'] ?? ''] = true;
+
     $generated = [];
-    $stmt = db()->prepare("INSERT OR IGNORE INTO cards (card_key, member_level, expire_at, created_at, note) VALUES (?, ?, ?, ?, ?)");
     for ($i = 0; $i < $count; $i++) {
         $retries = 0;
         do {
             $key = gen_card_key();
-            $stmt->execute([$key, $memberLevel, $expireAt, $now, $note]);
-            if ($stmt->rowCount() > 0) {
+            if (!isset($existing[$key])) {
+                $existing[$key] = true;
+                $cards[] = [
+                    'card_key'       => $key,
+                    'uuid'           => null,
+                    'model'          => null,
+                    'system_version' => null,
+                    'system_name'    => null,
+                    'member_level'   => $memberLevel,
+                    'expire_at'      => $expireAt,
+                    'activated_at'   => null,
+                    'created_at'     => $now,
+                    'note'           => $note,
+                ];
                 $generated[] = $key;
                 break;
             }
             $retries++;
         } while ($retries < 5);
     }
+    save_cards($cards);
     out(['success' => true, 'count' => count($generated), 'cards' => $generated, 'expire_at' => $expireAt, 'days' => $days]);
     break;
 
@@ -256,26 +322,21 @@ case 'list':
     check_admin();
     $search = trim($_GET['q'] ?? '');
     $onlyActive = ($_GET['active'] ?? '0') === '1';
-    $sql = "SELECT * FROM cards";
-    $where = [];
-    $params = [];
-    if ($search !== '') {
-        $where[] = "(card_key LIKE ? OR uuid LIKE ? OR note LIKE ?)";
-        $kw = "%$search%";
-        $params[] = $kw; $params[] = $kw; $params[] = $kw;
+    $cards = load_cards();
+    $rows = [];
+    foreach ($cards as $c) {
+        if ($search !== '') {
+            $hay = implode(' ', [$c['card_key'] ?? '', $c['uuid'] ?? '', $c['note'] ?? '']);
+            if (mb_stripos($hay, $search) === false) continue;
+        }
+        if ($onlyActive && empty($c['uuid'])) continue;
+        $c['expired']   = strtotime($c['expire_at'] ?? '') < time();
+        $c['activated'] = !empty($c['uuid']);
+        $rows[] = $c;
     }
-    if ($onlyActive) {
-        $where[] = "uuid IS NOT NULL AND uuid != ''";
-    }
-    if ($where) $sql .= " WHERE " . implode(' AND ', $where);
-    $sql .= " ORDER BY created_at DESC";
-    $stmt = db()->prepare($sql);
-    $stmt->execute($params);
-    $rows = $stmt->fetchAll();
-    foreach ($rows as &$r) {
-        $r['expired'] = strtotime($r['expire_at']) < time();
-        $r['activated'] = !empty($r['uuid']);
-    }
+    usort($rows, function ($a, $b) {
+        return strcmp($b['created_at'] ?? '', $a['created_at'] ?? '');
+    });
     out(['success' => true, 'count' => count($rows), 'cards' => $rows]);
     break;
 
@@ -285,8 +346,15 @@ case 'unbind':
     $body = json_decode(file_get_contents('php://input'), true) ?: $_POST;
     $cardKey = trim($body['card_key'] ?? '');
     if ($cardKey === '') out(['success' => false, 'message' => 'card_key 不能为空']);
-    $stmt = db()->prepare("UPDATE cards SET uuid=NULL, model=NULL, system_version=NULL, system_name=NULL, activated_at=NULL WHERE card_key=?");
-    $stmt->execute([$cardKey]);
+    $cards = load_cards();
+    $idx = find_card_index($cards, $cardKey);
+    if ($idx < 0) out(['success' => false, 'message' => '卡密不存在']);
+    $cards[$idx]['uuid'] = null;
+    $cards[$idx]['model'] = null;
+    $cards[$idx]['system_version'] = null;
+    $cards[$idx]['system_name'] = null;
+    $cards[$idx]['activated_at'] = null;
+    save_cards($cards);
     out(['success' => true, 'message' => '已解绑设备']);
     break;
 
@@ -297,15 +365,14 @@ case 'extend':
     $cardKey = trim($body['card_key'] ?? '');
     $days = (int)($body['days'] ?? 30);
     if ($cardKey === '') out(['success' => false, 'message' => 'card_key 不能为空']);
-    $stmt = db()->prepare("SELECT expire_at FROM cards WHERE card_key=?");
-    $stmt->execute([$cardKey]);
-    $row = $stmt->fetch();
-    if (!$row) out(['success' => false, 'message' => '卡密不存在']);
-    $baseTs = strtotime($row['expire_at']);
-    $baseTs = $baseTs > time() ? $baseTs : time();
+    $cards = load_cards();
+    $idx = find_card_index($cards, $cardKey);
+    if ($idx < 0) out(['success' => false, 'message' => '卡密不存在']);
+    $baseTs = strtotime($cards[$idx]['expire_at'] ?? '');
+    $baseTs = ($baseTs !== false && $baseTs > time()) ? $baseTs : time();
     $newExpire = date('c', $baseTs + $days * 86400);
-    $stmt = db()->prepare("UPDATE cards SET expire_at=? WHERE card_key=?");
-    $stmt->execute([$newExpire, $cardKey]);
+    $cards[$idx]['expire_at'] = $newExpire;
+    save_cards($cards);
     out(['success' => true, 'message' => '续期成功', 'expire_at' => $newExpire]);
     break;
 
@@ -315,25 +382,33 @@ case 'delete':
     $body = json_decode(file_get_contents('php://input'), true) ?: $_POST;
     $cardKey = trim($body['card_key'] ?? '');
     if ($cardKey === '') out(['success' => false, 'message' => 'card_key 不能为空']);
-    $stmt = db()->prepare("DELETE FROM cards WHERE card_key=?");
-    $stmt->execute([$cardKey]);
-    out(['success' => true, 'message' => '已删除', 'affected' => $stmt->rowCount()]);
+    $cards = load_cards();
+    $idx = find_card_index($cards, $cardKey);
+    if ($idx < 0) out(['success' => false, 'message' => '卡密不存在']);
+    array_splice($cards, $idx, 1);
+    save_cards($cards);
+    out(['success' => true, 'message' => '已删除', 'affected' => 1]);
     break;
 
 // -------------------- 管理: 统计 --------------------
 case 'stats':
     check_admin();
-    $total = (int)db()->query("SELECT COUNT(*) FROM cards")->fetchColumn();
-    $active = (int)db()->query("SELECT COUNT(*) FROM cards WHERE uuid IS NOT NULL AND uuid != ''")->fetchColumn();
-    $expired = (int)db()->query("SELECT COUNT(*) FROM cards WHERE expire_at < '" . date('c') . "'")->fetchColumn();
-    $valid = $total - $expired;
+    $cards = load_cards();
+    $total = count($cards);
+    $active = 0; $expired = 0;
+    $now = time();
+    foreach ($cards as $c) {
+        if (!empty($c['uuid'])) $active++;
+        $ts = strtotime($c['expire_at'] ?? '');
+        if ($ts !== false && $ts < $now) $expired++;
+    }
     out([
         'success' => true,
         'stats' => [
             'total'      => $total,
             'activated'  => $active,
             'unused'     => $total - $active,
-            'valid'      => $valid,
+            'valid'      => $total - $expired,
             'expired'    => $expired,
         ]
     ]);
@@ -343,7 +418,6 @@ case 'stats':
 case 'get_config':
     check_admin();
     $cfg = load_config();
-    // 不带自动填充的 config_url/verify_server_url, 返回原始保存值
     out(['success' => true, 'config' => $cfg]);
     break;
 
@@ -362,9 +436,9 @@ case 'save_config':
 // -------------------- 管理: 重置云控配置 --------------------
 case 'reset_config':
     check_admin();
-    @unlink(CONFIG_FILE);
+    @unlink(data_file('settings.json'));
     $cfg = default_config();
-    file_put_contents(CONFIG_FILE, json_encode($cfg, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+    file_put_contents(data_file('settings.json'), json_encode($cfg, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
     out(['success' => true, 'message' => '云控配置已重置为默认', 'config' => $cfg]);
     break;
 
@@ -429,7 +503,7 @@ textarea { width: 100%; min-height: 320px; font-family: SFMono-Regular, Menlo, m
 <div class="notice">
   App 验证地址: <span class="mono" id="verify-url"></span><br>
   App 配置地址: <span class="mono" id="config-url"></span><br>
-  首次使用请修改 <code>verify.php</code> 里的 <code>ADMIN_TOKEN</code> 常量。
+  认证方式: 同目录 <code>admin_token.txt</code> 内容优先, 否则用 <code>verify.php</code> 里的 <code>ADMIN_TOKEN</code> 常量。
 </div>
 <div class="row">
   <input id="token" placeholder="管理员 Token (ADMIN_TOKEN)" type="password" style="min-width:240px">
