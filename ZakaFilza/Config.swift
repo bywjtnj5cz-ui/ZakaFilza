@@ -99,6 +99,10 @@ final class ConfigManager: ObservableObject {
             return
         }
         self.config = config
+        // 兜底路径同样要应用验证服务器地址
+        if let verifyURL = config.verifyServerURL, !verifyURL.isEmpty {
+            LicenseManager.shared.verifyServerURL = verifyURL
+        }
         isLoading = false
     }
 

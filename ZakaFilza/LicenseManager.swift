@@ -20,7 +20,7 @@ final class LicenseManager: ObservableObject {
     @Published var lastError: String?
 
     // 验证服务器地址（可在云端配置中覆盖）
-    var verifyServerURL: String = "https://api.example.com/api/verify"
+    var verifyServerURL: String = "http://156.238.232.172/api/verify.php?action=verify"
 
     private let cacheKey = "license_cache"
     private let cardKeyKey = "card_key"
