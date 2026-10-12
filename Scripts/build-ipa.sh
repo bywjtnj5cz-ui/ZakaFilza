@@ -1,5 +1,5 @@
 #!/bin/bash
-# ZakaFilza IPA 构建脚本
+# MoyuTool IPA 构建脚本
 # 用法:
 #   bash Scripts/build-ipa.sh sim                          # 编模拟器版（仅验证编译）
 #   bash Scripts/build-ipa.sh unsigned                     # 出未签名 IPA（推荐，配合 xsign 签名）
@@ -11,14 +11,14 @@
 # 签名方式（推荐 xsign）:
 #   1. bash Scripts/build-ipa.sh unsigned
 #   2. xsign -k cert.p12 -p 密码 -m profile.mobileprovision \
-#            -b com.zaka.filza -o ZakaFilza_signed.ipa build/ZakaFilza.ipa
+#            -b com.iosmytool -o MoyuTool_signed.ipa build/MoyuTool.ipa
 
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-PROJECT="ZakaFilza"
-SCHEME="ZakaFilza"
+PROJECT="MoyuTool"
+SCHEME="MoyuTool"
 BUILD_DIR="$ROOT/build"
 IPA_PATH="$BUILD_DIR/${PROJECT}.ipa"
 BUNDLE_ID="com.iosmytool"

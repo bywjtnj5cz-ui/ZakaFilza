@@ -234,12 +234,17 @@ final class FileBridge: NSObject, WKScriptMessageHandler {
     private func handleAppInfo(callbackId: String) {
         let homeDir = NSHomeDirectory()
         let docsDir = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true).first ?? homeDir
-        respond(callbackId: callbackId, data: [
+        var info: [String: Any] = [
             "homeDir": homeDir,
             "documentsDir": docsDir,
             "exploitId": fileHandle.exploitId,
             "systemVersion": UIDevice.current.systemVersion
-        ])
+        ]
+        // 点云控按钮直接跳到指定目录 (HomeView 通过 UserDefaults 透传起始路径)
+        if let startPath = UserDefaults.standard.string(forKey: "filemanager_start_path"), !startPath.isEmpty {
+            info["startPath"] = startPath
+        }
+        respond(callbackId: callbackId, data: info)
     }
 
     // MARK: - 回调

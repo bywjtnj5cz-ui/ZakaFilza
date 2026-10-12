@@ -13,6 +13,10 @@ struct AppConfig: Codable {
     var minVersion: String?            // 最低可用版本 (版本封杀开关)
     var locked: Bool?                  // true = 服务端未授权 (无有效卡密/token)
     var lockedReason: String?          // 锁定原因 (服务端诊断用, 不泄露敏感数据)
+    var theme: ThemeConfig?            // 外观主题 (云端控制)
+    var killSwitch: Bool?              // 急停开关: true = 全体停用
+    var killMessage: String?           // 急停文案
+    var sources: [String]?             // 备用线路 (主线路挂了自动切换)
     var buttons: [ConfigButton]
     var memberButtons: [ConfigButton]  // 会员专属按钮
     var downloadShortcuts: [DownloadShortcut] // 一键下载直链
@@ -28,9 +32,34 @@ struct AppConfig: Codable {
         case minVersion = "min_version"
         case locked
         case lockedReason = "locked_reason"
+        case theme
+        case killSwitch = "kill_switch"
+        case killMessage = "kill_message"
+        case sources
         case buttons
         case memberButtons = "member_buttons"
         case downloadShortcuts = "download_shortcuts"
+    }
+}
+
+// 云端主题配置 (后台 🎨 外观主题)
+struct ThemeConfig: Codable {
+    var primary: String?       // 主色
+    var accent: String?        // 强调色
+    var background: String?    // 背景风格: "aurora" | "light" | "dark"
+    var cornerRadius: Double?  // 圆角
+    var buttonHeight: Double?  // 按钮高度
+    var fontScale: Double?     // 字号缩放
+    var cardOpacity: Double?   // 卡片透明度
+
+    enum CodingKeys: String, CodingKey {
+        case primary
+        case accent
+        case background
+        case cornerRadius = "corner_radius"
+        case buttonHeight = "button_height"
+        case fontScale = "font_scale"
+        case cardOpacity = "card_opacity"
     }
 }
 
@@ -40,10 +69,31 @@ struct ConfigButton: Codable, Identifiable {
     var action: String          // "open_file_manager" | "download" | "run_script" | "open_url" | "custom"
     var color: String?          // 十六进制颜色，如 "#FF6B9D"
     var downloadURL: String?    // action=download 时的直链
-    var scriptPath: String?     // action=run_script 时的脚本路径
+    var scriptPath: String?     // action=run_script 时的远端脚本路径 (兼容旧配置)
+    var script: String?         // action=run_script 时的内联脚本 (云端直发)
     var openURL: String?        // action=open_url 时的链接
     var memberOnly: Bool?       // 是否会员专属
-    var params: [String: String]?
+    var shortcut: String?       // 快捷键, 如 "cmd+1" / "shift+r" / "opt+space"
+    var confirmText: String?    // 二次确认文案 (留空则不确认)
+    var path: String?           // 点按钮直接跳到该目录
+    var paths: [String]?        // 路径数组 (uninstall 等批量操作使用)
+    var params: [String: String]? // 其它参数 (如 target_dir)
+
+    enum CodingKeys: String, CodingKey {
+        case title
+        case action
+        case color
+        case downloadURL = "download_url"
+        case scriptPath = "script_path"
+        case script
+        case openURL = "open_url"
+        case memberOnly = "member_only"
+        case shortcut
+        case confirmText = "confirm_text"
+        case path
+        case paths
+        case params
+    }
 }
 
 struct DownloadShortcut: Codable, Identifiable {
@@ -52,6 +102,13 @@ struct DownloadShortcut: Codable, Identifiable {
     var url: String
     var targetDir: String       // 导入到应用目录的哪个子目录
     var autoImport: Bool        // 下载后是否自动导入
+
+    enum CodingKeys: String, CodingKey {
+        case name
+        case url
+        case targetDir = "target_dir"
+        case autoImport = "auto_import"
+    }
 }
 
 // 配置管理器
@@ -63,6 +120,8 @@ final class ConfigManager: ObservableObject {
     @Published var loadError: String?
     @Published var updateRequired = false      // 版本封杀: 当前版本低于服务器 min_version
     @Published var requiredVersion: String?    // 要求的最低版本
+    @Published var isKilled = false            // 急停: 服务器一键停用全体用户
+    @Published var killMessage: String = "服务已暂停"  // 急停文案
 
     // App 启动时从此地址拉取云端配置 (按钮、下载直链、公告等)
     // 该地址由 verify.php 的 action=config 提供, 可在管理后台修改内容
@@ -74,10 +133,45 @@ final class ConfigManager: ObservableObject {
         isLoading = true
         loadError = nil
 
-        // 优先用用户自定义的地址
-        let urlString = AppStore.shared.customConfigURL ?? fallbackURL
+        // 主线路 + 备用线路 (sources), 主线路挂了自动切换到下一条
+        var urls: [String] = [AppStore.shared.customConfigURL ?? fallbackURL]
+        if let cached = config, let srcs = cached.sources {
+            for s in srcs where !s.isEmpty && !urls.contains(s) {
+                urls.append(s)
+            }
+        }
+        fetchConfig(fromSources: urls, index: 0)
+    }
 
-        // 携带身份参数: 服务端校验 session_token 才下发完整云控配置
+    // 逐条尝试配置线路, 全部失败才落到内置兜底
+    private func fetchConfig(fromSources urls: [String], index: Int) {
+        guard index < urls.count else {
+            loadFallback()
+            return
+        }
+        guard let url = configRequestURL(urls[index]) else {
+            fetchConfig(fromSources: urls, index: index + 1)
+            return
+        }
+        URLSession.shared.dataTask(with: url) { [weak self] data, _, error in
+            DispatchQueue.main.async {
+                if let error = error {
+                    self?.loadError = "网络错误: \(error.localizedDescription)"
+                    self?.fetchConfig(fromSources: urls, index: index + 1)
+                    return
+                }
+                if let data = data, let config = try? JSONDecoder().decode(AppConfig.self, from: data) {
+                    self?.apply(config)
+                } else {
+                    self?.loadError = "响应解析失败"
+                    self?.fetchConfig(fromSources: urls, index: index + 1)
+                }
+            }
+        }.resume()
+    }
+
+    // 携带身份参数构建请求地址: 服务端校验 session_token 才下发完整云控配置
+    private func configRequestURL(_ urlString: String) -> URL? {
         var components = URLComponents(string: urlString)
         var query = components?.queryItems ?? []
         let lm = LicenseManager.shared
@@ -89,39 +183,29 @@ final class ConfigManager: ObservableObject {
         }
         query.append(URLQueryItem(name: "uuid", value: DeviceManager.shared.uuid))
         components?.queryItems = query
+        return components?.url
+    }
 
-        guard let url = components?.url else {
-            loadFallback()
-            return
+    private func apply(_ config: AppConfig) {
+        self.config = config
+        // 更新卡密验证服务器地址
+        if let verifyURL = config.verifyServerURL, !verifyURL.isEmpty {
+            LicenseManager.shared.verifyServerURL = verifyURL
         }
-
-        URLSession.shared.dataTask(with: url) { [weak self] data, _, error in
-            DispatchQueue.main.async {
-                if let error = error {
-                    self?.loadError = "网络错误: \(error.localizedDescription)"
-                    self?.loadFallback()
-                    return
-                }
-                if let data = data, let config = try? JSONDecoder().decode(AppConfig.self, from: data) {
-                    self?.config = config
-                    // 更新卡密验证服务器地址
-                    if let verifyURL = config.verifyServerURL, !verifyURL.isEmpty {
-                        LicenseManager.shared.verifyServerURL = verifyURL
-                    }
-                    self?.applyServerPolicy(config)
-                    self?.isLoading = false
-                } else {
-                    self?.loadError = "响应解析失败"
-                    self?.loadFallback()
-                }
-            }
-        }.resume()
+        applyServerPolicy(config)
+        isLoading = false
     }
 
     // 服务端管控策略: 版本封杀检查 + 锁定态自愈
     private var lastSelfHealAt: Date = .distantPast
 
     private func applyServerPolicy(_ c: AppConfig) {
+        // 急停: 一键停用全体用户 (优先级最高)
+        isKilled = (c.killSwitch == true)
+        if isKilled {
+            killMessage = c.killMessage ?? "服务已暂停"
+        }
+
         // 锁定态自愈: 已激活但被服务器判定未授权
         //   (旧缓存缺 session_token / token 因服务器 secret 变更而失效)
         // → 静默重新验证拿新 token, 验证成功后 verify 内部会自动重拉配置

@@ -33,6 +33,13 @@ struct WebViewContainer: UIViewRepresentable {
             controller.addUserScript(WKUserScript(source: script, injectionTime: .atDocumentStart, forMainFrameOnly: true))
         }
 
+        // 注入云端主题变量 (文件管理器配色跟随云端主题同步)
+        if let theme = ConfigManager.shared.config?.theme,
+           let json = Self.themeJSON(theme) {
+            let script = "window.__theme = \(json);"
+            controller.addUserScript(WKUserScript(source: script, injectionTime: .atDocumentStart, forMainFrameOnly: true))
+        }
+
         config.userContentController = controller
         let webView = WKWebView(frame: .zero, configuration: config)
         webView.backgroundColor = .clear
@@ -64,6 +71,19 @@ struct WebViewContainer: UIViewRepresentable {
 
     func makeCoordinator() -> Coordinator {
         Coordinator()
+    }
+
+    // 把云端主题转成 JS 对象字符串, 供 file_manager.html 的 applyTheme() 读取
+    private static func themeJSON(_ theme: ThemeConfig) -> String? {
+        var obj: [String: Any] = [:]
+        if let v = theme.primary, !v.isEmpty { obj["primary"] = v }
+        if let v = theme.accent, !v.isEmpty { obj["accent"] = v }
+        obj["background"] = theme.background ?? "aurora"
+        if let v = theme.cornerRadius { obj["cornerRadius"] = v }
+        if let v = theme.fontScale { obj["fontScale"] = v }
+        guard let data = try? JSONSerialization.data(withJSONObject: obj),
+              let str = String(data: data, encoding: .utf8) else { return nil }
+        return str
     }
 
     class Coordinator: NSObject {

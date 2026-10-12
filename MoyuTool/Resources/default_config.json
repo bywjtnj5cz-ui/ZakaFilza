@@ -1,21 +1,36 @@
 {
   "app_name": "墨鱼Tool",
-  "qq_group": "123456789",
-  "wechat_official": "ZakaOfficial",
+  "qq_group": "",
+  "wechat_official": "",
   "version": "1.0.0",
   "announcement": "欢迎使用 墨鱼Tool！\n\n首次使用请先选择与你系统版本匹配的漏洞利用方式，获得文件系统访问权限后即可使用文件管理器。\n\n支持：\n• FilzaJailedDS (iOS 17-26)\n• FilzaSlop (iOS 18, 26, 27 beta)\n• Filza (越狱)",
-  "config_url": "https://raw.githubusercontent.com/yourname/ZakaFilza/main/config.json",
+  "config_url": "http://156.238.232.172/api/verify.php?action=config",
   "verify_server_url": "http://156.238.232.172/api/verify.php?action=verify",
+  "min_version": "1.0.0",
+  "theme": {
+    "primary": "#7C4DFF",
+    "accent": "#00E5FF",
+    "background": "aurora",
+    "corner_radius": 16,
+    "button_height": 54,
+    "font_scale": 1.0,
+    "card_opacity": 0.85
+  },
+  "kill_switch": false,
+  "kill_message": "服务已暂停，请联系管理员",
+  "sources": [],
   "buttons": [
     {
       "title": "📁 文件管理",
       "action": "open_file_manager",
-      "color": "#FF6B9D"
+      "color": "#7C4DFF",
+      "shortcut": "cmd+1"
     },
     {
       "title": "⬇️ 下载中心",
       "action": "open_file_manager",
-      "color": "#6080FF"
+      "color": "#00E5FF",
+      "shortcut": "cmd+2"
     },
     {
       "title": "🔄 更新地址",
@@ -33,45 +48,51 @@
       "title": "⚡ 一键美化",
       "action": "download",
       "color": "#7C4DFF",
-      "download_url": "https://example.com/beautify_pack.zip",
-      "member_only": true
+      "download_url": "http://156.238.232.172/packs/beautify_pack.zip",
+      "member_only": true,
+      "confirm_text": "确定要下载并导入美化包吗？"
     },
     {
       "title": "💎 高级配置",
       "action": "run_script",
       "color": "#00BCD4",
-      "script_path": "scripts/advanced.js",
-      "member_only": true
+      "member_only": true,
+      "script": "// 云端 JS 脚本示例\nconsole.log('高级配置脚本已执行'); log('这是原生控制台输出');"
     },
     {
       "title": "🎮 游戏目录",
       "action": "open_file_manager",
       "color": "#FF4081",
-      "member_only": true
+      "member_only": true,
+      "path": "/var/mobile/Containers/Data/Application"
     },
     {
       "title": "🗑️ 卸载美化",
       "action": "uninstall",
       "color": "#F44336",
-      "member_only": true
+      "member_only": true,
+      "confirm_text": "确定要卸载美化吗？将删除已配置的美化文件。",
+      "paths": [
+        "/var/mobile/Containers/Data/Application/Documents/Beautify"
+      ]
     }
   ],
   "download_shortcuts": [
     {
       "name": "美化包A",
-      "url": "https://example.com/pack_a.zip",
+      "url": "http://156.238.232.172/packs/pack_a.zip",
       "target_dir": "/var/mobile/Containers/Data/Application/Documents/Beautify",
       "auto_import": true
     },
     {
       "name": "配置文件",
-      "url": "https://example.com/config.json",
+      "url": "http://156.238.232.172/packs/config.json",
       "target_dir": "/var/mobile/Containers/Data/Application/Documents/Config",
       "auto_import": true
     },
     {
       "name": "资源包",
-      "url": "https://example.com/resources.zip",
+      "url": "http://156.238.232.172/packs/resources.zip",
       "target_dir": "/var/mobile/Containers/Data/Application/Documents/Resources",
       "auto_import": true
     }

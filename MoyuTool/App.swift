@@ -1,7 +1,7 @@
 import SwiftUI
 
 @main
-struct ZakaFilzaApp: App {
+struct MoyuToolApp: App {
     @StateObject private var config = ConfigManager.shared
     @StateObject private var exploit = ExploitManager.shared
     @StateObject private var store = AppStore.shared
@@ -14,7 +14,15 @@ struct ZakaFilzaApp: App {
                 .environmentObject(exploit)
                 .environmentObject(store)
                 .environmentObject(license)
-                .preferredColorScheme(.light)
+                .preferredColorScheme(colorScheme)
+        }
+    }
+
+    // 颜色方案由云端主题控制 (默认深空极光 = 深色)
+    private var colorScheme: ColorScheme? {
+        switch config.config?.theme?.background {
+        case "light": return .light
+        default: return .dark
         }
     }
 }
@@ -34,6 +42,9 @@ struct RootView: View {
             } else if config.updateRequired {
                 // 版本封杀: 服务器要求最低版本高于当前版本
                 UpdateRequiredView()
+            } else if config.isKilled {
+                // 急停: 服务器一键停用全体用户
+                KillSwitchView()
             } else if !license.isActivated {
                 // 卡密验证
                 LicenseView()
@@ -91,6 +102,28 @@ struct UpdateRequiredView: View {
                     .font(.callout.bold())
                     .foregroundColor(.pink)
             }
+        }
+        .padding(32)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(AppTheme.backgroundGradient.ignoresSafeArea())
+    }
+}
+
+// MARK: - 急停页 (服务器 kill_switch 打开时, 全体用户看到「服务已暂停」)
+struct KillSwitchView: View {
+    @EnvironmentObject var config: ConfigManager
+
+    var body: some View {
+        VStack(spacing: 20) {
+            Image(systemName: "exclamationmark.octagon.fill")
+                .font(.system(size: 64))
+                .foregroundColor(AppTheme.danger)
+            Text("服务已暂停")
+                .font(.title.bold())
+            Text(config.killMessage)
+                .font(.subheadline)
+                .multilineTextAlignment(.center)
+                .foregroundColor(.secondary)
         }
         .padding(32)
         .frame(maxWidth: .infinity, maxHeight: .infinity)

@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-ZakaFilza Xcode 工程生成器
+MoyuTool Xcode 工程生成器
 用法: python3 Scripts/gen_xcodeproj.py
-会自动扫描源码目录，生成/重建 ZakaFilza.xcodeproj
+会自动扫描源码目录，生成/重建 MoyuTool.xcodeproj
 """
 import os
 import uuid
@@ -12,7 +12,7 @@ from pathlib import Path
 
 # 工程根目录
 ROOT = Path(__file__).resolve().parent.parent
-PROJECT_NAME = "ZakaFilza"
+PROJECT_NAME = "MoyuTool"
 BUNDLE_ID = "com.iosmytool"
 APP_DISPLAY_NAME = "墨鱼Tool"
 IOS_DEPLOYMENT_TARGET = "16.0"
@@ -75,6 +75,91 @@ def generate_embedded_resources():
     write_file(ROOT / PROJECT_NAME / "GeneratedResources.swift", code)
     print(f"    已内嵌: file_manager.html ({len(html)} 字节), default_config.json ({len(cfg)} 字节)")
 
+def generate_scheme(target_id):
+    """生成共享 scheme, 供 xcodebuild -scheme MoyuTool / GitHub Actions 使用
+    BlueprintIdentifier 必须与 pbxproj 中的 target_id 一致, 故在生成工程时同步写入"""
+    scheme_dir = ROOT / f"{PROJECT_NAME}.xcodeproj" / "xcshareddata" / "xcschemes"
+    scheme_path = scheme_dir / f"{PROJECT_NAME}.xcscheme"
+    content = f'''<?xml version="1.0" encoding="UTF-8"?>
+<Scheme
+   LastUpgradeVersion = "1500"
+   version = "1.7">
+   <BuildAction
+      parallelizeBuildables = "YES"
+      buildImplicitDependencies = "YES">
+      <BuildActionEntries>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "{target_id}"
+               BuildableName = "{PROJECT_NAME}.app"
+               BlueprintName = "{PROJECT_NAME}"
+               ReferencedContainer = "container:{PROJECT_NAME}.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
+      </BuildActionEntries>
+   </BuildAction>
+   <TestAction
+      buildConfiguration = "Debug"
+      selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
+      selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
+      shouldUseLaunchSchemeArgsEnv = "YES">
+   </TestAction>
+   <LaunchAction
+      buildConfiguration = "Debug"
+      selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
+      selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
+      launchStyle = "0"
+      useCustomWorkingDirectory = "NO"
+      ignoresPersistentStateOnLaunch = "NO"
+      debugDocumentVersioning = "YES"
+      debugServiceExtension = "internal"
+      allowLocationSimulation = "YES">
+      <BuildableProductRunnable
+         runnableDebuggingMode = "0">
+         <BuildableReference
+            BuildableIdentifier = "primary"
+            BlueprintIdentifier = "{target_id}"
+            BuildableName = "{PROJECT_NAME}.app"
+            BlueprintName = "{PROJECT_NAME}"
+            ReferencedContainer = "container:{PROJECT_NAME}.xcodeproj">
+         </BuildableReference>
+      </BuildableProductRunnable>
+   </LaunchAction>
+   <ProfileAction
+      buildConfiguration = "Release"
+      shouldUseLaunchSchemeArgsEnv = "YES"
+      savedToolIdentifier = ""
+      useCustomWorkingDirectory = "NO"
+      debugDocumentVersioning = "YES">
+      <BuildableProductRunnable
+         runnableDebuggingMode = "0">
+         <BuildableReference
+            BuildableIdentifier = "primary"
+            BlueprintIdentifier = "{target_id}"
+            BuildableName = "{PROJECT_NAME}.app"
+            BlueprintName = "{PROJECT_NAME}"
+            ReferencedContainer = "container:{PROJECT_NAME}.xcodeproj">
+         </BuildableReference>
+      </BuildableProductRunnable>
+   </ProfileAction>
+   <AnalyzeAction
+      buildConfiguration = "Debug">
+   </AnalyzeAction>
+   <ArchiveAction
+      buildConfiguration = "Release"
+      revealArchiveInOrganizer = "YES">
+   </ArchiveAction>
+</Scheme>
+'''
+    write_file(scheme_path, content)
+    return scheme_path
+
 def main():
     print(f"[*] 生成 {PROJECT_NAME}.xcodeproj ...")
 
@@ -104,16 +189,20 @@ def main():
     print(f"    C 源码: {len(c_files)} 个")
     print(f"    资源文件: {len(resources)} 个 (HTML/JSON 已内嵌进二进制)")
 
-    # 生成 pbxproj 内容
-    pbxproj = generate_pbxproj(swift_sources, objc_m_files, objc_h_files,
-                               c_files, bridging_header, resources)
+    # 生成 pbxproj 内容 (返回 target_id 供 scheme 使用)
+    pbxproj, target_id = generate_pbxproj(swift_sources, objc_m_files, objc_h_files,
+                                          c_files, bridging_header, resources)
 
     # 写入 xcodeproj
     proj_dir = ROOT / f"{PROJECT_NAME}.xcodeproj"
     proj_dir.mkdir(exist_ok=True)
     write_file(proj_dir / "project.pbxproj", pbxproj)
 
+    # 生成共享 scheme (xcodebuild -scheme MoyuTool 依赖它)
+    scheme_path = generate_scheme(target_id)
+
     print(f"[✓] 工程已生成: {proj_dir}")
+    print(f"[✓] 共享 scheme 已生成: {scheme_path}")
 
 def generate_pbxproj(swift_sources, objc_m_files, objc_h_files, c_files, bridging_header, resources):
     # 所有源文件（swift + .m + .c 都要编译）
@@ -279,7 +368,7 @@ def generate_pbxproj(swift_sources, objc_m_files, objc_h_files, c_files, bridgin
     lines.append(f"\t\t\tsourceTree = \"<group>\";")
     lines.append("\t\t};")
 
-    # ZakaFilza 源码 group
+    # MoyuTool 源码 group
     lines.append(f"\t\t{sources_group_id} /* {PROJECT_NAME} */ = {{")
     lines.append("\t\t\tisa = PBXGroup;")
     lines.append("\t\t\tchildren = (")
@@ -357,7 +446,7 @@ def generate_pbxproj(swift_sources, objc_m_files, objc_h_files, c_files, bridgin
     lines.append("\t\t\tdependencies = (")
     lines.append("\t\t\t);")
     lines.append(f"\t\t\tname = {PROJECT_NAME};")
-    lines.append("\t\t\tproductName = ZakaFilza;")
+    lines.append("\t\t\tproductName = MoyuTool;")
     lines.append(f"\t\t\tproductReference = {product_ref_id} /* {PROJECT_NAME}.app */;")
     lines.append("\t\t\tproductType = \"com.apple.product-type.application\";")
     lines.append("\t\t};")
@@ -528,6 +617,8 @@ def generate_pbxproj(swift_sources, objc_m_files, objc_h_files, c_files, bridgin
     lines.append("\t\t\t\t\tIOSurface,")
     lines.append("\t\t\t\t\t\"-framework\",")
     lines.append("\t\t\t\t\tSecurity,")
+    lines.append("\t\t\t\t\t\"-framework\",")
+    lines.append("\t\t\t\t\tJavaScriptCore,")
     lines.append("\t\t\t\t\t\"-lz\",")
     lines.append("\t\t\t\t\t\"-lcompression\",")
     lines.append("\t\t\t\t);")
@@ -574,6 +665,8 @@ def generate_pbxproj(swift_sources, objc_m_files, objc_h_files, c_files, bridgin
     lines.append("\t\t\t\t\tIOSurface,")
     lines.append("\t\t\t\t\t\"-framework\",")
     lines.append("\t\t\t\t\tSecurity,")
+    lines.append("\t\t\t\t\t\"-framework\",")
+    lines.append("\t\t\t\t\tJavaScriptCore,")
     lines.append("\t\t\t\t\t\"-lz\",")
     lines.append("\t\t\t\t\t\"-lcompression\",")
     lines.append("\t\t\t\t);")
@@ -616,7 +709,7 @@ def generate_pbxproj(swift_sources, objc_m_files, objc_h_files, c_files, bridgin
     lines.append(f"\trootObject = {proj_id} /* Project object */;")
     lines.append("}")
 
-    return "\n".join(lines) + "\n"
+    return "\n".join(lines) + "\n", target_id
 
 if __name__ == "__main__":
     main()

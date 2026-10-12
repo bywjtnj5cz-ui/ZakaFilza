@@ -6,30 +6,51 @@
 <title>文件管理</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+/* 深空极光主题变量（云端可覆盖，默认 aurora） */
+:root {
+    --primary: #7C4DFF;
+    --accent: #00E5FF;
+    --bg-a: #0a0a1e;
+    --bg-b: #1f1233;
+    --bg-c: #0a1a33;
+    --card: rgba(255,255,255,0.08);
+    --card-strong: rgba(255,255,255,0.12);
+    --text: #e6e6f0;
+    --text-dim: #9aa0b5;
+    --danger: #ef5350;
+    --radius: 14px;
+    --font-scale: 1;
+}
+
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Helvetica Neue', sans-serif;
-    background: linear-gradient(135deg, #ffeef4 0%, #eef2ff 100%);
+    background: linear-gradient(135deg, var(--bg-a) 0%, var(--bg-b) 45%, var(--bg-c) 100%);
+    background-attachment: fixed;
     min-height: 100vh;
-    color: #1a1a1a;
+    color: var(--text);
+    font-size: calc(14px * var(--font-scale));
     user-select: none;
 }
+
 .header {
-    background: rgba(255,255,255,0.9);
+    background: var(--card);
     backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     padding: 12px 16px;
     position: sticky; top: 0; z-index: 100;
-    box-shadow: 0 1px 0 rgba(0,0,0,0.05);
+    box-shadow: 0 1px 0 rgba(255,255,255,0.06);
 }
 .header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
-.header h1 { font-size: 18px; font-weight: 700; color: #ff5c8a; }
+.header h1 { font-size: 18px; font-weight: 700; color: var(--primary); }
 .path-bar {
     display: flex; align-items: center; gap: 6px;
-    background: #f5f5f7; border-radius: 10px; padding: 8px 12px;
+    background: var(--card-strong); border-radius: 10px; padding: 8px 12px;
     font-size: 13px; overflow-x: auto; white-space: nowrap;
 }
-.path-bar span { color: #666; cursor: pointer; }
-.path-bar span:hover { color: #ff5c8a; }
-.path-bar .sep { color: #ccc; }
+.path-bar span { color: var(--text-dim); cursor: pointer; }
+.path-bar span:hover { color: var(--accent); }
+.path-bar .sep { color: var(--text-dim); opacity: 0.5; }
 .actions { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
 .btn {
     padding: 8px 14px; border-radius: 10px; border: none;
@@ -38,50 +59,54 @@ body {
     transition: transform 0.1s, opacity 0.1s;
 }
 .btn:active { transform: scale(0.96); opacity: 0.8; }
-.btn-primary { background: #ff5c8a; color: white; }
-.btn-secondary { background: #6080ff; color: white; }
+.btn-primary { background: var(--primary); color: white; }
+.btn-secondary { background: var(--accent); color: #04222a; }
 .btn-success { background: #5cc873; color: white; }
-.btn-danger { background: #ef5350; color: white; }
-.btn-gray { background: #e5e5ea; color: #333; }
+.btn-danger { background: var(--danger); color: white; }
+.btn-gray { background: var(--card-strong); color: var(--text); }
 .file-list { padding: 12px 16px; }
 .file-item {
     display: flex; align-items: center; gap: 12px;
-    padding: 12px; background: rgba(255,255,255,0.8);
+    padding: 12px; background: var(--card);
     border-radius: 12px; margin-bottom: 8px;
     transition: background 0.15s;
 }
-.file-item:active { background: rgba(255,255,255,0.5); }
+.file-item:active { background: var(--card-strong); }
 .file-icon { font-size: 28px; width: 36px; text-align: center; }
 .file-info { flex: 1; min-width: 0; }
 .file-name { font-size: 15px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.file-meta { font-size: 11px; color: #999; margin-top: 2px; }
+.file-meta { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
 .file-actions { display: flex; gap: 6px; opacity: 0; transition: opacity 0.2s; }
 .file-item.selected .file-actions { opacity: 1; }
 .mini-btn {
     padding: 6px 10px; border-radius: 8px; border: none;
     font-size: 11px; font-weight: 600; cursor: pointer;
 }
-.empty { text-align: center; padding: 60px 20px; color: #bbb; }
+.mini-btn.copy { background: rgba(0,229,255,0.15); color: var(--accent); }
+.mini-btn.danger { background: rgba(239,83,80,0.15); color: #ff8a80; }
+.empty { text-align: center; padding: 60px 20px; color: var(--text-dim); }
 .empty-icon { font-size: 48px; margin-bottom: 12px; }
 
 /* 下载面板 */
 .download-panel {
     margin: 12px 16px; padding: 14px;
-    background: rgba(255,255,255,0.85); border-radius: 16px;
+    background: var(--card); border-radius: var(--radius);
 }
-.download-panel h3 { font-size: 14px; margin-bottom: 10px; color: #ff5c8a; }
+.download-panel h3 { font-size: 14px; margin-bottom: 10px; color: var(--primary); }
 .download-row { display: flex; gap: 8px; margin-bottom: 8px; }
 .download-row input {
-    flex: 1; padding: 10px 12px; border: 1px solid #e0e0e0;
+    flex: 1; padding: 10px 12px; border: 1px solid var(--card-strong);
     border-radius: 10px; font-size: 13px; outline: none;
+    background: var(--card); color: var(--text);
 }
-.download-row input:focus { border-color: #ff5c8a; }
+.download-row input:focus { border-color: var(--accent); }
 .shortcut-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
 .shortcut-tag {
-    padding: 6px 12px; background: #fff0f5; border-radius: 20px;
-    font-size: 12px; color: #ff5c8a; cursor: pointer; border: 1px solid #ffd6e4;
+    padding: 6px 12px; background: rgba(124,77,255,0.15); border-radius: 20px;
+    font-size: 12px; color: var(--primary); cursor: pointer;
+    border: 1px solid rgba(124,77,255,0.35);
 }
-.shortcut-tag:active { background: #ffd6e4; }
+.shortcut-tag:active { background: rgba(124,77,255,0.3); }
 
 /* Toast */
 .toast {
@@ -93,26 +118,27 @@ body {
 .toast.show { opacity: 1; }
 
 /* 加载 */
-.loading { text-align: center; padding: 40px; color: #999; }
+.loading { text-align: center; padding: 40px; color: var(--text-dim); }
 .spinner {
     display: inline-block; width: 24px; height: 24px;
-    border: 3px solid #ffd6e4; border-top-color: #ff5c8a;
+    border: 3px solid var(--card-strong); border-top-color: var(--accent);
     border-radius: 50%; animation: spin 0.8s linear infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
 /* 上下文菜单 */
 .context-menu {
-    position: fixed; background: white; border-radius: 12px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.15); padding: 6px; z-index: 200;
-    min-width: 140px;
+    position: fixed; background: #16162a; border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.5); padding: 6px; z-index: 200;
+    min-width: 140px; color: var(--text);
+    border: 1px solid var(--card-strong);
 }
 .context-menu button {
     display: block; width: 100%; text-align: left;
     padding: 10px 14px; border: none; background: none;
-    font-size: 14px; cursor: pointer; border-radius: 8px;
+    font-size: 14px; cursor: pointer; border-radius: 8px; color: var(--text);
 }
-.context-menu button:active { background: #f5f5f7; }
+.context-menu button:active { background: var(--card-strong); color: var(--accent); }
 </style>
 </head>
 <body>
@@ -178,6 +204,27 @@ window.__bridgeCallback = function(response) {
     }
 };
 
+// ============ 主题 ============
+function applyTheme() {
+    const t = window.__theme || {};
+    const root = document.documentElement;
+    const set = (k, v) => { if (v !== undefined && v !== null && v !== '') root.style.setProperty(k, v); };
+    set('--primary', t.primary);
+    set('--accent', t.accent);
+    set('--radius', t.cornerRadius ? (t.cornerRadius + 'px') : undefined);
+    set('--font-scale', t.fontScale || 1);
+    const bg = t.background || 'aurora';
+    if (bg === 'light') {
+        set('--bg-a', '#ffeef4'); set('--bg-b', '#eef2ff'); set('--bg-c', '#eef2ff');
+        set('--card', 'rgba(255,255,255,0.9)'); set('--card-strong', 'rgba(0,0,0,0.05)');
+        set('--text', '#1a1a1a'); set('--text-dim', '#888');
+    } else if (bg === 'dark') {
+        set('--bg-a', '#05050a'); set('--bg-b', '#05050a'); set('--bg-c', '#05050a');
+        set('--card', 'rgba(255,255,255,0.08)'); set('--card-strong', 'rgba(255,255,255,0.14)');
+        set('--text', '#e6e6f0'); set('--text-dim', '#9aa0b5');
+    }
+}
+
 // ============ 状态 ============
 let currentPath = '';
 let clipboard = null;
@@ -187,9 +234,10 @@ let shortcuts = [];
 
 // ============ 初始化 ============
 async function init() {
+    applyTheme();
     try {
         appInfo = await callNative('appInfo');
-        currentPath = appInfo.documentsDir;
+        currentPath = appInfo.startPath || appInfo.documentsDir;
         loadShortcuts();
         await refresh();
     } catch (e) {
@@ -198,7 +246,6 @@ async function init() {
 }
 
 function loadShortcuts() {
-    // 从云端配置加载下载快捷键（通过 URL 参数或原生注入）
     if (window.__shortcuts) {
         shortcuts = window.__shortcuts;
         renderShortcuts();
@@ -256,14 +303,13 @@ async function refresh() {
                         <div class="file-meta">${size} ${date}</div>
                     </div>
                     <div class="file-actions">
-                        <button class="mini-btn" style="background:#e3f2fd;color:#1976d2" onclick="event.stopPropagation();copyItem('${item.path}')">复制</button>
-                        <button class="mini-btn" style="background:#ffebee;color:#c62828" onclick="event.stopPropagation();deleteItem('${item.path}')">删除</button>
+                        <button class="mini-btn copy" onclick="event.stopPropagation();copyItem('${item.path}')">复制</button>
+                        <button class="mini-btn danger" onclick="event.stopPropagation();deleteItem('${item.path}')">删除</button>
                     </div>
                 </div>
             `;
         }).join('');
 
-        // 绑定点击事件
         list.querySelectorAll('.file-item').forEach(el => {
             el.addEventListener('click', () => {
                 const path = el.dataset.path;
@@ -310,7 +356,7 @@ function goToPath(path) {
 }
 
 function goHome() {
-    if (appInfo) goToPath(appInfo.documentsDir);
+    if (appInfo) goToPath(appInfo.documentsDir || appInfo.homeDir);
 }
 
 function goUp() {
@@ -443,7 +489,6 @@ async function renameItem(path) {
 
 function shareItem(path) {
     showToast('分享功能调用原生');
-    // 可通过 callNative 调用原生分享
     hideContextMenu();
 }
 
@@ -456,7 +501,6 @@ function showToast(msg) {
     window._toastTimer = setTimeout(() => toast.classList.remove('show'), 2500);
 }
 
-// 点击空白关闭菜单
 document.addEventListener('click', (e) => {
     const menu = document.getElementById('contextMenu');
     if (menu.style.display === 'block' && !menu.contains(e.target)) {
@@ -464,7 +508,6 @@ document.addEventListener('click', (e) => {
     }
 });
 
-// 启动
 init();
 </script>
 </body>

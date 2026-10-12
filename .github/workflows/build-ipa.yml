@@ -1,4 +1,4 @@
-name: Build ZakaFilza IPA
+name: Build MoyuTool IPA
 
 on:
   push:
@@ -24,8 +24,8 @@ jobs:
       - name: Upload IPA
         uses: actions/upload-artifact@v4
         with:
-          name: ZakaFilza-unsigned-ipa
-          path: build/ZakaFilza.ipa
+          name: MoyuTool-unsigned-ipa
+          path: build/MoyuTool.ipa
           if-no-files-found: error
 
       - name: Upload build logs

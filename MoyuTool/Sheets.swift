@@ -50,9 +50,9 @@ struct SheetsView: View {
 
     private var aboutView: some View {
         List {
-            LabeledContent("App 名称", value: "Zaka文件管理")
+            LabeledContent("App 名称", value: "墨鱼Tool")
             LabeledContent("版本", value: "1.0.0")
-            LabeledContent("最低系统", value: "iOS 15.0")
+            LabeledContent("最低系统", value: "iOS 16.0")
             Section("支持的漏洞") {
                 Text("FilzaJailedDS - iOS 17.0–26.0.1")
                 Text("FilzaSlop - iOS 18, 26, 27 beta")
