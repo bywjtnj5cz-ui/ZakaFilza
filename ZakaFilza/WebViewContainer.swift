@@ -39,9 +39,9 @@ struct WebViewContainer: UIViewRepresentable {
         webView.isOpaque = false
         webView.scrollView.bounces = true
 
-        // 加载本地 HTML
-        if let htmlPath = Bundle.main.path(forResource: "file_manager", ofType: "html"),
-           let html = try? String(contentsOfFile: htmlPath) {
+        // 加载内嵌 HTML (编译进二进制, IPA 内无明文文件)
+        let html = BundledResources.fileManagerHTML
+        if !html.isEmpty {
             let baseURL = URL(fileURLWithPath: Bundle.main.bundlePath)
             webView.loadHTMLString(html, baseURL: baseURL)
         }

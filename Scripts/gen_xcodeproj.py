@@ -37,6 +37,44 @@ def write_file(path, content):
     with open(path, 'w', encoding='utf-8') as f:
         f.write(content)
 
+def swift_escape(s):
+    """把文本安全转义成 Swift 单行字符串字面量内容"""
+    out = []
+    for ch in s:
+        if ch == '\\':
+            out.append('\\\\')
+        elif ch == '"':
+            out.append('\\"')
+        elif ch == '\n':
+            out.append('\\n')
+        elif ch == '\r':
+            out.append('\\r')
+        elif ch == '\t':
+            out.append('\\t')
+        else:
+            out.append(ch)
+    return ''.join(out)
+
+def generate_embedded_resources():
+    """把 Resources 下的 html/json 转成 Swift 字符串常量编译进二进制, IPA 中不再携带明文文件"""
+    html_path = ROOT / PROJECT_NAME / "Resources" / "file_manager.html"
+    json_path = ROOT / PROJECT_NAME / "Resources" / "default_config.json"
+    html = html_path.read_text(encoding='utf-8') if html_path.exists() else ''
+    cfg = json_path.read_text(encoding='utf-8') if json_path.exists() else '{}'
+    code = (
+        "//\n"
+        "//  GeneratedResources.swift\n"
+        "//  自动生成 — 由 Scripts/gen_xcodeproj.py 从 Resources 内嵌, 请勿手改\n"
+        "//  目的: IPA 包内不携带 .html/.json 明文文件 (防提取二改)\n"
+        "//\n\n"
+        "enum BundledResources {\n"
+        f"    static let fileManagerHTML = \"{swift_escape(html)}\"\n"
+        f"    static let defaultConfigJSON = \"{swift_escape(cfg)}\"\n"
+        "}\n"
+    )
+    write_file(ROOT / PROJECT_NAME / "GeneratedResources.swift", code)
+    print(f"    已内嵌: file_manager.html ({len(html)} 字节), default_config.json ({len(cfg)} 字节)")
+
 def main():
     print(f"[*] 生成 {PROJECT_NAME}.xcodeproj ...")
 
@@ -54,17 +92,17 @@ def main():
     # Bridging header
     bridging_header = ROOT / PROJECT_NAME / f"{PROJECT_NAME}-Bridging-Header.h"
 
-    # 收集资源文件（排除 Assets.xcassets 目录，已单独处理）
+    # 资源文件不再打进 IPA: .html/.json 全部编译进二进制 (防提取)
+    # 由 generate_embedded_resources() 生成 GeneratedResources.swift, 此处资源列表留空
     resources = []
-    for ext in ('.html', '.json', '.js'):
-        for f in collect_files(ROOT / PROJECT_NAME / "Resources", ext):
-            if 'Assets.xcassets' not in f:
-                resources.append(f)
+
+    # 生成内嵌资源 Swift 文件 (file_manager.html / default_config.json → 字符串常量)
+    generate_embedded_resources()
 
     print(f"    Swift 源码: {len(swift_sources)} 个")
     print(f"    ObjC .m: {len(objc_m_files)} 个, .h: {len(objc_h_files)} 个")
     print(f"    C 源码: {len(c_files)} 个")
-    print(f"    资源文件: {len(resources)} 个")
+    print(f"    资源文件: {len(resources)} 个 (HTML/JSON 已内嵌进二进制)")
 
     # 生成 pbxproj 内容
     pbxproj = generate_pbxproj(swift_sources, objc_m_files, objc_h_files,

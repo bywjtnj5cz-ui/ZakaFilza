@@ -140,10 +140,9 @@ final class ConfigManager: ObservableObject {
         Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.0"
     }
 
-    // 加载内置兜底配置
+    // 加载内置兜底配置 (编译进二进制的字符串常量, IPA 内无明文 json)
     private func loadFallback() {
-        guard let path = Bundle.main.path(forResource: "default_config", ofType: "json"),
-              let data = FileManager.default.contents(atPath: path),
+        guard let data = BundledResources.defaultConfigJSON.data(using: .utf8),
               let config = try? JSONDecoder().decode(AppConfig.self, from: data) else {
             loadError = "配置加载失败"
             isLoading = false
