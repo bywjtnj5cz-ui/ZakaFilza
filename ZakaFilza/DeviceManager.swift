@@ -74,14 +74,24 @@ final class DeviceManager {
 
     private let uuidKey = "device_uuid"
 
-    // 获取设备 UUID（首次生成后永久存储在 Keychain）
+    // 获取设备 UUID（首次生成后永久存储）
+    // 双保险: 优先 Keychain, 失效时回退 UserDefaults (自签/重签场景 Keychain 偶发读不到)
+    // 最后才用 identifierForVendor; 三者都无法持久时用 UUID() 随机兜底
     var uuid: String {
-        if let saved = KeychainHelper.shared.readString(for: uuidKey) {
+        // 1. Keychain
+        if let saved = KeychainHelper.shared.readString(for: uuidKey), !saved.isEmpty {
             return saved
         }
-        // 生成新 UUID（优先用 identifierForVendor，否则随机）
+        // 2. UserDefaults (重启/重签更可靠)
+        if let ud = UserDefaults.standard.string(forKey: uuidKey), !ud.isEmpty {
+            KeychainHelper.shared.saveString(ud, for: uuidKey)
+            return ud
+        }
+        // 3. identifierForVendor (同一签名团队+bundleId 恒定)
         let newUUID = UIDevice.current.identifierForVendor?.uuidString
             ?? UUID().uuidString
+        // 同时写两处
+        UserDefaults.standard.set(newUUID, forKey: uuidKey)
         KeychainHelper.shared.saveString(newUUID, for: uuidKey)
         return newUUID
     }
