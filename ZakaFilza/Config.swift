@@ -56,7 +56,9 @@ final class ConfigManager: ObservableObject {
     @Published var isLoading = true
     @Published var loadError: String?
 
-    private let fallbackURL = "https://raw.githubusercontent.com/yourname/ZakaFilza/main/config.json"
+    // App 启动时从此地址拉取云端配置 (按钮、下载直链、公告等)
+    // 该地址由 verify.php 的 action=config 提供, 可在管理后台修改内容
+    private let fallbackURL = "http://156.238.232.172/api/verify.php?action=config"
 
     private init() {}
 
