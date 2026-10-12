@@ -132,74 +132,67 @@ def generate_pbxproj(swift_sources, objc_m_files, objc_h_files, c_files, bridgin
     lines.append("\tobjects = {")
     lines.append("")
 
-    # PBXBuildFile section
+    # 先生成所有 PBXFileReference 的 ID（每个文件一个唯一 ID）
+    file_refs = {}
+    for src in swift_sources + objc_m_files + c_files + objc_h_files + resources:
+        file_refs[src] = gen_id()
+    bridge_id = gen_id()
+    file_refs['BridgingHeader'] = bridge_id
+    assets_id = gen_id()
+    file_refs['Assets'] = assets_id
+    info_plist_id = gen_id()
+    file_refs['Info.plist'] = info_plist_id
+
+    # PBXBuildFile section —— PBXBuildFile 和 PBXFileReference 必须用不同 ID
     lines.append("/* Begin PBXBuildFile section */")
     build_files = {}
     for src in swift_sources:
-        fid = gen_id()
-        build_files[src] = fid
-        rel = os.path.relpath(src, ROOT)
-        lines.append(f"\t\t{fid} /* {os.path.basename(src)} in Sources */ = {{isa = PBXBuildFile; fileRef = {fid} /* {os.path.basename(src)} */; }};")
-    # ObjC .m 文件加入编译
+        bid = gen_id()
+        build_files[src] = bid
+        lines.append(f"\t\t{bid} /* {os.path.basename(src)} in Sources */ = {{isa = PBXBuildFile; fileRef = {file_refs[src]} /* {os.path.basename(src)} */; }};")
     for m in objc_m_files:
-        fid = gen_id()
-        build_files[m] = fid
-        lines.append(f"\t\t{fid} /* {os.path.basename(m)} in Sources */ = {{isa = PBXBuildFile; fileRef = {fid} /* {os.path.basename(m)} */; }};")
-    # C 文件加入编译
+        bid = gen_id()
+        build_files[m] = bid
+        lines.append(f"\t\t{bid} /* {os.path.basename(m)} in Sources */ = {{isa = PBXBuildFile; fileRef = {file_refs[m]} /* {os.path.basename(m)} */; }};")
     for c in c_files:
-        fid = gen_id()
-        build_files[c] = fid
-        lines.append(f"\t\t{fid} /* {os.path.basename(c)} in Sources */ = {{isa = PBXBuildFile; fileRef = {fid} /* {os.path.basename(c)} */; }};")
+        bid = gen_id()
+        build_files[c] = bid
+        lines.append(f"\t\t{bid} /* {os.path.basename(c)} in Sources */ = {{isa = PBXBuildFile; fileRef = {file_refs[c]} /* {os.path.basename(c)} */; }};")
     for res in resources:
-        fid = gen_id()
-        build_files[res] = fid
-        rel = os.path.relpath(res, ROOT)
-        lines.append(f"\t\t{fid} /* {os.path.basename(res)} in Resources */ = {{isa = PBXBuildFile; fileRef = {fid} /* {os.path.basename(res)} */; }};")
+        bid = gen_id()
+        build_files[res] = bid
+        lines.append(f"\t\t{bid} /* {os.path.basename(res)} in Resources */ = {{isa = PBXBuildFile; fileRef = {file_refs[res]} /* {os.path.basename(res)} */; }};")
     # Assets.xcassets
-    assets_id = gen_id()
-    build_files['Assets'] = assets_id
-    lines.append(f"\t\t{assets_id} /* Assets.xcassets in Resources */ = {{isa = PBXBuildFile; fileRef = {assets_id} /* Assets.xcassets */; }};")
+    assets_build_id = gen_id()
+    build_files['Assets'] = assets_build_id
+    lines.append(f"\t\t{assets_build_id} /* Assets.xcassets in Resources */ = {{isa = PBXBuildFile; fileRef = {assets_id} /* Assets.xcassets */; }};")
     lines.append("/* End PBXBuildFile section */")
     lines.append("")
 
     # PBXFileReference section
     lines.append("/* Begin PBXFileReference section */")
-    file_refs = {}
     for src in swift_sources:
-        fid = build_files[src]
-        file_refs[src] = fid
+        fid = file_refs[src]
         lines.append(f"\t\t{fid} /* {os.path.basename(src)} */ = {{isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = \"{os.path.basename(src)}\"; sourceTree = \"<group>\"; }};")
-    # ObjC .m 文件
     for m in objc_m_files:
-        fid = build_files[m]
-        file_refs[m] = fid
+        fid = file_refs[m]
         lines.append(f"\t\t{fid} /* {os.path.basename(m)} */ = {{isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = \"{os.path.basename(m)}\"; sourceTree = \"<group>\"; }};")
-    # C 文件
     for c in c_files:
-        fid = build_files[c]
-        file_refs[c] = fid
+        fid = file_refs[c]
         lines.append(f"\t\t{fid} /* {os.path.basename(c)} */ = {{isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = \"{os.path.basename(c)}\"; sourceTree = \"<group>\"; }};")
-    # ObjC .h 头文件（不编译，仅引用）
     for h in objc_h_files:
-        fid = gen_id()
-        file_refs[h] = fid
+        fid = file_refs[h]
         lines.append(f"\t\t{fid} /* {os.path.basename(h)} */ = {{isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = \"{os.path.basename(h)}\"; sourceTree = \"<group>\"; }};")
     # Bridging header
-    bridge_id = gen_id()
-    file_refs['BridgingHeader'] = bridge_id
     lines.append(f"\t\t{bridge_id} /* {PROJECT_NAME}-Bridging-Header.h */ = {{isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = \"{PROJECT_NAME}-Bridging-Header.h\"; sourceTree = \"<group>\"; }};")
     for res in resources:
-        fid = build_files[res]
-        file_refs[res] = fid
+        fid = file_refs[res]
         ext = os.path.splitext(res)[1]
         ftype = {'.html': 'text.html', '.json': 'text.json', '.js': 'sourcecode.javascript'}.get(ext, 'text')
         lines.append(f"\t\t{fid} /* {os.path.basename(res)} */ = {{isa = PBXFileReference; lastKnownFileType = {ftype}; path = \"{os.path.basename(res)}\"; sourceTree = \"<group>\"; }};")
     # Assets.xcassets
-    file_refs['Assets'] = assets_id
     lines.append(f"\t\t{assets_id} /* Assets.xcassets */ = {{isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = \"<group>\"; }};")
     # Info.plist
-    info_plist_id = gen_id()
-    file_refs['Info.plist'] = info_plist_id
     lines.append(f"\t\t{info_plist_id} /* Info.plist */ = {{isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = \"<group>\"; }};")
     # Product
     lines.append(f"\t\t{product_ref_id} /* {PROJECT_NAME}.app */ = {{isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = {PROJECT_NAME}.app; sourceTree = BUILT_PRODUCTS_DIR; }};")
@@ -357,7 +350,7 @@ def generate_pbxproj(swift_sources, objc_m_files, objc_h_files, c_files, bridgin
     lines.append("\t\t\tfiles = (")
     for res in resources:
         lines.append(f"\t\t\t\t{build_files[res]} /* {os.path.basename(res)} in Resources */,")
-    lines.append(f"\t\t\t\t{assets_id} /* Assets.xcassets in Resources */,")
+    lines.append(f"\t\t\t\t{build_files['Assets']} /* Assets.xcassets in Resources */,")
     lines.append("\t\t\t);")
     lines.append("\t\t\trunOnlyForDeploymentPostprocessing = 0;")
     lines.append("\t\t};")
