@@ -110,8 +110,16 @@ final class ConfigManager: ObservableObject {
         }.resume()
     }
 
-    // 服务端管控策略: 版本封杀检查
+    // 服务端管控策略: 版本封杀检查 + 锁定态自愈
     private func applyServerPolicy(_ c: AppConfig) {
+        // 锁定态自愈: 已激活但被服务器判定未授权 (旧缓存缺 session_token / token 失效)
+        // → 静默重新验证拿 token, 验证成功后 verify 内部会自动重拉配置
+        if c.locked == true,
+           LicenseManager.shared.isActivated,
+           LicenseManager.shared.sessionToken == nil || LicenseManager.shared.sessionToken?.isEmpty == true {
+            LicenseManager.shared.refreshIfNeeded()
+            return
+        }
         if let minV = c.minVersion, !minV.isEmpty {
             let current = Version(currentAppVersion())
             if current < Version(minV) {
