@@ -7,7 +7,7 @@ import UIKit
 final class KeychainHelper {
     static let shared = KeychainHelper()
 
-    private let service = "com.zaka.filza.keychain"
+    private let service = "com.iosmytool.keychain"
 
     // 存储数据到 Keychain
     func save(_ data: Data, for key: String) -> Bool {

@@ -13,7 +13,8 @@ from pathlib import Path
 # 工程根目录
 ROOT = Path(__file__).resolve().parent.parent
 PROJECT_NAME = "ZakaFilza"
-BUNDLE_ID = "com.zaka.filza"
+BUNDLE_ID = "com.iosmytool"
+APP_DISPLAY_NAME = "墨鱼Tool"
 IOS_DEPLOYMENT_TARGET = "16.0"
 
 # 生成唯一 ID（24位十六进制）
@@ -472,6 +473,7 @@ def generate_pbxproj(swift_sources, objc_m_files, objc_h_files, c_files, bridgin
     lines.append(f"\t\t\t\tINFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;")
     lines.append(f"\t\t\t\tINFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;")
     lines.append(f"\t\t\t\tINFOPLIST_KEY_UILaunchScreen_Generation = YES;")
+    lines.append(f"\t\t\t\tINFOPLIST_KEY_CFBundleDisplayName = \"{APP_DISPLAY_NAME}\";")
     lines.append(f"\t\t\t\tINFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = \"UIInterfaceOrientationPortrait\";")
     lines.append(f"\t\t\t\tINFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = \"UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight\";")
     lines.append(f"\t\t\t\tIPHONEOS_DEPLOYMENT_TARGET = {IOS_DEPLOYMENT_TARGET};")
@@ -517,6 +519,7 @@ def generate_pbxproj(swift_sources, objc_m_files, objc_h_files, c_files, bridgin
     lines.append(f"\t\t\t\tINFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;")
     lines.append(f"\t\t\t\tINFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;")
     lines.append(f"\t\t\t\tINFOPLIST_KEY_UILaunchScreen_Generation = YES;")
+    lines.append(f"\t\t\t\tINFOPLIST_KEY_CFBundleDisplayName = \"{APP_DISPLAY_NAME}\";")
     lines.append(f"\t\t\t\tINFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = \"UIInterfaceOrientationPortrait\";")
     lines.append(f"\t\t\t\tINFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = \"UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight\";")
     lines.append(f"\t\t\t\tIPHONEOS_DEPLOYMENT_TARGET = {IOS_DEPLOYMENT_TARGET};")

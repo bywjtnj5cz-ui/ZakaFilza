@@ -21,7 +21,7 @@ PROJECT="ZakaFilza"
 SCHEME="ZakaFilza"
 BUILD_DIR="$ROOT/build"
 IPA_PATH="$BUILD_DIR/${PROJECT}.ipa"
-BUNDLE_ID="com.zaka.filza"
+BUNDLE_ID="com.iosmytool"
 MARKETING_VERSION="1.0.0"
 CLEAN=0
 
