@@ -53,12 +53,12 @@ def main():
     # Bridging header
     bridging_header = ROOT / PROJECT_NAME / f"{PROJECT_NAME}-Bridging-Header.h"
 
-    # 收集资源文件
+    # 收集资源文件（排除 Assets.xcassets 目录，已单独处理）
     resources = []
-    resources += collect_files(ROOT / PROJECT_NAME / "Resources", '.html')
-    resources += collect_files(ROOT / PROJECT_NAME / "Resources", '.json')
-    resources += collect_files(ROOT / PROJECT_NAME / "Resources", '.js')
-    # Assets.xcassets 和 Info.plist 单独处理
+    for ext in ('.html', '.json', '.js'):
+        for f in collect_files(ROOT / PROJECT_NAME / "Resources", ext):
+            if 'Assets.xcassets' not in f:
+                resources.append(f)
 
     print(f"    Swift 源码: {len(swift_sources)} 个")
     print(f"    ObjC .m: {len(objc_m_files)} 个, .h: {len(objc_h_files)} 个")
