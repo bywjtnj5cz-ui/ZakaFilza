@@ -1,5 +1,6 @@
 import Foundation
 import Security
+import UIKit
 
 // MARK: - Keychain 工具
 // 用于持久化存储 UUID 和卡密，卸载重装不丢失

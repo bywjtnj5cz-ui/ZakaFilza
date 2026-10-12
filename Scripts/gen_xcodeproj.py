@@ -14,7 +14,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 PROJECT_NAME = "ZakaFilza"
 BUNDLE_ID = "com.zaka.filza"
-IOS_DEPLOYMENT_TARGET = "15.0"
+IOS_DEPLOYMENT_TARGET = "16.0"
 
 # 生成唯一 ID（24位十六进制）
 def gen_id():

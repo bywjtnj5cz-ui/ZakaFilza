@@ -1,4 +1,5 @@
 import Foundation
+import UIKit
 
 // 本地持久化存储
 final class AppStore: ObservableObject {
