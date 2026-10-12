@@ -1,0 +1,79 @@
+{
+  "app_name": "Zaka文件管理",
+  "qq_group": "123456789",
+  "wechat_official": "ZakaOfficial",
+  "version": "1.0.0",
+  "announcement": "欢迎使用 Zaka 文件管理！\n\n首次使用请先选择与你系统版本匹配的漏洞利用方式，获得文件系统访问权限后即可使用文件管理器。\n\n支持：\n• FilzaJailedDS (iOS 17-26)\n• FilzaSlop (iOS 18, 26, 27 beta)\n• Filza (越狱)",
+  "config_url": "https://raw.githubusercontent.com/yourname/ZakaFilza/main/config.json",
+  "verify_server_url": "https://api.example.com/api/verify",
+  "buttons": [
+    {
+      "title": "📁 文件管理",
+      "action": "open_file_manager",
+      "color": "#FF6B9D"
+    },
+    {
+      "title": "⬇️ 下载中心",
+      "action": "open_file_manager",
+      "color": "#6080FF"
+    },
+    {
+      "title": "🔄 更新地址",
+      "action": "update_url",
+      "color": "#5CC873"
+    },
+    {
+      "title": "🔔 查看公告",
+      "action": "announcement",
+      "color": "#FFA940"
+    }
+  ],
+  "member_buttons": [
+    {
+      "title": "⚡ 一键美化",
+      "action": "download",
+      "color": "#7C4DFF",
+      "download_url": "https://example.com/beautify_pack.zip",
+      "member_only": true
+    },
+    {
+      "title": "💎 高级配置",
+      "action": "run_script",
+      "color": "#00BCD4",
+      "script_path": "scripts/advanced.js",
+      "member_only": true
+    },
+    {
+      "title": "🎮 游戏目录",
+      "action": "open_file_manager",
+      "color": "#FF4081",
+      "member_only": true
+    },
+    {
+      "title": "🗑️ 卸载美化",
+      "action": "uninstall",
+      "color": "#F44336",
+      "member_only": true
+    }
+  ],
+  "download_shortcuts": [
+    {
+      "name": "美化包A",
+      "url": "https://example.com/pack_a.zip",
+      "target_dir": "/var/mobile/Containers/Data/Application/Documents/Beautify",
+      "auto_import": true
+    },
+    {
+      "name": "配置文件",
+      "url": "https://example.com/config.json",
+      "target_dir": "/var/mobile/Containers/Data/Application/Documents/Config",
+      "auto_import": true
+    },
+    {
+      "name": "资源包",
+      "url": "https://example.com/resources.zip",
+      "target_dir": "/var/mobile/Containers/Data/Application/Documents/Resources",
+      "auto_import": true
+    }
+  ]
+}

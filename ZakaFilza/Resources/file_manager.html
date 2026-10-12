@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>文件管理</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Helvetica Neue', sans-serif;
+    background: linear-gradient(135deg, #ffeef4 0%, #eef2ff 100%);
+    min-height: 100vh;
+    color: #1a1a1a;
+    user-select: none;
+}
+.header {
+    background: rgba(255,255,255,0.9);
+    backdrop-filter: blur(20px);
+    padding: 12px 16px;
+    position: sticky; top: 0; z-index: 100;
+    box-shadow: 0 1px 0 rgba(0,0,0,0.05);
+}
+.header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.header h1 { font-size: 18px; font-weight: 700; color: #ff5c8a; }
+.path-bar {
+    display: flex; align-items: center; gap: 6px;
+    background: #f5f5f7; border-radius: 10px; padding: 8px 12px;
+    font-size: 13px; overflow-x: auto; white-space: nowrap;
+}
+.path-bar span { color: #666; cursor: pointer; }
+.path-bar span:hover { color: #ff5c8a; }
+.path-bar .sep { color: #ccc; }
+.actions { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+.btn {
+    padding: 8px 14px; border-radius: 10px; border: none;
+    font-size: 13px; font-weight: 600; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 4px;
+    transition: transform 0.1s, opacity 0.1s;
+}
+.btn:active { transform: scale(0.96); opacity: 0.8; }
+.btn-primary { background: #ff5c8a; color: white; }
+.btn-secondary { background: #6080ff; color: white; }
+.btn-success { background: #5cc873; color: white; }
+.btn-danger { background: #ef5350; color: white; }
+.btn-gray { background: #e5e5ea; color: #333; }
+.file-list { padding: 12px 16px; }
+.file-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px; background: rgba(255,255,255,0.8);
+    border-radius: 12px; margin-bottom: 8px;
+    transition: background 0.15s;
+}
+.file-item:active { background: rgba(255,255,255,0.5); }
+.file-icon { font-size: 28px; width: 36px; text-align: center; }
+.file-info { flex: 1; min-width: 0; }
+.file-name { font-size: 15px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.file-meta { font-size: 11px; color: #999; margin-top: 2px; }
+.file-actions { display: flex; gap: 6px; opacity: 0; transition: opacity 0.2s; }
+.file-item.selected .file-actions { opacity: 1; }
+.mini-btn {
+    padding: 6px 10px; border-radius: 8px; border: none;
+    font-size: 11px; font-weight: 600; cursor: pointer;
+}
+.empty { text-align: center; padding: 60px 20px; color: #bbb; }
+.empty-icon { font-size: 48px; margin-bottom: 12px; }
+
+/* 下载面板 */
+.download-panel {
+    margin: 12px 16px; padding: 14px;
+    background: rgba(255,255,255,0.85); border-radius: 16px;
+}
+.download-panel h3 { font-size: 14px; margin-bottom: 10px; color: #ff5c8a; }
+.download-row { display: flex; gap: 8px; margin-bottom: 8px; }
+.download-row input {
+    flex: 1; padding: 10px 12px; border: 1px solid #e0e0e0;
+    border-radius: 10px; font-size: 13px; outline: none;
+}
+.download-row input:focus { border-color: #ff5c8a; }
+.shortcut-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.shortcut-tag {
+    padding: 6px 12px; background: #fff0f5; border-radius: 20px;
+    font-size: 12px; color: #ff5c8a; cursor: pointer; border: 1px solid #ffd6e4;
+}
+.shortcut-tag:active { background: #ffd6e4; }
+
+/* Toast */
+.toast {
+    position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
+    background: rgba(0,0,0,0.8); color: white; padding: 10px 20px;
+    border-radius: 20px; font-size: 13px; z-index: 999;
+    opacity: 0; transition: opacity 0.3s; pointer-events: none;
+}
+.toast.show { opacity: 1; }
+
+/* 加载 */
+.loading { text-align: center; padding: 40px; color: #999; }
+.spinner {
+    display: inline-block; width: 24px; height: 24px;
+    border: 3px solid #ffd6e4; border-top-color: #ff5c8a;
+    border-radius: 50%; animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* 上下文菜单 */
+.context-menu {
+    position: fixed; background: white; border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15); padding: 6px; z-index: 200;
+    min-width: 140px;
+}
+.context-menu button {
+    display: block; width: 100%; text-align: left;
+    padding: 10px 14px; border: none; background: none;
+    font-size: 14px; cursor: pointer; border-radius: 8px;
+}
+.context-menu button:active { background: #f5f5f7; }
+</style>
+</head>
+<body>
+
+<div class="header">
+    <div class="header-top">
+        <h1>📁 文件管理</h1>
+        <div style="display:flex;gap:6px;">
+            <button class="btn btn-gray" onclick="goHome()">🏠</button>
+            <button class="btn btn-gray" onclick="goUp()">⬆️</button>
+        </div>
+    </div>
+    <div class="path-bar" id="pathBar"></div>
+    <div class="actions">
+        <button class="btn btn-primary" onclick="showDownloadPanel()">⬇️ 下载直链</button>
+        <button class="btn btn-secondary" onclick="newFolder()">📁 新建</button>
+        <button class="btn btn-success" onclick="pasteFromClipboard()">📋 粘贴</button>
+    </div>
+</div>
+
+<!-- 一键下载面板 -->
+<div class="download-panel" id="downloadPanel" style="display:none;">
+    <h3>⬇️ 一键下载直链并导入</h3>
+    <div class="download-row">
+        <input type="text" id="urlInput" placeholder="粘贴直链 URL (https://...)" />
+        <button class="btn btn-primary" onclick="downloadURL()">下载</button>
+    </div>
+    <div class="download-row">
+        <input type="text" id="filenameInput" placeholder="文件名（可选，留空用远程文件名）" />
+    </div>
+    <div class="shortcut-list" id="shortcutList"></div>
+</div>
+
+<div class="file-list" id="fileList">
+    <div class="loading"><div class="spinner"></div><p style="margin-top:10px;">加载中...</p></div>
+</div>
+
+<div class="toast" id="toast"></div>
+<div class="context-menu" id="contextMenu" style="display:none;"></div>
+
+<script>
+// ============ JS Bridge ============
+let callbackCounter = 0;
+const callbacks = {};
+
+function callNative(action, params) {
+    return new Promise((resolve, reject) => {
+        const callbackId = 'cb_' + (++callbackCounter);
+        callbacks[callbackId] = { resolve, reject };
+        const message = Object.assign({ action, callbackId }, params || {});
+        window.webkit.messageHandlers.fileBridge.postMessage(message);
+    });
+}
+
+window.__bridgeCallback = function(response) {
+    const cb = callbacks[response.callbackId];
+    if (!cb) return;
+    delete callbacks[response.callbackId];
+    if (response.error) {
+        cb.reject(response.error);
+    } else {
+        cb.resolve(response.data);
+    }
+};
+
+// ============ 状态 ============
+let currentPath = '';
+let clipboard = null;
+let selectedFile = null;
+let appInfo = null;
+let shortcuts = [];
+
+// ============ 初始化 ============
+async function init() {
+    try {
+        appInfo = await callNative('appInfo');
+        currentPath = appInfo.documentsDir;
+        loadShortcuts();
+        await refresh();
+    } catch (e) {
+        showToast('初始化失败: ' + e);
+    }
+}
+
+function loadShortcuts() {
+    // 从云端配置加载下载快捷键（通过 URL 参数或原生注入）
+    if (window.__shortcuts) {
+        shortcuts = window.__shortcuts;
+        renderShortcuts();
+    }
+}
+
+function renderShortcuts() {
+    const list = document.getElementById('shortcutList');
+    if (!shortcuts.length) { list.innerHTML = ''; return; }
+    list.innerHTML = shortcuts.map(s =>
+        `<span class="shortcut-tag" onclick="quickDownload('${s.url}','${s.targetDir}','${s.name}')">⚡ ${s.name}</span>`
+    ).join('');
+}
+
+// ============ 路径渲染 ============
+function renderPathBar() {
+    const bar = document.getElementById('pathBar');
+    const parts = currentPath.split('/').filter(Boolean);
+    let html = `<span onclick="goToPath('/')">/</span>`;
+    let accumulated = '';
+    parts.forEach((part, i) => {
+        accumulated += '/' + part;
+        html += `<span class="sep">/</span><span onclick="goToPath('${accumulated}')">${part}</span>`;
+    });
+    bar.innerHTML = html;
+}
+
+// ============ 文件列表 ============
+async function refresh() {
+    renderPathBar();
+    const list = document.getElementById('fileList');
+    list.innerHTML = '<div class="loading"><div class="spinner"></div><p style="margin-top:10px;">加载中...</p></div>';
+
+    try {
+        const data = await callNative('list', { path: currentPath });
+        const items = (data.items || []).sort((a, b) => {
+            if (a.isDirectory !== b.isDirectory) return a.isDirectory ? -1 : 1;
+            return a.name.localeCompare(b.name);
+        });
+
+        if (items.length === 0) {
+            list.innerHTML = '<div class="empty"><div class="empty-icon">📂</div><p>此目录为空</p></div>';
+            return;
+        }
+
+        list.innerHTML = items.map(item => {
+            const icon = item.isDirectory ? '📁' : getFileIcon(item.name);
+            const size = item.isDirectory ? '' : formatSize(item.size);
+            const date = item.modificationDate ? new Date(item.modificationDate * 1000).toLocaleString('zh-CN') : '';
+            return `
+                <div class="file-item" data-path="${item.path}" data-dir="${item.isDirectory}">
+                    <div class="file-icon">${icon}</div>
+                    <div class="file-info">
+                        <div class="file-name">${item.name}</div>
+                        <div class="file-meta">${size} ${date}</div>
+                    </div>
+                    <div class="file-actions">
+                        <button class="mini-btn" style="background:#e3f2fd;color:#1976d2" onclick="event.stopPropagation();copyItem('${item.path}')">复制</button>
+                        <button class="mini-btn" style="background:#ffebee;color:#c62828" onclick="event.stopPropagation();deleteItem('${item.path}')">删除</button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        // 绑定点击事件
+        list.querySelectorAll('.file-item').forEach(el => {
+            el.addEventListener('click', () => {
+                const path = el.dataset.path;
+                const isDir = el.dataset.dir === 'true';
+                if (isDir) {
+                    goToPath(path);
+                } else {
+                    showContextMenu(path);
+                }
+            });
+        });
+    } catch (e) {
+        list.innerHTML = `<div class="empty"><div class="empty-icon">⚠️</div><p>加载失败: ${e}</p></div>`;
+    }
+}
+
+function getFileIcon(name) {
+    const ext = name.split('.').pop().toLowerCase();
+    const icons = {
+        png:'🖼️', jpg:'🖼️', jpeg:'🖼️', gif:'🖼️', webp:'🖼️', heic:'🖼️',
+        mp4:'🎬', mov:'🎬', avi:'🎬', mkv:'🎬',
+        mp3:'🎵', wav:'🎵', flac:'🎵', aac:'🎵',
+        zip:'🗜️', rar:'🗜️', '7z':'🗜️', tar:'🗜️', gz:'🗜️',
+        txt:'📄', md:'📄', json:'📄', xml:'📄', plist:'📄',
+        pdf:'📕', doc:'📘', docx:'📘', xls:'📗', xlsx:'📗',
+        js:'📜', html:'🌐', css:'🎨', swift:'🐦', py:'🐍',
+        deb:'📦', ipa:'📱', dylib:'🔧', framework:'🔧'
+    };
+    return icons[ext] || '📄';
+}
+
+function formatSize(bytes) {
+    if (bytes === 0) return '0 B';
+    const units = ['B','KB','MB','GB','TB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(1024));
+    return (bytes / Math.pow(1024, i)).toFixed(1) + ' ' + units[i];
+}
+
+// ============ 导航 ============
+function goToPath(path) {
+    currentPath = path;
+    hideContextMenu();
+    refresh();
+}
+
+function goHome() {
+    if (appInfo) goToPath(appInfo.documentsDir);
+}
+
+function goUp() {
+    const parts = currentPath.split('/');
+    parts.pop();
+    goToPath(parts.join('/') || '/');
+}
+
+// ============ 文件操作 ============
+async function copyItem(path) {
+    clipboard = { type: 'copy', path };
+    showToast('已复制，点击「粘贴」到目标目录');
+}
+
+async function cutItem(path) {
+    clipboard = { type: 'move', path };
+    showToast('已剪切，点击「粘贴」到目标目录');
+}
+
+async function pasteFromClipboard() {
+    if (!clipboard) { showToast('剪贴板为空'); return; }
+    try {
+        const name = clipboard.path.split('/').pop();
+        const dest = (currentPath + '/' + name).replace(/\/+/g, '/');
+        if (clipboard.type === 'copy') {
+            await callNative('copy', { src: clipboard.path, dst: dest });
+            showToast('复制成功');
+        } else {
+            await callNative('move', { src: clipboard.path, dst: dest });
+            showToast('移动成功');
+            clipboard = null;
+        }
+        refresh();
+    } catch (e) { showToast('操作失败: ' + e); }
+}
+
+async function deleteItem(path) {
+    if (!confirm('确定删除？')) return;
+    try {
+        await callNative('delete', { path });
+        showToast('已删除');
+        refresh();
+    } catch (e) { showToast('删除失败: ' + e); }
+}
+
+async function newFolder() {
+    const name = prompt('文件夹名称');
+    if (!name) return;
+    try {
+        const path = (currentPath + '/' + name).replace(/\/+/g, '/');
+        await callNative('mkdir', { path });
+        showToast('已创建');
+        refresh();
+    } catch (e) { showToast('创建失败: ' + e); }
+}
+
+// ============ 下载功能 ============
+function showDownloadPanel() {
+    const panel = document.getElementById('downloadPanel');
+    panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+}
+
+async function downloadURL() {
+    const url = document.getElementById('urlInput').value.trim();
+    const filename = document.getElementById('filenameInput').value.trim();
+    if (!url) { showToast('请输入直链'); return; }
+
+    showToast('开始下载...');
+    try {
+        const result = await callNative('download', {
+            url: url,
+            targetDir: currentPath,
+            filename: filename || undefined,
+            autoImport: true
+        });
+        showToast(`下载成功: ${formatSize(result.size)} -> ${result.path.split('/').pop()}`);
+        document.getElementById('urlInput').value = '';
+        document.getElementById('filenameInput').value = '';
+        refresh();
+    } catch (e) { showToast('下载失败: ' + e); }
+}
+
+async function quickDownload(url, targetDir, name) {
+    showToast(`开始下载 ${name}...`);
+    try {
+        const result = await callNative('download', {
+            url: url,
+            targetDir: targetDir,
+            autoImport: true
+        });
+        showToast(`导入成功: ${name}`);
+        refresh();
+    } catch (e) { showToast('下载失败: ' + e); }
+}
+
+// ============ 上下文菜单 ============
+function showContextMenu(path) {
+    const menu = document.getElementById('contextMenu');
+    selectedFile = path;
+    menu.innerHTML = `
+        <button onclick="copyItem('${path}');hideContextMenu()">📋 复制</button>
+        <button onclick="cutItem('${path}');hideContextMenu()">✂️ 剪切</button>
+        <button onclick="renameItem('${path}')">✏️ 重命名</button>
+        <button onclick="deleteItem('${path}');hideContextMenu()">🗑️ 删除</button>
+        <button onclick="shareItem('${path}')">📤 分享</button>
+        <button onclick="hideContextMenu()">取消</button>
+    `;
+    menu.style.display = 'block';
+    menu.style.left = '50%';
+    menu.style.top = '50%';
+    menu.style.transform = 'translate(-50%, -50%)';
+}
+
+function hideContextMenu() {
+    document.getElementById('contextMenu').style.display = 'none';
+}
+
+async function renameItem(path) {
+    const oldName = path.split('/').pop();
+    const newName = prompt('新名称', oldName);
+    if (!newName || newName === oldName) { hideContextMenu(); return; }
+    try {
+        const newPath = path.substring(0, path.length - oldName.length) + newName;
+        await callNative('move', { src: path, dst: newPath });
+        showToast('已重命名');
+        refresh();
+    } catch (e) { showToast('重命名失败: ' + e); }
+    hideContextMenu();
+}
+
+function shareItem(path) {
+    showToast('分享功能调用原生');
+    // 可通过 callNative 调用原生分享
+    hideContextMenu();
+}
+
+// ============ Toast ============
+function showToast(msg) {
+    const toast = document.getElementById('toast');
+    toast.textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(window._toastTimer);
+    window._toastTimer = setTimeout(() => toast.classList.remove('show'), 2500);
+}
+
+// 点击空白关闭菜单
+document.addEventListener('click', (e) => {
+    const menu = document.getElementById('contextMenu');
+    if (menu.style.display === 'block' && !menu.contains(e.target)) {
+        hideContextMenu();
+    }
+});
+
+// 启动
+init();
+</script>
+</body>
+</html>
