@@ -257,12 +257,16 @@ function parse_size($v) {
     }
 }
 
-function upload_file_url($name) {
+function upload_file_url($name, $client = false) {
     $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
     $host = $_SERVER['HTTP_HOST'] ?? $_SERVER['SERVER_NAME'] ?? 'localhost';
     $dir = rtrim(dirname($_SERVER['SCRIPT_NAME'] ?? '/api/verify.php'), '/');
-    return "$protocol://$host$dir/verify.php?action=download_upload&name="
-         . rawurlencode($name) . '&admin_token=' . rawurlencode(admin_token());
+    $url = "$protocol://$host$dir/verify.php?action=download_upload&name=" . rawurlencode($name);
+    if ($client) {
+        // 客户端直链: 不含 admin_token (App 下载时会自动附加会话凭证)
+        return $url;
+    }
+    return $url . '&admin_token=' . rawurlencode(admin_token());
 }
 
 function list_uploads() {
@@ -280,6 +284,32 @@ function list_uploads() {
         return strcmp($b['modified_at'], $a['modified_at']);
     });
     return $items;
+}
+
+// ==================== 会话凭证校验 ====================
+// App 卡密验证成功后持有 session_token = HMAC(card_key|uuid, secret)
+// 返回 [是否有效, 失败原因]。config / download_upload 共用。
+function app_session_check($cardKey, $uuid, $token) {
+    if ($cardKey === '' || $uuid === '' || $token === '') {
+        return [false, '缺少参数 (card_key/uuid/token)'];
+    }
+    $cards = load_cards();
+    $idx = find_card_index($cards, $cardKey);
+    if ($idx < 0) {
+        return [false, '卡密不存在或已被删除'];
+    }
+    $card = $cards[$idx];
+    $memberLevel  = (int)($card['member_level'] ?? 1);
+    $isMemberCard = $memberLevel >= 1;
+    $expireTs   = strtotime($card['expire_at'] ?? '');
+    $notExpired = ($expireTs !== false && $expireTs >= time());
+    // 会员卡: 必须设备匹配 (一机一码); 免费卡: 密码式, 不校验设备绑定
+    $uuidMatch = $isMemberCard ? (!empty($card['uuid']) && $card['uuid'] === $uuid) : true;
+    $tokenOk   = hash_equals(session_token($cardKey, $uuid), $token);
+    if (!$notExpired) return [false, '卡密已过期'];
+    if (!$uuidMatch)  return [false, '设备UUID不匹配(会员卡已绑定其他设备)'];
+    if (!$tokenOk)    return [false, '会话token失效(需重新验证卡密)'];
+    return [true, ''];
 }
 
 // ==================== Session Token (服务端强制管控) ====================
@@ -402,32 +432,7 @@ case 'config':
     $cardKey = trim($_GET['card_key'] ?? '');
     $uuid    = trim($_GET['uuid'] ?? '');
     $token   = trim($_GET['token'] ?? '');
-    $authorized = false;
-    $lockReason = '未携带有效凭证';
-    if ($cardKey === '' || $uuid === '' || $token === '') {
-        $lockReason = '缺少参数 (card_key/uuid/token)';
-    } else {
-        $cards = load_cards();
-        $idx = find_card_index($cards, $cardKey);
-        if ($idx < 0) {
-            $lockReason = '卡密不存在或已被删除';
-        } else {
-            $card = $cards[$idx];
-            $memberLevel = (int)($card['member_level'] ?? 1);
-            $isMemberCard = $memberLevel >= 1;
-            $expireTs = strtotime($card['expire_at'] ?? '');
-            $notExpired = ($expireTs !== false && $expireTs >= time());
-            // 会员卡: 必须设备匹配 (一机一码); 免费卡: 密码式, 不校验设备绑定
-            $uuidMatch = $isMemberCard ? (!empty($card['uuid']) && $card['uuid'] === $uuid) : true;
-            $tokenOk = hash_equals(session_token($cardKey, $uuid), $token);
-            $authorized = $notExpired && $uuidMatch && $tokenOk;
-            if (!$authorized) {
-                if (!$notExpired)               $lockReason = '卡密已过期';
-                elseif (!$uuidMatch)            $lockReason = '设备UUID不匹配(会员卡已绑定其他设备)';
-                elseif (!$tokenOk)              $lockReason = '会话token失效(需重新验证卡密)';
-            }
-        }
-    }
+    [$authorized, $lockReason] = app_session_check($cardKey, $uuid, $token);
 
     header('Content-Type: application/json; charset=utf-8');
     if (!$authorized) {
@@ -686,7 +691,8 @@ case 'uploads':
     check_admin();
     $items = list_uploads();
     foreach ($items as &$it) {
-        $it['url'] = upload_file_url($it['name']);
+        $it['url']        = upload_file_url($it['name']);           // 管理员直链 (含 admin_token, 仅自己测试用)
+        $it['client_url'] = upload_file_url($it['name'], true);     // 客户端直链 (填到配置 download_url, App 自动带凭证)
     }
     unset($it);
     out([
@@ -698,9 +704,22 @@ case 'uploads':
     ]);
     break;
 
-// -------------------- 管理: 下载已上传文件 --------------------
+// -------------------- 管理/客户端: 下载已上传文件 --------------------
+// 双通道鉴权: 管理员 token 或 App 会话凭证 (card_key+uuid+token)。
+// 客户端直链 (uploads 列表的 client_url) 不含 admin_token, App 下载时自动附加会话凭证。
 case 'download_upload':
-    check_admin();
+    $adminToken = $_GET['admin_token'] ?? $_SERVER['HTTP_X_ADMIN_TOKEN'] ?? '';
+    $isAdmin = ($adminToken !== '' && hash_equals(admin_token(), $adminToken));
+    if (!$isAdmin) {
+        [$ok] = app_session_check(
+            trim($_GET['card_key'] ?? ''),
+            trim($_GET['uuid'] ?? ''),
+            trim($_GET['token'] ?? '')
+        );
+        if (!$ok) {
+            out(['success' => false, 'message' => '下载鉴权失败 (需管理员或有效会话凭证)'], 403);
+        }
+    }
     $name = $_GET['name'] ?? '';
     if (sanitize_filename($name) !== $name) {
         out(['success' => false, 'message' => '文件名非法'], 400);
@@ -1374,12 +1393,23 @@ async function loadUploads() {
       <td class="mono">${esc(f.name)}</td>
       <td>${fmtSize(f.size)}</td>
       <td>${fmtDate(f.modified_at)}</td>
-      <td style="white-space:nowrap">
+      <td style="white-space:nowrap;max-width:420px">
         <a class="tag blue" href="${esc(f.url)}" target="_blank" style="text-decoration:none">下载</a>
+        <button class="gray" onclick="copyText('${esc(f.client_url)}');this.textContent='已复制'">客户端直链</button>
         <button class="gray" onclick="deleteUpload('${esc(f.name)}')">删除</button>
+        <div class="mono" style="font-size:11px;color:#999;margin-top:4px;word-break:break-all">${esc(f.client_url)}</div>
       </td>`;
     tbody.appendChild(tr);
   }
+}
+
+function copyText(t) {
+  (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject())
+    .catch(() => {
+      const ta = document.createElement('textarea');
+      ta.value = t; document.body.appendChild(ta); ta.select();
+      document.execCommand('copy'); ta.remove();
+    });
 }
 
 async function uploadFile() {

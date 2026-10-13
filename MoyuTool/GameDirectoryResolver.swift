@@ -23,7 +23,9 @@ enum GameDirectoryResolver {
 
     // 会话级缓存: bundleID -> 容器根目录。
     // MCM 定位需要逐个容器申请租约, 枚举几百个容器较慢, 缓存避免每次下载都重复枚举。
+    // (线程安全: 下载回调线程与主线程都会访问)
     private static var cachedRoots: [String: String] = [:]
+    private static let lock = NSLock()
 
     /// 解析路径。普通路径原样返回；"@game:<key>" 解析为容器内的绝对目录，失败返回 nil。
     static func resolve(_ raw: String, fileHandle: FileAccessHandle?) -> String? {
@@ -52,9 +54,10 @@ enum GameDirectoryResolver {
     /// 成功定位后登记 UUID → bundle id 映射 (写入层申请租约用, metadata plist 常读不到)
     private static func registerMapping(root: String, bundleID: String) {
         let uuid = (root as NSString).lastPathComponent
-        if uuid.contains("-") {
-            MCMFileManager.registerUUID(uuid, identifier: bundleID)
-        }
+        guard uuid.contains("-") else { return }
+        lock.lock()
+        MCMFileManager.registerUUID(uuid, identifier: bundleID)
+        lock.unlock()
     }
 
     /// 完整定位 + 诊断信息。
@@ -64,7 +67,10 @@ enum GameDirectoryResolver {
     static func lookup(bundleID: String, fileHandle: FileAccessHandle?) -> LookupReport {
         var r = LookupReport()
 
-        if let hit = cachedRoots[bundleID] {
+        lock.lock()
+        let cached = cachedRoots[bundleID]
+        lock.unlock()
+        if let hit = cached {
             r.root = hit
             r.notes.append("命中会话缓存")
             registerMapping(root: hit, bundleID: bundleID)
@@ -78,7 +84,7 @@ enum GameDirectoryResolver {
         if let path = direct.path {
             r.root = path
             r.notes.append("bundle id 直查成功")
-            cachedRoots[bundleID] = path
+            lock.lock(); cachedRoots[bundleID] = path; lock.unlock()
             registerMapping(root: path, bundleID: bundleID)
             return r
         } else {
@@ -110,7 +116,7 @@ enum GameDirectoryResolver {
                 }
                 if identifier == bundleID {
                     r.root = root
-                    cachedRoots[bundleID] = root
+                    lock.lock(); cachedRoots[bundleID] = root; lock.unlock()
                     registerMapping(root: root, bundleID: bundleID)
                     return r
                 }
@@ -142,7 +148,7 @@ enum GameDirectoryResolver {
                 }
                 if identifier == bundleID {
                     r.root = entry.path
-                    cachedRoots[bundleID] = entry.path
+                    lock.lock(); cachedRoots[bundleID] = entry.path; lock.unlock()
                     registerMapping(root: entry.path, bundleID: bundleID)
                     return r
                 }

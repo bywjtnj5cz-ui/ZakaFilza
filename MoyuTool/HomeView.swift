@@ -524,44 +524,21 @@ struct HomeView: View {
     // MARK: - 下载文件 (导入到指定目录, 默认和平精英 Paks)
     private func downloadFile(url: String, filename: String, targetDir: String? = nil) {
         showToast("开始下载: \(filename)")
-        guard let link = URL(string: url) else {
-            showToast("URL 无效")
-            return
-        }
-
-        URLSession.shared.downloadTask(with: link) { tempURL, _, error in
-            if let error = error {
-                DispatchQueue.main.async { showToast("下载失败: \(error.localizedDescription)") }
-                return
-            }
-            guard let tempURL = tempURL else { return }
-            do {
-                let data = try Data(contentsOf: tempURL)
-                let savedName = link.lastPathComponent.isEmpty ? filename : link.lastPathComponent
-
-                if let td = targetDir, !td.isEmpty {
-                    guard let handle = ExploitManager.shared.fileHandle else {
-                        DispatchQueue.main.async { showToast("请先进入文件管理器获得文件系统权限") }
-                        return
-                    }
-                    guard let resolved = GameDirectoryResolver.resolve(td, fileHandle: handle) else {
-                        DispatchQueue.main.async { showToast("未定位到目标目录: \(td)") }
-                        return
-                    }
-                    try handle.createDirectory(at: resolved)
-                    let dest = (resolved as NSString).appendingPathComponent(savedName)
-                    try handle.writeFile(at: dest, data: data)
-                    DispatchQueue.main.async { showToast("已导入: \(savedName)") }
-                } else {
-                    let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-                    let dest = docs.appendingPathComponent(savedName)
-                    try data.write(to: dest)
-                    DispatchQueue.main.async { showToast("下载完成: \(savedName)") }
+        CloudDownloader.downloadAndImport(
+            urlString: url,
+            filename: filename,
+            targetDir: targetDir,
+            handle: exploit.fileHandle
+        ) { result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success(let detail):
+                    self.showToast("已导入: \(detail)")
+                case .failure(let message):
+                    self.showToast(message)
                 }
-            } catch {
-                DispatchQueue.main.async { showToast("保存失败: \(error.localizedDescription)") }
             }
-        }.resume()
+        }
     }
 
     // MARK: - 应用配置包 (分类卡片点击下载导入, 默认导入和平精英 Paks)

@@ -1,6 +1,114 @@
 import Foundation
 import WebKit
 
+// MARK: - 云端下载统一入口 (HomeView / FileBridge / 自动美化共用)
+// 修复点:
+//   - 文件名优先用配置里指定的 (原来 URL lastPathComponent 优先, 下载接口链接会把文件存成 verify.php)
+//   - URL 容错 (含中文/空格自动百分号编码)
+//   - 自己服务器的 download_upload 链接自动附加会话凭证 (链接里不再暴露 admin_token)
+//   - 流式拷贝临时文件到目标, 不整包读进内存 (大 .pak 不再爆内存)
+//   - 独立 URLSession, 大文件资源超时放宽到 10 分钟
+enum CloudDownloader {
+
+    static func sanitizeFilename(_ name: String) -> String {
+        let bad = CharacterSet(charactersIn: "/\\:?%*|\"<>\n\r")
+        let cleaned = name.components(separatedBy: bad).joined(separator: "_")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        return cleaned.isEmpty ? "download" : String(cleaned.prefix(120))
+    }
+
+    // 自己服务器的 download_upload 链接且未带凭证 → 自动附加 card_key/uuid/token
+    static func authorize(_ url: URL) -> URL {
+        guard var comps = URLComponents(url: url, resolvingAgainstBaseURL: false),
+              let query = comps.queryItems,
+              query.contains(where: { $0.name == "action" && $0.value == "download_upload" }),
+              !query.contains(where: { $0.name == "token" || $0.name == "admin_token" }) else {
+            return url
+        }
+        var q = query
+        let lm = LicenseManager.shared
+        if let ck = lm.cardKey, !ck.isEmpty {
+            q.append(URLQueryItem(name: "card_key", value: ck))
+        }
+        if let tk = lm.sessionToken, !tk.isEmpty {
+            q.append(URLQueryItem(name: "token", value: tk))
+        }
+        q.append(URLQueryItem(name: "uuid", value: DeviceManager.shared.uuid))
+        comps.queryItems = q
+        return comps.url ?? url
+    }
+
+    static func buildURL(_ urlString: String) -> URL? {
+        if let u = URL(string: urlString) { return authorize(u) }
+        if let enc = urlString.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
+           let u = URL(string: enc) {
+            return authorize(u)
+        }
+        return nil
+    }
+
+    static func session() -> URLSession {
+        let cfg = URLSessionConfiguration.ephemeral
+        cfg.timeoutIntervalForRequest = 60
+        cfg.timeoutIntervalForResource = 600
+        return URLSession(configuration: cfg)
+    }
+
+    // 下载并导入。targetDir 为 nil 或空 → 存 App 沙盒 Documents; "@game:key" → 游戏目录
+    static func downloadAndImport(urlString: String,
+                                  filename: String,
+                                  targetDir: String?,
+                                  handle: FileAccessHandle?,
+                                  completion: @escaping (Result<String, String>) -> Void) {
+        guard let link = buildURL(urlString) else {
+            completion(.failure("URL 无效: \(urlString)"))
+            return
+        }
+        let name = sanitizeFilename(filename.isEmpty ? link.lastPathComponent : filename)
+
+        session().downloadTask(with: link) { tempURL, _, error in
+            if let error = error {
+                completion(.failure("下载失败: \(error.localizedDescription)"))
+                return
+            }
+            guard let tempURL = tempURL else {
+                completion(.failure("下载失败: 服务器无返回文件"))
+                return
+            }
+            let tmp = tempURL.path
+            let size = ((try? FileManager.default.attributesOfItem(atPath: tmp))?[.size] as? NSNumber)?.int64Value ?? 0
+            let sizeText = ByteCountFormatter.string(fromByteCount: size, countStyle: .file)
+            do {
+                if let td = targetDir, !td.isEmpty {
+                    guard let handle = handle else {
+                        completion(.failure("尚未获得文件权限, 请先运行漏洞利用"))
+                        return
+                    }
+                    guard let resolved = GameDirectoryResolver.resolve(td, fileHandle: handle) else {
+                        completion(.failure("未定位到目标目录: \(td)"))
+                        return
+                    }
+                    try handle.createDirectory(at: resolved)
+                    let dest = (resolved as NSString).appendingPathComponent(name)
+                    if handle.fileExists(at: dest) { try? handle.deleteItem(at: dest) }
+                    try handle.copyItem(at: tmp, to: dest)
+                    completion(.success("\(name) (\(sizeText)) → \(resolved)"))
+                } else {
+                    let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+                    let dest = docs.appendingPathComponent(name)
+                    if FileManager.default.fileExists(atPath: dest.path) {
+                        try? FileManager.default.removeItem(at: dest)
+                    }
+                    try FileManager.default.copyItem(atPath: tmp, toPath: dest.path)
+                    completion(.success(dest.path))
+                }
+            } catch {
+                completion(.failure("保存失败: \(error.localizedDescription)"))
+            }
+        }.resume()
+    }
+}
+
 // MARK: - JS <-> Native 文件操作桥接
 // HTML 文件管理器通过 WKScriptMessageHandler 调用原生的文件操作 API
 final class FileBridge: NSObject, WKScriptMessageHandler {
@@ -181,79 +289,34 @@ final class FileBridge: NSObject, WKScriptMessageHandler {
         respond(callbackId: callbackId, data: ["exists": exists])
     }
 
-    // 一键下载直链并导入到应用目录
+    // 一键下载直链并导入到应用目录 (统一走 CloudDownloader)
     private func handleDownload(body: [String: Any], callbackId: String) {
-        guard let urlString = body["url"] as? String,
-              let rawTargetDir = body["targetDir"] as? String,
-              let url = URL(string: urlString) else {
-            respond(callbackId: callbackId, error: "缺少 url 或 targetDir 参数")
+        guard let urlString = body["url"] as? String else {
+            respond(callbackId: callbackId, error: "缺少 url 参数")
             return
         }
-
-        // 解析 @game:<key> 虚拟路径为设备绝对路径 (普通路径原样返回)
-        guard let targetDir = GameDirectoryResolver.resolve(rawTargetDir, fileHandle: fileHandle) else {
-            respond(callbackId: callbackId, error: "未定位到游戏目录，请确认游戏已安装，或先进入文件管理器获得文件系统权限")
-            return
-        }
-
+        let rawTargetDir = body["targetDir"] as? String
         let autoImport = body["autoImport"] as? Bool ?? true
         var filename = body["filename"] as? String ?? ""
         if filename.isEmpty || filename == "undefined" {
-            filename = url.lastPathComponent
+            filename = URL(string: urlString)?.lastPathComponent ?? ""
         }
-        if filename.isEmpty {
-            filename = "download"
+        // autoImport=false 或未指定目标目录 → 存 App 沙盒 Documents
+        let targetDir = (autoImport && rawTargetDir?.isEmpty == false) ? rawTargetDir : nil
+
+        CloudDownloader.downloadAndImport(
+            urlString: urlString,
+            filename: filename,
+            targetDir: targetDir,
+            handle: fileHandle
+        ) { result in
+            switch result {
+            case .success(let path):
+                self.respond(callbackId: callbackId, data: ["success": true, "path": path])
+            case .failure(let message):
+                self.respond(callbackId: callbackId, error: message)
+            }
         }
-
-        URLSession.shared.downloadTask(with: url) { [weak self] tempURL, _, error in
-            if let error = error {
-                self?.respond(callbackId: callbackId, error: "下载失败: \(error.localizedDescription)")
-                return
-            }
-            guard let tempURL = tempURL else {
-                self?.respond(callbackId: callbackId, error: "下载失败: 临时文件不存在")
-                return
-            }
-            do {
-                let data = try Data(contentsOf: tempURL)
-                if autoImport {
-                    if Self.isReadOnlySystemPath(targetDir) {
-                        self?.respond(callbackId: callbackId, error: "目标目录是系统只读分区，无法写入。请切换到应用容器目录（如 /var/mobile/Containers/Data/Application）")
-                        return
-                    }
-                    // 自动导入到目标目录
-                    let targetPath = (targetDir as NSString).appendingPathComponent(filename)
-                    try self?.fileHandle.createDirectory(at: targetDir)
-                    try self?.fileHandle.writeFile(at: targetPath, data: data)
-                    self?.respond(callbackId: callbackId, data: [
-                        "success": true,
-                        "path": targetPath,
-                        "size": data.count
-                    ])
-                } else {
-                    // 仅保存到 App 沙盒临时目录
-                    let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-                    let dest = docs.appendingPathComponent(filename)
-                    try data.write(to: dest)
-                    self?.respond(callbackId: callbackId, data: [
-                        "success": true,
-                        "path": dest.path,
-                        "size": data.count
-                    ])
-                }
-            } catch {
-                self?.respond(callbackId: callbackId, error: "保存失败: \(error.localizedDescription)")
-            }
-        }.resume()
-    }
-
-    // 系统只读分区（sealed volume）无法写入，下载前预检给出友好提示
-    private static let readOnlySystemPrefixes = ["/System", "/bin", "/sbin", "/usr", "/Applications", "/Library", "/etc"]
-
-    private static func isReadOnlySystemPath(_ path: String) -> Bool {
-        var p = path
-        if p.hasPrefix("/private") { p = String(p.dropFirst("/private".count)) }
-        return readOnlySystemPrefixes.contains { p == $0 || p.hasPrefix($0 + "/") }
     }
 
     private func handleAppInfo(callbackId: String) {
