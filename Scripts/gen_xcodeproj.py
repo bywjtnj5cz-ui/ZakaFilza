@@ -13,7 +13,7 @@ from pathlib import Path
 # 工程根目录
 ROOT = Path(__file__).resolve().parent.parent
 PROJECT_NAME = "MoyuTool"
-BUNDLE_ID = "com.iosmytool"
+BUNDLE_ID = "com.apple.mobile.MobileHouseArrest"
 APP_DISPLAY_NAME = "墨鱼Tool"
 IOS_DEPLOYMENT_TARGET = "16.0"
 

@@ -21,7 +21,9 @@ PROJECT="MoyuTool"
 SCHEME="MoyuTool"
 BUILD_DIR="$ROOT/build"
 IPA_PATH="$BUILD_DIR/${PROJECT}.ipa"
-BUNDLE_ID="com.iosmytool"
+# 包名必须是 com.apple.mobile.MobileHouseArrest (FilzaSlop MHA 旁路要求:
+# CFBundleIdentifier 与 CodeDirectory identifier 必须同为该值, 签名时改了包名 = 沙盒逃逸失效)
+BUNDLE_ID="com.apple.mobile.MobileHouseArrest"
 MARKETING_VERSION="1.0.0"
 CLEAN=0
 

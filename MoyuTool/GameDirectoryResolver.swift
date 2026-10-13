@@ -8,6 +8,8 @@ enum GameDirectoryResolver {
     // 定位过程的完整诊断信息 (目录检测页面展示用)
     struct LookupReport {
         var root: String? = nil
+        var directTried = false        // 是否尝试过按 bundle id 直接租约
+        var directError = ""           // 直查失败原因
         var mcmAvailable = false       // MCM bridge 是否可用 (FilzaSlop)
         var mcmEnumCount = 0           // MCM 枚举到的容器数量
         var mcmLeaseOk = 0             // MCM 租约成功的容器数量
@@ -57,6 +59,20 @@ enum GameDirectoryResolver {
             r.root = hit
             r.notes.append("命中会话缓存")
             return r
+        }
+
+        // ---- 0. 按 bundle id 直接租约 (FilzaSlop 正统用法, 需要 MHA 签名身份) ----
+        // iOS 26 上 MCM 枚举近乎为空, 但按 bundle id 直查始终可用 — 这是原版的第一选择
+        r.directTried = true
+        let direct = MCMFileManager.shared.obtainLease(identifier: bundleID, containerClass: .appData)
+        if let path = direct.path {
+            r.root = path
+            r.notes.append("bundle id 直查成功")
+            cachedRoots[bundleID] = path
+            return r
+        } else {
+            r.directError = direct.error ?? "未知错误"
+            r.notes.append("bundle id 直查失败: \(r.directError)")
         }
 
         // ---- 1. MCM 枚举路径 ----

@@ -696,19 +696,37 @@ struct HomeView: View {
         }
         lines.append("")
 
-        // 1. 定位容器根 (MCM 枚举 → 句柄扫描, 带完整诊断)
+        // 1. 定位容器根 (bundle id 直查 → MCM 枚举 → 句柄扫描, 带完整诊断)
         let report = GameDirectoryResolver.lookup(bundleID: gd.bundleID, fileHandle: handle)
         guard let root = report.root else {
+            // 签名身份是 MHA 旁路的开关 — 不是它则一切 MCM 调用被拒
+            let identity = MCMFileManager.shared.signedCodeIdentifier
+            let isMHA = MCMFileManager.shared.isMHAIdentity
+
+            // LS 发现渠道: 本机实际安装的腾讯系应用 (iOS 26 上唯一可靠的发现方式)
+            let lsTencent = MCMFileManager.shared.installedApplicationIdentifiers()
+                .filter { $0.lowercased().contains("tencent") }
+
             lines.append("❌ 未定位到应用容器")
             lines.append("")
+            lines.append("—— 签名身份 (关键) ——")
+            lines.append("当前: \(identity.isEmpty ? "(读取失败)" : identity)")
+            if isMHA {
+                lines.append("✅ 是 com.apple.mobile.MobileHouseArrest")
+            } else {
+                lines.append("❌ 不是 com.apple.mobile.MobileHouseArrest")
+                lines.append("→ 没有该签名身份, 系统会拒绝所有 MCM 容器访问 (FilzaSlop 旁路失效)")
+                lines.append("→ 重签 IPA 时必须保持包名 com.apple.mobile.MobileHouseArrest 不变")
+            }
+            lines.append("")
             lines.append("—— 诊断详情 ——")
+            for n in report.notes {
+                lines.append("· \(n)")
+            }
             lines.append("MCM bridge: \(report.mcmAvailable ? "可用" : "不可用")")
             if report.mcmAvailable {
                 lines.append("MCM 枚举容器数: \(report.mcmEnumCount)")
                 lines.append("MCM 租约成功数: \(report.mcmLeaseOk)")
-            }
-            for n in report.notes {
-                lines.append("· \(n)")
             }
             if report.scanTried {
                 if report.scanFailed {
@@ -718,20 +736,18 @@ struct HomeView: View {
                 }
             }
             lines.append("")
-            if report.tencentBundles.isEmpty {
-                lines.append("⚠️ 未发现任何腾讯系应用容器")
+            if lsTencent.isEmpty && report.tencentBundles.isEmpty {
+                lines.append("⚠️ 未发现任何腾讯系应用")
                 lines.append("→ 本机很可能没有安装和平精英")
-                lines.append("→ 或游戏容器刚安装, 重启 App 后再试")
             } else {
                 lines.append("本机检测到的腾讯系应用:")
-                for b in report.tencentBundles {
+                var seen = Set<String>()
+                for b in lsTencent + report.tencentBundles where seen.insert(b).inserted {
                     lines.append("   \(b)")
                 }
                 lines.append("→ 上面没有 com.tencent.tmgp.pubgmhd 说明装的版本不对")
                 lines.append("  (国际服 com.tencent.ig / 体验服 bundle 不同)")
             }
-            lines.append("")
-            lines.append("→ 到后台「游戏目录」把 bundle_id 改成上面列出的实际包名即可")
             scriptLogText = lines.joined(separator: "\n")
             activeSheet = .scriptLog
             return
