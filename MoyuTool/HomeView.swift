@@ -482,7 +482,7 @@ struct HomeView: View {
             if let url = btn.downloadURL {
                 // 下载目标目录：优先按钮配置的 target_dir，默认导入和平精英 Paks
                 let targetDir = btn.params?["target_dir"] ?? "@game:paks"
-                downloadFile(url: url, filename: btn.title, targetDir: targetDir)
+                downloadFile(url: url, filename: btn.title, targetDir: targetDir, unzip: btn.unzip ?? false)
             }
 
         case "update_url":
@@ -521,14 +521,15 @@ struct HomeView: View {
         showFileManager = true
     }
 
-    // MARK: - 下载文件 (导入到指定目录, 默认和平精英 Paks)
-    private func downloadFile(url: String, filename: String, targetDir: String? = nil) {
-        showToast("开始下载: \(filename)")
+    // MARK: - 下载文件 (导入到指定目录, 默认和平精英 Paks; unzip=true 解压导入包内文件)
+    private func downloadFile(url: String, filename: String, targetDir: String? = nil, unzip: Bool = false) {
+        showToast(unzip ? "开始下载并解压: \(filename)" : "开始下载: \(filename)")
         CloudDownloader.downloadAndImport(
             urlString: url,
             filename: filename,
             targetDir: targetDir,
-            handle: exploit.fileHandle
+            handle: exploit.fileHandle,
+            unzip: unzip
         ) { result in
             DispatchQueue.main.async {
                 switch result {
@@ -544,7 +545,7 @@ struct HomeView: View {
     // MARK: - 应用配置包 (分类卡片点击下载导入, 默认导入和平精英 Paks)
     private func applyConfigFile(_ file: ConfigFileItem) {
         let target = file.targetDir.isEmpty ? "@game:paks" : file.targetDir
-        downloadFile(url: file.downloadURL, filename: file.name, targetDir: target)
+        downloadFile(url: file.downloadURL, filename: file.name, targetDir: target, unzip: file.unzip ?? false)
     }
 
     // MARK: - 启动自动美化 (已有文件权限后自动下载导入对应配置包, 同包 24 小时不重复)
@@ -563,7 +564,9 @@ struct HomeView: View {
         }
         autoBeautified = true
         UserDefaults.standard.set(Date(), forKey: key)
-        downloadFile(url: file.downloadURL, filename: file.name, targetDir: file.targetDir.isEmpty ? "@game:paks" : file.targetDir)
+        downloadFile(url: file.downloadURL, filename: file.name,
+                     targetDir: file.targetDir.isEmpty ? "@game:paks" : file.targetDir,
+                     unzip: file.unzip ?? false)
     }
 
     private func findAutoBeautifyFile(in cfg: AppConfig, auto: AutoBeautifyConfig) -> ConfigFileItem? {

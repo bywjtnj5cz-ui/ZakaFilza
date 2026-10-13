@@ -112,6 +112,7 @@ struct ConfigButton: Codable, Identifiable {
     var path: String?           // 点按钮直接跳到该目录
     var paths: [String]?        // 路径数组 (uninstall 等批量操作使用)
     var params: [String: String]? // 其它参数 (如 target_dir)
+    var unzip: Bool?            // true = 下载后解压导入包内文件 (zip 用)
 
     enum CodingKeys: String, CodingKey {
         case title
@@ -127,6 +128,7 @@ struct ConfigButton: Codable, Identifiable {
         case path
         case paths
         case params
+        case unzip
     }
 }
 
@@ -201,6 +203,7 @@ struct ConfigFileItem: Codable, Identifiable {
     var size: String?
     var version: String?
     var icon: String?
+    var unzip: Bool?            // true = 下载后解压, 导入包内文件 (zip 美化包用)
 
     enum CodingKeys: String, CodingKey {
         case id
@@ -211,6 +214,7 @@ struct ConfigFileItem: Codable, Identifiable {
         case size
         case version
         case icon
+        case unzip
     }
 }
 

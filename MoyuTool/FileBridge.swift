@@ -60,10 +60,12 @@ enum CloudDownloader {
     }
 
     // 下载并导入。targetDir 为 nil 或空 → 存 App 沙盒 Documents; "@game:key" → 游戏目录
+    // unzip=true 时把下载的 zip 解压, 按包内相对结构导入所有文件 (美化配置包场景)
     static func downloadAndImport(urlString: String,
                                   filename: String,
                                   targetDir: String?,
                                   handle: FileAccessHandle?,
+                                  unzip: Bool = false,
                                   completion: @escaping (DownloadOutcome) -> Void) {
         guard let link = buildURL(urlString) else {
             completion(.failure("URL 无效: \(urlString)"))
@@ -93,24 +95,67 @@ enum CloudDownloader {
                         completion(.failure("未定位到目标目录: \(td)"))
                         return
                     }
-                    try handle.createDirectory(at: resolved)
-                    let dest = (resolved as NSString).appendingPathComponent(name)
-                    if handle.fileExists(at: dest) { try? handle.deleteItem(at: dest) }
-                    try handle.copyItem(at: tmp, to: dest)
-                    completion(.success("\(name) (\(sizeText)) → \(resolved)"))
+                    if unzip {
+                        let count = try importUnzipped(zipPath: tmp, into: resolved, handle: handle)
+                        completion(.success("\(count) 个文件 (解压导入) → \(resolved)"))
+                    } else {
+                        try handle.createDirectory(at: resolved)
+                        let dest = (resolved as NSString).appendingPathComponent(name)
+                        if handle.fileExists(at: dest) { try? handle.deleteItem(at: dest) }
+                        try handle.copyItem(at: tmp, to: dest)
+                        completion(.success("\(name) (\(sizeText)) → \(resolved)"))
+                    }
                 } else {
                     let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-                    let dest = docs.appendingPathComponent(name)
-                    if FileManager.default.fileExists(atPath: dest.path) {
-                        try? FileManager.default.removeItem(at: dest)
+                    if unzip {
+                        let count = try importUnzipped(zipPath: tmp, into: docs.path, handle: nil)
+                        completion(.success("\(count) 个文件 (解压导入) → \(docs.path)"))
+                    } else {
+                        let dest = docs.appendingPathComponent(name)
+                        if FileManager.default.fileExists(atPath: dest.path) {
+                            try? FileManager.default.removeItem(at: dest)
+                        }
+                        try FileManager.default.copyItem(atPath: tmp, toPath: dest.path)
+                        completion(.success(dest.path))
                     }
-                    try FileManager.default.copyItem(atPath: tmp, toPath: dest.path)
-                    completion(.success(dest.path))
                 }
             } catch {
                 completion(.failure("保存失败: \(error.localizedDescription)"))
             }
         }.resume()
+    }
+
+    // 解压 zip 并把包内文件按相对结构导入目标目录 (handle 为 nil 时走沙盒拷贝)
+    private static func importUnzipped(zipPath: String,
+                                       into dir: String,
+                                       handle: FileAccessHandle?) throws -> Int {
+        let extractDir = FileManager.default.temporaryDirectory
+            .appendingPathComponent("unzip-\(UUID().uuidString)").path
+        defer { try? FileManager.default.removeItem(atPath: extractDir) }
+
+        let entries = try ZipExtractor.extract(zipPath: zipPath, toDirectory: extractDir)
+        guard !entries.isEmpty else {
+            throw ZipExtractor.ZipError.corrupt("压缩包内没有文件")
+        }
+        for rel in entries {
+            let src = (extractDir as NSString).appendingPathComponent(rel)
+            let dst = (dir as NSString).appendingPathComponent(rel)
+            let parent = (dst as NSString).deletingLastPathComponent
+            if handle != nil {
+                if parent != dir { try handle?.createDirectory(at: parent) }
+                if handle?.fileExists(at: dst) == true { try? handle?.deleteItem(at: dst) }
+                try handle?.copyItem(at: src, to: dst)
+            } else {
+                if parent != dir {
+                    try FileManager.default.createDirectory(atPath: parent, withIntermediateDirectories: true)
+                }
+                if FileManager.default.fileExists(atPath: dst) {
+                    try? FileManager.default.removeItem(atPath: dst)
+                }
+                try FileManager.default.copyItem(atPath: src, toPath: dst)
+            }
+        }
+        return entries.count
     }
 }
 
@@ -302,6 +347,7 @@ final class FileBridge: NSObject, WKScriptMessageHandler {
         }
         let rawTargetDir = body["targetDir"] as? String
         let autoImport = body["autoImport"] as? Bool ?? true
+        let unzip = body["unzip"] as? Bool ?? false
         var filename = body["filename"] as? String ?? ""
         if filename.isEmpty || filename == "undefined" {
             filename = URL(string: urlString)?.lastPathComponent ?? ""
@@ -313,7 +359,8 @@ final class FileBridge: NSObject, WKScriptMessageHandler {
             urlString: urlString,
             filename: filename,
             targetDir: targetDir,
-            handle: fileHandle
+            handle: fileHandle,
+            unzip: unzip
         ) { result in
             switch result {
             case .success(let path):

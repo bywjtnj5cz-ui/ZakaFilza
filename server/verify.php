@@ -118,7 +118,7 @@ function default_config() {
             ['title' => '🔍 目录检测', 'action' => 'game_diagnostic', 'color' => '#FF6B9D'],
         ],
         'member_buttons' => [
-            ['title' => '⚡ 一键美化', 'action' => 'download',     'color' => '#0A84FF', 'download_url' => '', 'member_only' => true, 'confirm_text' => '确定要下载并导入美化包吗？', 'params' => ['target_dir' => '@game:paks']],
+            ['title' => '⚡ 一键美化', 'action' => 'download',     'color' => '#0A84FF', 'download_url' => '', 'member_only' => true, 'confirm_text' => '确定要下载并导入美化包吗？', 'unzip' => true, 'params' => ['target_dir' => '@game:paks']],
             ['title' => '💎 高级配置', 'action' => 'run_script',  'color' => '#00BCD4', 'member_only' => true, 'script' => "// 云端 JS 脚本示例\nconsole.log('高级配置脚本已执行'); log('这是原生控制台输出');"],
             ['title' => '🎮 游戏目录', 'action' => 'open_file_manager', 'color' => '#FF4081', 'member_only' => true, 'path' => '@game:paks'],
             ['title' => '🗑️ 卸载美化', 'action' => 'uninstall',   'color' => '#F44336', 'member_only' => true, 'confirm_text' => '确定要卸载美化吗？将删除已配置的美化文件。', 'paths' => ['/var/mobile/Containers/Data/Application/Documents/Beautify']],
@@ -935,7 +935,7 @@ textarea { width: 100%; min-height: 320px; font-family: SFMono-Regular, Menlo, m
   <div class="card">
     <h3>🗂️ 配置分类树（美化 / 画质 / 功能）</h3>
     <div style="font-size:12px;color:#888;margin-bottom:6px">
-      结构为分类数组，每项含 id / title / type / icon / member_only / files。files 每项字段：id、name、desc、download_url、target_dir（如 @game:paks）、size、version、icon。
+      结构为分类数组，每项含 id / title / type / icon / member_only / files。files 每项字段：id、name、desc、download_url、target_dir（如 @game:paks）、unzip（true = zip 下载后自动解压导入包内文件）、size、version、icon。
     </div>
     <textarea id="c-raw-categories" style="min-height:260px"></textarea>
   </div>
@@ -1187,6 +1187,7 @@ function renderButtons(fieldId, arr) {
       </div>
       <div class="row">
         <input placeholder="target_dir 下载目录（支持 @game:paks）" value="${esc(b.params?.target_dir ?? '')}" data-f="target_dir">
+        <label style="font-size:12px;white-space:nowrap"><input type="checkbox" data-f="unzip" ${b.unzip ? 'checked' : ''}> 解压导入</label>
       </div>
       <div class="row">
         <input placeholder="confirm_text 二次确认文案" value="${esc(b.confirm_text ?? '')}" data-f="confirm_text">
@@ -1214,6 +1215,7 @@ function collectButtons(fieldId) {
     b.member_only = item.querySelector('[data-f="member_only"]').checked;
     const path = item.querySelector('[data-f="path"]').value; if (path) b.path = path;
     const targetDir = item.querySelector('[data-f="target_dir"]').value; if (targetDir) b.params = { target_dir: targetDir };
+    if (item.querySelector('[data-f="unzip"]').checked) b.unzip = true;
     const confirmText = item.querySelector('[data-f="confirm_text"]').value; if (confirmText) b.confirm_text = confirmText;
     const pathsRaw = item.querySelector('[data-f="paths"]').value;
     const paths = pathsRaw.split(',').map(s => s.trim()).filter(s => s);

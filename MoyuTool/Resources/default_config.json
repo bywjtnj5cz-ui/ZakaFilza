@@ -56,6 +56,7 @@
       "download_url": "",
       "member_only": true,
       "confirm_text": "确定要下载并导入美化包吗？",
+      "unzip": true,
       "params": { "target_dir": "@game:paks" }
     },
     {
