@@ -434,22 +434,8 @@ struct HomeView: View {
         VStack(spacing: 8) {
             Divider().opacity(AppTheme.isDark ? 0.25 : 0.4)
 
-            HStack(spacing: 4) {
-                Text("设备")
-                    .foregroundColor(.secondary.opacity(0.7))
-                Text(store.deviceUUID)
-                    .foregroundColor(.secondary)
-                    .lineLimit(1)
-                    .truncationMode(.middle)
-            }
-            .font(.caption2)
-
             HStack(spacing: 6) {
                 Text("iOS \(store.systemVersion)")
-                Text("·")
-                Text(currentCloudURL)
-                    .lineLimit(1)
-                    .truncationMode(.middle)
             }
             .font(.caption2)
             .foregroundColor(.secondary.opacity(0.7))
@@ -466,10 +452,6 @@ struct HomeView: View {
         .padding(.top, 20)
     }
 
-    private var currentCloudURL: String {
-        AppStore.shared.customConfigURL ?? config.config?.configURL ?? "内置默认"
-    }
-
     // MARK: - 诊断面板（长按头部卡片打开）
     private var diagnosticSheet: some View {
         NavigationStack {
@@ -481,15 +463,8 @@ struct HomeView: View {
                     if let reason = config.config?.lockedReason, !reason.isEmpty {
                         diagRow("锁定原因", reason)
                     }
-                    diagRow("会话 Token", license.sessionToken?.isEmpty == false ? "有" : "无")
-                    diagRow("卡密", license.cardKey ?? "无")
-                    diagRow("卡密到期", license.expireText)
                     diagRow("App 版本", Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "?")
                     diagRow("当前漏洞", exploit.selectedExploitId ?? "未选择")
-                    diagRow("云端地址", currentCloudURL)
-                    if let custom = AppStore.shared.customConfigURL, !custom.isEmpty {
-                        diagRow("自定义地址", custom)
-                    }
                 }
                 .padding()
 
