@@ -48,7 +48,7 @@
       "title": "⚡ 一键美化",
       "action": "download",
       "color": "#7C4DFF",
-      "download_url": "http://156.238.232.172/packs/beautify_pack.zip",
+      "download_url": "",
       "member_only": true,
       "confirm_text": "确定要下载并导入美化包吗？"
     },
@@ -77,24 +77,5 @@
       ]
     }
   ],
-  "download_shortcuts": [
-    {
-      "name": "美化包A",
-      "url": "http://156.238.232.172/packs/pack_a.zip",
-      "target_dir": "/var/mobile/Containers/Data/Application/Documents/Beautify",
-      "auto_import": true
-    },
-    {
-      "name": "配置文件",
-      "url": "http://156.238.232.172/packs/config.json",
-      "target_dir": "/var/mobile/Containers/Data/Application/Documents/Config",
-      "auto_import": true
-    },
-    {
-      "name": "资源包",
-      "url": "http://156.238.232.172/packs/resources.zip",
-      "target_dir": "/var/mobile/Containers/Data/Application/Documents/Resources",
-      "auto_import": true
-    }
-  ]
+  "download_shortcuts": []
 }

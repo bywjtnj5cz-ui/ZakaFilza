@@ -113,16 +113,12 @@ function default_config() {
             ['title' => '🔔 查看公告', 'action' => 'announcement',      'color' => '#FFA940'],
         ],
         'member_buttons' => [
-            ['title' => '⚡ 一键美化', 'action' => 'download',     'color' => '#7C4DFF', 'download_url' => 'http://156.238.232.172/packs/beautify_pack.zip', 'member_only' => true, 'confirm_text' => '确定要下载并导入美化包吗？'],
+            ['title' => '⚡ 一键美化', 'action' => 'download',     'color' => '#7C4DFF', 'download_url' => '', 'member_only' => true, 'confirm_text' => '确定要下载并导入美化包吗？'],
             ['title' => '💎 高级配置', 'action' => 'run_script',  'color' => '#00BCD4', 'member_only' => true, 'script' => "// 云端 JS 脚本示例\nconsole.log('高级配置脚本已执行'); log('这是原生控制台输出');"],
             ['title' => '🎮 游戏目录', 'action' => 'open_file_manager', 'color' => '#FF4081', 'member_only' => true, 'path' => '/var/mobile/Containers/Data/Application'],
             ['title' => '🗑️ 卸载美化', 'action' => 'uninstall',   'color' => '#F44336', 'member_only' => true, 'confirm_text' => '确定要卸载美化吗？将删除已配置的美化文件。', 'paths' => ['/var/mobile/Containers/Data/Application/Documents/Beautify']],
         ],
-        'download_shortcuts' => [
-            ['name' => '美化包A', 'url' => 'http://156.238.232.172/packs/pack_a.zip',     'target_dir' => '/var/mobile/Containers/Data/Application/Documents/Beautify', 'auto_import' => true],
-            ['name' => '配置文件', 'url' => 'http://156.238.232.172/packs/config.json',   'target_dir' => '/var/mobile/Containers/Data/Application/Documents/Config',   'auto_import' => true],
-            ['name' => '资源包',  'url' => 'http://156.238.232.172/packs/resources.zip',  'target_dir' => '/var/mobile/Containers/Data/Application/Documents/Resources', 'auto_import' => true],
-        ],
+        'download_shortcuts' => [],
     ];
 }
 
