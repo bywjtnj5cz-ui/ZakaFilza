@@ -62,11 +62,13 @@ enum CloudDownloader {
     // 下载并导入。targetDir 为 nil 或空 → 存 App 沙盒 Documents; "@game:key" → 游戏目录
     // unzip=true 时把下载的 zip 解压, 按包内相对结构导入所有文件 (美化配置包场景)
     // 防呆: 若文件头实际是 zip 但 unzip=false, 且目标为游戏目录, 自动启用解压
+    // progress: 下载进度回调 (0.0~1.0, 主线程回调), 传 nil 时走简单闭包式下载
     static func downloadAndImport(urlString: String,
                                   filename: String,
                                   targetDir: String?,
                                   handle: FileAccessHandle?,
                                   unzip: Bool = false,
+                                  progress: ((Double) -> Void)? = nil,
                                   completion: @escaping (DownloadOutcome) -> Void) {
         guard let link = buildURL(urlString) else {
             completion(.failure("URL 无效: \(urlString)"))
@@ -74,61 +76,96 @@ enum CloudDownloader {
         }
         let name = sanitizeFilename(filename.isEmpty ? link.lastPathComponent : filename)
 
-        session().downloadTask(with: link) { tempURL, _, error in
-            if let error = error {
-                completion(.failure("下载失败: \(error.localizedDescription)"))
-                return
-            }
-            guard let tempURL = tempURL else {
-                completion(.failure("下载失败: 服务器无返回文件"))
-                return
-            }
-            let tmp = tempURL.path
-            let size = ((try? FileManager.default.attributesOfItem(atPath: tmp))?[.size] as? NSNumber)?.int64Value ?? 0
-            let sizeText = ByteCountFormatter.string(fromByteCount: size, countStyle: .file)
-            do {
-                // 智能检测: 文件头是否为 zip (PK\x03\x04)
-                let isActuallyZip = Self.isZipFile(atPath: tmp)
-                // 若显式要求解压, 或文件实为 zip 且导入游戏目录, 自动解压
-                let shouldUnzip = unzip || (isActuallyZip && targetDir?.hasPrefix("@game:") == true)
+        // 无进度回调 → 走闭包式下载 (简单路径)
+        guard let progress = progress else {
+            session().downloadTask(with: link) { tempURL, _, error in
+                processDownloaded(tempURL: tempURL, error: error, name: name,
+                                  targetDir: targetDir, handle: handle, unzip: unzip,
+                                  completion: completion)
+            }.resume()
+            return
+        }
 
-                if let td = targetDir, !td.isEmpty {
-                    guard let handle = handle else {
-                        completion(.failure("尚未获得文件权限, 请先运行漏洞利用"))
-                        return
-                    }
-                    guard let resolved = GameDirectoryResolver.resolve(td, fileHandle: handle) else {
-                        completion(.failure("未定位到目标目录: \(td)"))
-                        return
-                    }
-                    if shouldUnzip {
-                        let count = try importUnzipped(zipPath: tmp, into: resolved, handle: handle)
-                        completion(.success("\(count) 个文件 (解压导入) → \(resolved)"))
-                    } else {
-                        try handle.createDirectory(at: resolved)
-                        let dest = (resolved as NSString).appendingPathComponent(name)
-                        if handle.fileExists(at: dest) { try? handle.deleteItem(at: dest) }
-                        try handle.copyItem(at: tmp, to: dest)
-                        completion(.success("\(name) (\(sizeText)) → \(resolved)"))
-                    }
-                } else {
-                    let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-                    if shouldUnzip {
-                        let count = try importUnzipped(zipPath: tmp, into: docs.path, handle: nil)
-                        completion(.success("\(count) 个文件 (解压导入) → \(docs.path)"))
-                    } else {
-                        let dest = docs.appendingPathComponent(name)
-                        if FileManager.default.fileExists(atPath: dest.path) {
-                            try? FileManager.default.removeItem(at: dest)
-                        }
-                        try FileManager.default.copyItem(atPath: tmp, toPath: dest.path)
-                        completion(.success(dest.path))
-                    }
+        // 有进度回调 → 委托式下载, 实时上报 0.0~1.0
+        let delegate = ProgressDownloadDelegate()
+        delegate.onProgress = progress
+        delegate.onDownloaded = { stableURL in
+            processDownloaded(tempURL: stableURL, error: nil, name: name,
+                              targetDir: targetDir, handle: handle, unzip: unzip,
+                              completion: completion)
+            try? FileManager.default.removeItem(at: stableURL)
+        }
+        delegate.onFailed = { msg in
+            completion(.failure(msg))
+        }
+        let cfg = URLSessionConfiguration.ephemeral
+        cfg.timeoutIntervalForRequest = 60
+        cfg.timeoutIntervalForResource = 600
+        let sess = URLSession(configuration: cfg, delegate: delegate, delegateQueue: nil)
+        sess.downloadTask(with: link).resume()
+    }
+
+    // 统一处理下载完成的临时文件: 检测 zip → 解压/拷贝导入目标目录
+    private static func processDownloaded(tempURL: URL?,
+                                          error: Error?,
+                                          name: String,
+                                          targetDir: String?,
+                                          handle: FileAccessHandle?,
+                                          unzip: Bool,
+                                          completion: @escaping (DownloadOutcome) -> Void) {
+        if let error = error {
+            completion(.failure("下载失败: \(error.localizedDescription)"))
+            return
+        }
+        guard let tempURL = tempURL else {
+            completion(.failure("下载失败: 服务器无返回文件"))
+            return
+        }
+        let tmp = tempURL.path
+        let size = ((try? FileManager.default.attributesOfItem(atPath: tmp))?[.size] as? NSNumber)?.int64Value ?? 0
+        let sizeText = ByteCountFormatter.string(fromByteCount: size, countStyle: .file)
+        do {
+            // 智能检测: 文件头是否为 zip (PK\x03\x04)
+            let isActuallyZip = Self.isZipFile(atPath: tmp)
+            // 若显式要求解压, 或文件实为 zip 且导入游戏目录, 自动解压
+            let shouldUnzip = unzip || (isActuallyZip && targetDir?.hasPrefix("@game:") == true)
+
+            if let td = targetDir, !td.isEmpty {
+                guard let handle = handle else {
+                    completion(.failure("尚未获得文件权限, 请先运行漏洞利用"))
+                    return
                 }
-            } catch {
-                completion(.failure("保存失败: \(error.localizedDescription)"))
+                guard let resolved = GameDirectoryResolver.resolve(td, fileHandle: handle) else {
+                    completion(.failure("未定位到目标目录: \(td)"))
+                    return
+                }
+                if shouldUnzip {
+                    let count = try importUnzipped(zipPath: tmp, into: resolved, handle: handle)
+                    completion(.success("\(count) 个文件 (解压导入) → \(resolved)"))
+                } else {
+                    try handle.createDirectory(at: resolved)
+                    let dest = (resolved as NSString).appendingPathComponent(name)
+                    if handle.fileExists(at: dest) { try? handle.deleteItem(at: dest) }
+                    try handle.copyItem(at: tmp, to: dest)
+                    completion(.success("\(name) (\(sizeText)) → \(resolved)"))
+                }
+            } else {
+                let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+                if shouldUnzip {
+                    let count = try importUnzipped(zipPath: tmp, into: docs.path, handle: nil)
+                    completion(.success("\(count) 个文件 (解压导入) → \(docs.path)"))
+                } else {
+                    let dest = docs.appendingPathComponent(name)
+                    if FileManager.default.fileExists(atPath: dest.path) {
+                        try? FileManager.default.removeItem(at: dest)
+                    }
+                    try FileManager.default.copyItem(atPath: tmp, toPath: dest.path)
+                    completion(.success(dest.path))
+                }
             }
-        }.resume()
+        } catch {
+            completion(.failure("保存失败: \(error.localizedDescription)"))
+        }
     }
 
     /// 通过文件头魔数检测是否为 zip 格式 (支持 PK\x03\x04 / PK\x05\x06 / PK\x07\x08)
@@ -171,6 +208,56 @@ enum CloudDownloader {
             }
         }
         return entries.count
+    }
+}
+
+// MARK: - 带进度回调的下载委托
+// URLSessionDownloadDelegate 实时上报下载进度; 下载完成后先把临时文件拷贝到稳定路径,
+// 再交给处理逻辑 (didFinishDownloadingTo 的 location 仅在回调期间有效)
+final class ProgressDownloadDelegate: NSObject, URLSessionDownloadDelegate {
+    var onProgress: ((Double) -> Void)?     // 0.0~1.0, 主线程回调
+    var onDownloaded: ((URL) -> Void)?      // 稳定临时文件路径 (后台线程)
+    var onFailed: ((String) -> Void)?
+    private var settled = false
+
+    func urlSession(_ session: URLSession,
+                    downloadTask: URLSessionDownloadTask,
+                    didWriteData bytesWritten: Int64,
+                    totalBytesWritten: Int64,
+                    totalBytesExpectedToWrite: Int64) {
+        guard totalBytesExpectedToWrite > 0 else { return }
+        let p = Double(totalBytesWritten) / Double(totalBytesExpectedToWrite)
+        let clamped = min(max(p, 0.0), 1.0)
+        DispatchQueue.main.async { [weak self] in
+            self?.onProgress?(clamped)
+        }
+    }
+
+    func urlSession(_ session: URLSession,
+                    downloadTask: URLSessionDownloadTask,
+                    didFinishDownloadingTo location: URL) {
+        // location 仅在本回调执行期间有效 → 立即拷贝到稳定临时路径再处理
+        let stable = FileManager.default.temporaryDirectory
+            .appendingPathComponent("moyu-dl-\(UUID().uuidString)")
+        do {
+            try FileManager.default.copyItem(at: location, to: stable)
+            settled = true
+            onDownloaded?(stable)
+        } catch {
+            settled = true
+            onFailed?("保存下载文件失败: \(error.localizedDescription)")
+        }
+    }
+
+    func urlSession(_ session: URLSession,
+                    task: URLSessionTask,
+                    didCompleteWithError error: Error?) {
+        if let error = error, !settled {
+            settled = true
+            onFailed?("下载失败: \(error.localizedDescription)")
+        }
+        // 释放 session 对 delegate 的强引用
+        session.finishTasksAndInvalidate()
     }
 }
 

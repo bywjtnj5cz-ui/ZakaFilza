@@ -94,7 +94,7 @@ function default_config() {
         'qq_group'           => '',
         'wechat_official'    => '',
         'version'            => '1.0.0',
-        'announcement'       => "欢迎使用 墨鱼Tool!\n\n首次使用请先选择与你系统版本匹配的漏洞利用方式, 获得文件系统访问权限后即可使用文件管理器.\n\n支持:\n• FilzaJailedDS (iOS 17-26)\n• FilzaSlop (iOS 18, 26, 27 beta)\n• Filza (越狱)",
+        'announcement'       => "欢迎使用 墨鱼Tool!\n\n首次使用请先选择与你系统版本匹配的漏洞利用方式, 获得文件系统访问权限后即可使用文件管理器.\n\n支持:\n• FilzaJailedDS (iOS 17-26)\n• FilzaSlop (iOS 18, 26, 27 beta)\n• Filza (巨魔)",
         'config_url'         => '',  // 留空, 让 App 自行决定
         'verify_server_url'  => '',  // 留空, App 用内置默认地址
         'min_version'        => '1.0.0',  // 最低可用版本, 低于此版本 App 启动即锁定 (版本封杀开关)

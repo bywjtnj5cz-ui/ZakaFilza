@@ -15,6 +15,7 @@ struct HomeView: View {
     @State private var activeAlert: HomeAlert?
     @State private var scriptLogText = ""
     @State private var autoBeautified = false   // 防止自动美化重复触发
+    @State private var downloadProgress: Double? = nil   // nil = 未在下载; 0.0~1.0 = 下载进度
 
     private let columns = [GridItem(.flexible()), GridItem(.flexible())]
 
@@ -126,6 +127,103 @@ struct HomeView: View {
                 .animation(.spring(response: 0.35, dampingFraction: 0.8), value: showToast),
                 alignment: .bottom
             )
+            // 下载/导入进度遮罩
+            .overlay(
+                Group {
+                    if let p = downloadProgress {
+                        ZStack {
+                            Color.black.opacity(0.35).ignoresSafeArea()
+                            downloadProgressCard(progress: p)
+                        }
+                        .transition(.opacity)
+                    }
+                }
+                .animation(.easeInOut(duration: 0.2), value: downloadProgress)
+            )
+        }
+    }
+
+    // MARK: - 下载进度卡片
+    private func downloadProgressCard(progress: Double) -> some View {
+        let percent = Int((progress * 100).rounded())
+        return VStack(spacing: 16) {
+            HStack {
+                ProgressView()
+                    .progressViewStyle(CircularProgressViewStyle(tint: AppTheme.primary))
+                    .scaleEffect(0.9)
+                Text("正在下载…")
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundColor(AppTheme.textPrimary)
+                Spacer()
+                Text("\(percent)%")
+                    .font(.system(size: 16, weight: .bold, design: .rounded))
+                    .foregroundColor(AppTheme.primary)
+            }
+
+            // 渐变进度条
+            GeometryReader { geo in
+                ZStack(alignment: .leading) {
+                    Capsule()
+                        .fill(AppTheme.primary.opacity(0.14))
+                    Capsule()
+                        .fill(AppTheme.primaryGradient())
+                        .frame(width: max(geo.size.width * progress, 8))
+                }
+            }
+            .frame(height: 8)
+
+            Text("请勿关闭 App，完成后自动导入")
+                .font(.caption)
+                .foregroundColor(AppTheme.textSecondary)
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .padding(20)
+        .frame(width: 270)
+        .background(.ultraThinMaterial)
+        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 20, style: .continuous)
+                .stroke(AppTheme.cardBorder, lineWidth: 0.5)
+        )
+        .shadow(color: AppTheme.cardShadow, radius: 24, x: 0, y: 10)
+    }
+
+    // 读取本 App 的图标: 先按名称取, 再从 Info.plist 的 CFBundleIconFiles 兜底
+    private var appIconImage: UIImage? {
+        if let img = UIImage(named: "AppIcon") { return img }
+        if let icons = Bundle.main.infoDictionary?["CFBundleIcons"] as? [String: Any],
+           let primary = icons["CFBundlePrimaryIcon"] as? [String: Any],
+           let files = primary["CFBundleIconFiles"] as? [String] {
+            for name in files.reversed() {
+                if let img = UIImage(named: name) { return img }
+            }
+        }
+        return nil
+    }
+
+    // MARK: - 应用图标视图 (优先用 App Icon, 取不到回退渐变圆底 + SF Symbol)
+    @ViewBuilder
+    private var appIconView: some View {
+        if let uiIcon = appIconImage {
+            Image(uiImage: uiIcon)
+                .resizable()
+                .scaledToFill()
+                .frame(width: 46, height: 46)
+                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .stroke(AppTheme.cardBorder, lineWidth: 0.5)
+                )
+                .shadow(color: AppTheme.cardShadow, radius: 5, x: 0, y: 2)
+        } else {
+            ZStack {
+                Circle()
+                    .fill(AppTheme.primaryGradient())
+                    .frame(width: 46, height: 46)
+                Image(systemName: "bolt.horizontal.circle.fill")
+                    .font(.system(size: 22, weight: .semibold))
+                    .foregroundColor(.white)
+            }
         }
     }
 
@@ -133,15 +231,8 @@ struct HomeView: View {
     private var headerCard: some View {
         VStack(spacing: 12) {
             HStack(alignment: .center, spacing: 12) {
-                // 应用图标/标识区
-                ZStack {
-                    Circle()
-                        .fill(AppTheme.primaryGradient())
-                        .frame(width: 44, height: 44)
-                    Image(systemName: "bolt.horizontal.circle.fill")
-                        .font(.system(size: 22, weight: .semibold))
-                        .foregroundColor(.white)
-                }
+                // 应用图标 (读取 App Icon, 取不到时回退渐变圆底)
+                appIconView
 
                 VStack(alignment: .leading, spacing: 2) {
                     Text(config.config?.appName ?? "墨鱼Tool")
@@ -683,14 +774,20 @@ struct HomeView: View {
     // MARK: - 下载文件 (导入到指定目录, 默认和平精英 Paks; unzip=true 解压导入包内文件)
     private func downloadFile(url: String, filename: String, targetDir: String? = nil, unzip: Bool = false) {
         showToast(unzip ? "开始下载并解压: \(filename)" : "开始下载: \(filename)")
+        downloadProgress = 0
         CloudDownloader.downloadAndImport(
             urlString: url,
             filename: filename,
             targetDir: targetDir,
             handle: exploit.fileHandle,
-            unzip: unzip
+            unzip: unzip,
+            progress: { p in
+                // 委托已在主线程回调, 直接更新进度
+                self.downloadProgress = p
+            }
         ) { result in
             DispatchQueue.main.async {
+                self.downloadProgress = nil
                 switch result {
                 case .success(let detail):
                     self.showToast("已导入: \(detail)")
