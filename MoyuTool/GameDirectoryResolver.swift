@@ -62,13 +62,10 @@ enum GameDirectoryResolver {
         let ids = mcm.enumerateIdentifiers(forClass: .appData, limit: 800)
         guard !ids.isEmpty else { return nil }
 
-        let fm = FileManager.default
         for uuid in ids {
             // 申请租约并激活, 之后该容器根目录才可读
-            guard let (path, _) = mcm.obtainLease(identifier: uuid, containerClass: .appData),
-                  let root = path else {
-                continue
-            }
+            let lease = mcm.obtainLease(identifier: uuid, containerClass: .appData)
+            guard let root = lease.path else { continue }
             let metadata = (root as NSString).appendingPathComponent(".com.apple.mobile_container_manager.metadata.plist")
             guard let data = try? Data(contentsOf: URL(fileURLWithPath: metadata)),
                   let plist = try? PropertyListSerialization.propertyList(from: data, options: [], format: nil),
