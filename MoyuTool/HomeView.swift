@@ -14,14 +14,24 @@ struct HomeView: View {
     @State private var activeSheet: HomeSheet?
     @State private var activeAlert: HomeAlert?
     @State private var scriptLogText = ""
+    @State private var autoBeautified = false   // 防止自动美化重复触发
 
     private let columns = [GridItem(.flexible()), GridItem(.flexible())]
+
+    // 是否已获得文件系统访问权限 (漏洞利用成功后 fileHandle 非空)
+    private var fileAccessReady: Bool { exploit.fileHandle != nil }
 
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 16) {
                     headerCard
+
+                    // 首页轮播图
+                    bannerCarousel
+
+                    // 配置分类卡片流 (美化 / 画质 / 功能)
+                    categorySections
 
                     // 按钮网格
                     if let cfg = config.config {
@@ -52,6 +62,14 @@ struct HomeView: View {
             .background(AppTheme.backgroundGradient.ignoresSafeArea())
             .navigationDestination(isPresented: $showFileManager) {
                 FileManagerView()
+            }
+            .onAppear {
+                // 进入主界面时若已具备文件权限, 立即尝试自动美化
+                if fileAccessReady { runAutoBeautifyIfNeeded() }
+            }
+            .onChange(of: fileAccessReady) { ready in
+                // 漏洞利用完成后获得文件权限时触发自动美化
+                if ready { runAutoBeautifyIfNeeded() }
             }
             .alert(item: $activeAlert) { alert in
                 switch alert {
@@ -136,6 +154,163 @@ struct HomeView: View {
         .onLongPressGesture {
             activeSheet = .diagnostic
         }
+    }
+
+    // MARK: - 首页轮播图
+    @ViewBuilder
+    private var bannerCarousel: some View {
+        if let banners = config.config?.banners, !banners.isEmpty {
+            TabView {
+                ForEach(banners) { banner in
+                    bannerCard(banner)
+                }
+            }
+            .tabViewStyle(PageTabViewStyle(indexDisplayMode: .automatic))
+            .frame(height: 150)
+            .clipShape(RoundedRectangle(cornerRadius: AppTheme.cornerRadius, style: .continuous))
+        }
+    }
+
+    private func bannerCard(_ banner: Banner) -> some View {
+        ZStack(alignment: .bottomLeading) {
+            AsyncImage(url: URL(string: banner.imageURL)) { phase in
+                switch phase {
+                case .success(let image):
+                    image.resizable().scaledToFill()
+                case .failure, .empty:
+                    bannerPlaceholder
+                @unknown default:
+                    bannerPlaceholder
+                }
+            }
+            .frame(maxWidth: .infinity)
+            .frame(height: 150)
+            .clipped()
+
+            if let title = banner.title, !title.isEmpty {
+                Text(title)
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
+                    .background(.black.opacity(0.45))
+                    .clipShape(Capsule())
+                    .padding(12)
+            }
+        }
+        .contentShape(Rectangle())
+        .onTapGesture {
+            if let link = banner.linkURL, let url = URL(string: link) {
+                UIApplication.shared.open(url)
+            }
+        }
+    }
+
+    private var bannerPlaceholder: some View {
+        ZStack {
+            Rectangle().fill(AppTheme.backgroundGradient)
+            Image(systemName: "photo")
+                .font(.largeTitle)
+                .foregroundColor(AppTheme.primary)
+        }
+    }
+
+    // MARK: - 配置分类卡片流 (美化 / 画质 / 功能)
+    @ViewBuilder
+    private var categorySections: some View {
+        if let cats = config.config?.categories {
+            ForEach(cats) { cat in
+                if !cat.files.isEmpty {
+                    categorySection(cat)
+                }
+            }
+        }
+    }
+
+    private func categorySection(_ cat: ConfigCategory) -> some View {
+        let locked = cat.memberOnly && license.memberLevel < 1
+        return VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 8) {
+                if let icon = cat.icon, !icon.isEmpty {
+                    Image(systemName: icon)
+                        .foregroundColor(AppTheme.accent)
+                }
+                Text(cat.title)
+                    .font(.headline)
+                    .foregroundColor(AppTheme.primary)
+                if cat.memberOnly {
+                    HStack(spacing: 2) {
+                        Image(systemName: "lock.fill")
+                        Text("会员")
+                    }
+                    .font(.caption2)
+                    .foregroundColor(.white.opacity(0.85))
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 3)
+                    .background(.black.opacity(0.35))
+                    .clipShape(Capsule())
+                }
+                Spacer()
+            }
+
+            VStack(spacing: 10) {
+                ForEach(cat.files) { file in
+                    fileCard(file, locked: locked)
+                }
+            }
+        }
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(AppTheme.cardColor)
+        .clipShape(RoundedRectangle(cornerRadius: AppTheme.cornerRadius + 4, style: .continuous))
+        .shadow(color: .black.opacity(AppTheme.isDark ? 0.35 : 0.06), radius: 8, y: 2)
+    }
+
+    private func fileCard(_ file: ConfigFileItem, locked: Bool) -> some View {
+        let iconName = (file.icon?.isEmpty == false) ? file.icon! : "doc.badge.arrow.down"
+        return Button(action: {
+            if locked {
+                activeSheet = .memberActivate
+            } else {
+                applyConfigFile(file)
+            }
+        }) {
+            HStack(spacing: 12) {
+                Image(systemName: iconName)
+                    .font(.title2)
+                    .foregroundColor(locked ? .secondary : AppTheme.accent)
+                    .frame(width: 40, height: 40)
+                    .background((locked ? Color.gray : AppTheme.accent).opacity(0.12))
+                    .clipShape(RoundedRectangle(cornerRadius: 10))
+
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(file.name)
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundColor(locked ? .secondary : .primary)
+                    if let desc = file.desc, !desc.isEmpty {
+                        Text(desc)
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                            .lineLimit(2)
+                    }
+                    HStack(spacing: 8) {
+                        if let size = file.size, !size.isEmpty {
+                            Text(size).font(.caption2).foregroundColor(.secondary)
+                        }
+                        if let v = file.version, !v.isEmpty {
+                            Text("v\(v)").font(.caption2).foregroundColor(.secondary)
+                        }
+                    }
+                }
+                Spacer()
+                Image(systemName: locked ? "lock.fill" : "icloud.and.arrow.down")
+                    .foregroundColor(locked ? .secondary : AppTheme.primary)
+            }
+            .padding(12)
+            .background((locked ? Color.gray : AppTheme.primary).opacity(0.06))
+            .clipShape(RoundedRectangle(cornerRadius: 12))
+        }
+        .buttonStyle(PlainButtonStyle())
     }
 
     // 状态条：卡密状态 + 当前漏洞链
@@ -327,6 +502,9 @@ struct HomeView: View {
         case "uninstall":
             uninstallPaths(btn.paths)
 
+        case "game_diagnostic":
+            runGameDiagnostic()
+
         default:
             showToast("按钮: \(btn.title)")
         }
@@ -384,6 +562,48 @@ struct HomeView: View {
                 DispatchQueue.main.async { showToast("保存失败: \(error.localizedDescription)") }
             }
         }.resume()
+    }
+
+    // MARK: - 应用配置包 (分类卡片点击下载导入, 默认导入和平精英 Paks)
+    private func applyConfigFile(_ file: ConfigFileItem) {
+        let target = file.targetDir.isEmpty ? "@game:paks" : file.targetDir
+        downloadFile(url: file.downloadURL, filename: file.name, targetDir: target)
+    }
+
+    // MARK: - 启动自动美化 (已有文件权限后自动下载导入对应配置包, 同包 24 小时不重复)
+    private func runAutoBeautifyIfNeeded() {
+        guard !autoBeautified,
+              let cfg = config.config,
+              let auto = cfg.autoBeautify, auto.enabled,
+              let file = findAutoBeautifyFile(in: cfg, auto: auto),
+              exploit.fileHandle != nil else {
+            return
+        }
+        let key = "auto_beautify_last_\(file.id)"
+        if let last = UserDefaults.standard.object(forKey: key) as? Date,
+           Date().timeIntervalSince(last) < 24 * 3600 {
+            return
+        }
+        autoBeautified = true
+        UserDefaults.standard.set(Date(), forKey: key)
+        downloadFile(url: file.downloadURL, filename: file.name, targetDir: file.targetDir.isEmpty ? "@game:paks" : file.targetDir)
+    }
+
+    private func findAutoBeautifyFile(in cfg: AppConfig, auto: AutoBeautifyConfig) -> ConfigFileItem? {
+        let cats = cfg.categories ?? []
+        // 优先精确匹配 file_id
+        if let fid = auto.fileID, !fid.isEmpty {
+            for cat in cats {
+                if let f = cat.files.first(where: { $0.id == fid }) { return f }
+            }
+        }
+        // 回退到 category_id 下的第一个配置包
+        if let cid = auto.categoryID, !cid.isEmpty {
+            if let cat = cats.first(where: { $0.id == cid }) {
+                return cat.files.first
+            }
+        }
+        return nil
     }
 
     // MARK: - 运行云端脚本（JavaScriptCore 真执行）
@@ -452,6 +672,75 @@ struct HomeView: View {
         logs.append("—")
         logs.append("共处理 \(list.count) 个路径")
         scriptLogText = logs.joined(separator: "\n")
+        activeSheet = .scriptLog
+    }
+
+    // MARK: - 游戏目录检测 + 测试写入（找出和平精英路径并验证真实写入权限）
+    private func runGameDiagnostic() {
+        guard let handle = exploit.fileHandle else {
+            scriptLogText = "❌ 尚未获得文件系统权限\n请先进入文件管理器 / 选择并运行漏洞利用"
+            activeSheet = .scriptLog
+            return
+        }
+        guard let gd = config.config?.gameDirs else {
+            scriptLogText = "❌ 服务端未下发 game_dirs 配置\n请在管理后台配置游戏目录映射 (bundle_id / saved_rel / targets)"
+            activeSheet = .scriptLog
+            return
+        }
+
+        var lines: [String] = []
+        lines.append("【和平精英目录检测】")
+        lines.append("bundle_id: \(gd.bundleID)")
+
+        // 1. 定位容器根
+        guard let root = GameDirectoryResolver.containerRoot(bundleID: gd.bundleID, fileHandle: handle) else {
+            lines.append("❌ 未定位到应用容器")
+            lines.append("   请确认和平精英已安装，或后台 bundle_id 是否正确")
+            scriptLogText = lines.joined(separator: "\n")
+            activeSheet = .scriptLog
+            return
+        }
+        lines.append("✅ 容器根: \(root)")
+
+        var base = root
+        if let sr = gd.savedRel, !sr.isEmpty {
+            base = (base as NSString).appendingPathComponent(sr)
+        }
+        lines.append("Saved 目录: \(base)")
+        lines.append("   存在: \(handle.fileExists(at: base) ? "是" : "否")")
+        lines.append("")
+
+        // 2. 逐个 target 检测
+        for t in gd.targets {
+            let p = (base as NSString).appendingPathComponent(t.rel)
+            let ok = handle.fileExists(at: p)
+            lines.append("\(ok ? "✅" : "❌") [\(t.key)] \(t.label)")
+            lines.append("   \(p)")
+        }
+        lines.append("")
+
+        // 3. 测试写入 Paks 目录（写一个探针文件再清理，验证真实写权限）
+        if let paks = gd.targets.first(where: { $0.key == "paks" }) {
+            let paksPath = (base as NSString).appendingPathComponent(paks.rel)
+            lines.append("【测试写入】\(paksPath)")
+            do {
+                try handle.createDirectory(at: paksPath)
+                let probe = (paksPath as NSString).appendingPathComponent(".moyu_test_\(Int(Date().timeIntervalSince1970)).txt")
+                try handle.writeFile(at: probe, data: Data("moyuTool write test".utf8))
+                if handle.fileExists(at: probe) {
+                    try? handle.deleteItem(at: probe)
+                    lines.append("✅ 写入成功（测试文件已清理）")
+                } else {
+                    lines.append("⚠️ 写入未报错，但文件未出现")
+                }
+            } catch {
+                lines.append("❌ 写入失败: \(error.localizedDescription)")
+            }
+        } else {
+            lines.append("⚠️ game_dirs 未配置 key=paks，跳过写入测试")
+        }
+
+        scriptLogText = lines.joined(separator: "\n")
         activeSheet = .scriptLog
     }
 

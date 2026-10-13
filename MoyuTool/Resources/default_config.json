@@ -41,6 +41,11 @@
       "title": "🔔 查看公告",
       "action": "announcement",
       "color": "#FFA940"
+    },
+    {
+      "title": "🔍 目录检测",
+      "action": "game_diagnostic",
+      "color": "#FF6B9D"
     }
   ],
   "member_buttons": [
@@ -87,5 +92,37 @@
       { "key": "avatarpaks", "label": "AvatarPaks", "rel": "Paks/avatarpaks" },
       { "key": "savegame", "label": "SaveGame", "rel": "Savegame" }
     ]
-  }
+  },
+  "banners": [],
+  "auto_beautify": {
+    "enabled": false,
+    "category_id": "",
+    "file_id": ""
+  },
+  "categories": [
+    {
+      "id": "beautify",
+      "title": "⚡ 美化",
+      "type": "beautify",
+      "icon": "sparkles",
+      "member_only": true,
+      "files": []
+    },
+    {
+      "id": "quality",
+      "title": "🎨 画质",
+      "type": "quality",
+      "icon": "paintpalette",
+      "member_only": true,
+      "files": []
+    },
+    {
+      "id": "function",
+      "title": "⚙️ 功能",
+      "type": "function",
+      "icon": "gearshape",
+      "member_only": false,
+      "files": []
+    }
+  ]
 }

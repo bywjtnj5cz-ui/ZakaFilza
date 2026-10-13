@@ -21,6 +21,9 @@ struct AppConfig: Codable {
     var memberButtons: [ConfigButton]  // 会员专属按钮
     var downloadShortcuts: [DownloadShortcut] // 一键下载直链
     var gameDirs: GameDirsConfig?      // 游戏目录定位 (和平精英等)
+    var banners: [Banner]?             // 首页轮播图
+    var autoBeautify: AutoBeautifyConfig? // 启动自动美化 (自动下载导入配置包)
+    var categories: [ConfigCategory]?  // 配置分类树 (美化 / 画质 / 功能)
 
     enum CodingKeys: String, CodingKey {
         case appName = "app_name"
@@ -41,6 +44,9 @@ struct AppConfig: Codable {
         case memberButtons = "member_buttons"
         case downloadShortcuts = "download_shortcuts"
         case gameDirs = "game_dirs"
+        case banners
+        case autoBeautify = "auto_beautify"
+        case categories
     }
 }
 
@@ -136,6 +142,75 @@ struct DownloadShortcut: Codable, Identifiable {
         case url
         case targetDir = "target_dir"
         case autoImport = "auto_import"
+    }
+}
+
+// 首页轮播图 (image_url 图片直链, link_url 点击跳转, title 覆盖文字可留空)
+struct Banner: Codable, Identifiable {
+    var id: String { imageURL + (linkURL ?? "") + (title ?? "") }
+    var imageURL: String
+    var linkURL: String?
+    var title: String?
+
+    enum CodingKeys: String, CodingKey {
+        case imageURL = "image_url"
+        case linkURL = "link_url"
+        case title
+    }
+}
+
+// 启动自动美化配置
+struct AutoBeautifyConfig: Codable {
+    var enabled: Bool
+    var categoryID: String?     // 为空则按 file_id 匹配
+    var fileID: String?         // 配置包 id (对应 categories[].files[].id)
+
+    enum CodingKeys: String, CodingKey {
+        case enabled
+        case categoryID = "category_id"
+        case fileID = "file_id"
+    }
+}
+
+// 配置分类 (树节点)
+struct ConfigCategory: Codable, Identifiable {
+    var id: String
+    var title: String
+    var type: String
+    var icon: String?           // SF Symbol 名称, 可空
+    var memberOnly: Bool        // 会员专属分类 (未解锁置灰)
+    var files: [ConfigFileItem]
+
+    enum CodingKeys: String, CodingKey {
+        case id
+        case title
+        case type
+        case icon
+        case memberOnly = "member_only"
+        case files
+    }
+}
+
+// 分类下的配置包 (文件卡片)
+struct ConfigFileItem: Codable, Identifiable {
+    var id: String
+    var name: String
+    var desc: String?
+    var downloadURL: String
+    var targetDir: String       // 如 "@game:paks" 或绝对路径
+    var size: String?
+    var version: String?
+    var icon: String?
+
+    enum CodingKeys: String, CodingKey {
+        case id
+        case name
+        case desc
+        case downloadURL = "download_url"
+        case targetDir = "target_dir"
+        case size
+        case version
+        case icon
     }
 }
 

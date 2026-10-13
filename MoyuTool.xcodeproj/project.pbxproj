@@ -7,176 +7,176 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		08A415FACAF046EFBA508D2F /* App.swift in Sources */ = {isa = PBXBuildFile; fileRef = F148B67E9DD9475B929101A0 /* App.swift */; };
-		546757D1EFC045FFBB612EA8 /* AuthViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C8C83AF47004F139188C9E0 /* AuthViews.swift */; };
-		94175A049C56412A9329EA17 /* Config.swift in Sources */ = {isa = PBXBuildFile; fileRef = F996AF54E50A42D5B2AD1B3A /* Config.swift */; };
-		C5122539DE174147BA66CC7A /* DeviceManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F7715A21BDA4DCCA756EFA6 /* DeviceManager.swift */; };
-		E66C66ABCDEB43AE842A86ED /* ExploitManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E074E1176944E0D936155DA /* ExploitManager.swift */; };
-		4E9D8BC4606242B1955F1855 /* ExploitSelectView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BA4ED3D5AAE4840BFC5389D /* ExploitSelectView.swift */; };
-		40868A1266A344199183A57F /* FileBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = E379C69CD01542479B0D9498 /* FileBridge.swift */; };
-		8E7286310F1A47F59A169404 /* FileImplementations.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88C74F4D2538449CAFF216AF /* FileImplementations.swift */; };
-		9EE8AB2BCEA84A62B780B125 /* GameDirectoryResolver.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE504DDA0D3B4D378F90B5A0 /* GameDirectoryResolver.swift */; };
-		B25539E0742D4CCCB203BA31 /* GeneratedResources.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB0D089DBFAA424DB9F4FE05 /* GeneratedResources.swift */; };
-		9AAB61A75F4A4F5F8B4548D0 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19760E66DFA6480797718C7E /* HomeView.swift */; };
-		0932E54514334BF4850E73CB /* LicenseManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B1DD1C909A944B1AE2A4FFD /* LicenseManager.swift */; };
-		6267A9C1A7574013AD5D345D /* ScriptRunner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68AEE4610BDD444CB5B11833 /* ScriptRunner.swift */; };
-		C7E152CB34CD4E35911A35A1 /* Sheets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0041D3F47E35496B98850C51 /* Sheets.swift */; };
-		B72D63B46B3C4E96ADF72858 /* Store.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8194025AC5544B1193ABDE13 /* Store.swift */; };
-		73EE1E296C0347ABA97FB030 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F31BB93E6464FE9AF2F70D1 /* Theme.swift */; };
-		99D46878356D46CF896636B4 /* WebViewContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF334E5E2976451FB4D1BF66 /* WebViewContainer.swift */; };
-		584187828C98470BAED50A04 /* FilzaExploit.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE74D84ABC824D198C7FD8E4 /* FilzaExploit.swift */; };
-		6AA9308CB0034179ABC74E68 /* FilzaJailedDSExploit.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0145F750914553B24D22C3 /* FilzaJailedDSExploit.swift */; };
-		CEEC1FE879A24FB981965C1F /* FilzaSlopExploit.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2F42B61D8C94FC9B9A2995F /* FilzaSlopExploit.swift */; };
-		34B3B4898CCF4B3091E5ECB6 /* MCMFileManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4B07921FE704E0EA182AD27 /* MCMFileManager.swift */; };
-		6D70FBF497A74D67A3F47725 /* LaraExploit.swift in Sources */ = {isa = PBXBuildFile; fileRef = B04E4F0E229F49B4A3BE3ADE /* LaraExploit.swift */; };
-		A17091900A9C4382BF4D32DA /* FilzaJailedDSBridge.m in Sources */ = {isa = PBXBuildFile; fileRef = 172AE94260CC425D98AC82BB /* FilzaJailedDSBridge.m */; };
-		C5024E515BAA4956A7CFCCEB /* apfs_own.m in Sources */ = {isa = PBXBuildFile; fileRef = B587C531577947479D117A85 /* apfs_own.m */; };
-		073C1101F56E4B32B65CA178 /* kexploit_opa334.m in Sources */ = {isa = PBXBuildFile; fileRef = 1772CBEB05434BCDB52022C3 /* kexploit_opa334.m */; };
-		9BEDE58849DC46A18ABE4EC0 /* krw.m in Sources */ = {isa = PBXBuildFile; fileRef = D6EC7A0B34FC4133B1745838 /* krw.m */; };
-		3683E7B4A18545E0B9A5EAD7 /* kutils.m in Sources */ = {isa = PBXBuildFile; fileRef = EB0E42AE000E4E239F586E0F /* kutils.m */; };
-		F10442E255CD48CAA92864C0 /* offsets.m in Sources */ = {isa = PBXBuildFile; fileRef = D5230DE408E8488795707FA9 /* offsets.m */; };
-		F3361500637A4E1992F43F16 /* vnode.m in Sources */ = {isa = PBXBuildFile; fileRef = E09A339B0510445BA5B14B38 /* vnode.m */; };
-		CB0F597C849D4BFE8ECC2266 /* patchfinder.m in Sources */ = {isa = PBXBuildFile; fileRef = 7C0CE101DD61418DB6DE988A /* patchfinder.m */; };
-		D5B0EA4BDA1D463686B6237E /* sandbox_escape.m in Sources */ = {isa = PBXBuildFile; fileRef = 3E85ABA2CBA14A1E8270A6DF /* sandbox_escape.m */; };
-		3ABB229B939040E697225054 /* MCMBridge.m in Sources */ = {isa = PBXBuildFile; fileRef = BBC8F058FE4B4C9D866C7E4F /* MCMBridge.m */; };
-		0132F7EDA1DB41E1A99DAF6B /* Base64.c in Sources */ = {isa = PBXBuildFile; fileRef = 5AC488882E974812A7BD56E3 /* Base64.c */; };
-		DB3C02086F0645D5BA5C9B77 /* BufferedStream.c in Sources */ = {isa = PBXBuildFile; fileRef = A36096288E4347E382952B95 /* BufferedStream.c */; };
-		3CE9D948DF9D43A1B1FF3856 /* CSBlob.c in Sources */ = {isa = PBXBuildFile; fileRef = 434151313E18439D88FCAB40 /* CSBlob.c */; };
-		7EF84B04023449E59F8D87F5 /* CodeDirectory.c in Sources */ = {isa = PBXBuildFile; fileRef = D1C3C511BB054DF08D657685 /* CodeDirectory.c */; };
-		63E495F897DC480992CC82C3 /* DER.c in Sources */ = {isa = PBXBuildFile; fileRef = 40BE5A73C4FC4584A3ADE69C /* DER.c */; };
-		E9242F78CDCB464F864EF226 /* DyldSharedCache.c in Sources */ = {isa = PBXBuildFile; fileRef = B5A26B805000481C84876F0E /* DyldSharedCache.c */; };
-		7DC9B50AC57149D99BE7715F /* Entitlements.c in Sources */ = {isa = PBXBuildFile; fileRef = 5CB07DA3E20944E0B340B05E /* Entitlements.c */; };
-		C50F4275A4AE4780B41EAB2D /* Fat.c in Sources */ = {isa = PBXBuildFile; fileRef = 477D9052C559474B828D0B1A /* Fat.c */; };
-		9BE54D31B3474D32B8F791C4 /* FileStream.c in Sources */ = {isa = PBXBuildFile; fileRef = 03D33251A510488A84C9410D /* FileStream.c */; };
-		A40576B69B72487EA0C53A72 /* Host.c in Sources */ = {isa = PBXBuildFile; fileRef = 30A0788A72A444EDB8107C69 /* Host.c */; };
-		D5DC2362B5824266A9E97C71 /* MachO.c in Sources */ = {isa = PBXBuildFile; fileRef = 15BFD5A7FFA247D5A76EB9DB /* MachO.c */; };
-		0F0586544F8C48EFBED12ECD /* MachOLoadCommand.c in Sources */ = {isa = PBXBuildFile; fileRef = F5969797488545FF9FD71EB4 /* MachOLoadCommand.c */; };
-		588883A0D275477A93A5E51F /* MemoryStream.c in Sources */ = {isa = PBXBuildFile; fileRef = 8248AD23D0BC4B70A583ABF2 /* MemoryStream.c */; };
-		E4E0D60B1409481DA047B01A /* PatchFinder.c in Sources */ = {isa = PBXBuildFile; fileRef = 353F6375CE2D48158656179D /* PatchFinder.c */; };
-		13B11CDA3C094D298580F2A4 /* PatchFinder_arm64.c in Sources */ = {isa = PBXBuildFile; fileRef = 6BBF5DCB80A3466A924930A8 /* PatchFinder_arm64.c */; };
-		C7A88125795E4038BF987CA2 /* Util.c in Sources */ = {isa = PBXBuildFile; fileRef = FD706863632A44A383F0BD09 /* Util.c */; };
-		E3A23DD35DDE4545A03EA915 /* arm64.c in Sources */ = {isa = PBXBuildFile; fileRef = B7BEEC5446F14F14AB165FEC /* arm64.c */; };
-		8B0BF1E89D604F30B965E2B4 /* bad_recovery.c in Sources */ = {isa = PBXBuildFile; fileRef = 87DC7A83E2AF4C709CAFC8F1 /* bad_recovery.c */; };
-		7DD1C324431C42CD8DE84665 /* common.c in Sources */ = {isa = PBXBuildFile; fileRef = 87F68B29CE244A7A9C640D61 /* common.c */; };
-		61CBA26F80234314B9FE96B5 /* decompress.c in Sources */ = {isa = PBXBuildFile; fileRef = 3D02AEF422C64A0F897E1282 /* decompress.c */; };
-		88C2412CE2704C7AB3C817A8 /* non_ppl.c in Sources */ = {isa = PBXBuildFile; fileRef = 5B6D77D843954F45861B139D /* non_ppl.c */; };
-		CC0A15A96DCC4455BEE19604 /* ppl.c in Sources */ = {isa = PBXBuildFile; fileRef = D4F5A42C847F45EBA202EE6D /* ppl.c */; };
-		0169C8E035584F718FE952F0 /* xpf.c in Sources */ = {isa = PBXBuildFile; fileRef = 3826FC5DF8C34FDEB52CBDD8 /* xpf.c */; };
-		EAC2E754C81D429BB017FF3C /* file.c in Sources */ = {isa = PBXBuildFile; fileRef = EB84BEE9064643FDBE02B60C /* file.c */; };
-		5C4A11F851494D198C086B2B /* hexdump.c in Sources */ = {isa = PBXBuildFile; fileRef = 621559A40DED475AADD1AF5D /* hexdump.c */; };
-		75993D41D74A437F88703CB3 /* process.c in Sources */ = {isa = PBXBuildFile; fileRef = 1E3B93B7476C4A5FBA7CD8A0 /* process.c */; };
-		C5E1EA9D06224FFD8E6FBE59 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DF571CDE927D46F0A5830888 /* Assets.xcassets */; };
+		9B42906F9ADB4FB68F659DCF /* App.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E745B56FD0244FAB36214E6 /* App.swift */; };
+		4E9B8E55B533403AB925B79A /* AuthViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = E23F2BF41DC64513AA192735 /* AuthViews.swift */; };
+		833C9F6C55134D1284A2F40C /* Config.swift in Sources */ = {isa = PBXBuildFile; fileRef = D11E00B1E6CC4AB783A64C96 /* Config.swift */; };
+		39EB624A58C7460E8CC7BDA3 /* DeviceManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45F9A9983880446F97DA9D63 /* DeviceManager.swift */; };
+		C97558DECAE5480A9749A5BF /* ExploitManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AAA270F1F7B4C1184B01503 /* ExploitManager.swift */; };
+		AE7B3FEF86E049629F26C71D /* ExploitSelectView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A34E6D0F1E74903AA91A993 /* ExploitSelectView.swift */; };
+		4E5991BBAAEB40BFB15F3C80 /* FileBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8B90FB5D6BF462C87BA16B6 /* FileBridge.swift */; };
+		5D2225269D3749AF9D113ED5 /* FileImplementations.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1269ABB1DB274E90951B5AE8 /* FileImplementations.swift */; };
+		25FBFECF95B04C768B0DBEA3 /* GameDirectoryResolver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9054B353BF8E446C90403E37 /* GameDirectoryResolver.swift */; };
+		1B8F5F540C0B47B3A8E9002C /* GeneratedResources.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19FEC4E4CFCF40BEB82B0C60 /* GeneratedResources.swift */; };
+		577F1CBED8894C638D32514D /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9D1AA0332B247A186FD3F19 /* HomeView.swift */; };
+		3E363994E2144E4281FA8D3E /* LicenseManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 489B70D5E9D94B9597319FFA /* LicenseManager.swift */; };
+		26A65BBA461E40BAB91E1C6C /* ScriptRunner.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF4481C59C764A479D580A9A /* ScriptRunner.swift */; };
+		00DA39527CA7467F8F55B144 /* Sheets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65E4264B006144139FFAB30E /* Sheets.swift */; };
+		E7CBCA143CCA4935BBEDF0D3 /* Store.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0881208B1E8742DBB7ADCE67 /* Store.swift */; };
+		3B738E75144B4F8E90C9AE48 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4EB3E1A81D34044B5326E26 /* Theme.swift */; };
+		FA6B48592CC24A21BFE50D42 /* WebViewContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5EF0C4721094639863E3992 /* WebViewContainer.swift */; };
+		F06852E288A54203B183E6EB /* FilzaExploit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53BE789DC3444B9BAA8E2C34 /* FilzaExploit.swift */; };
+		DD17A8D0537E4E62AA9FA1DB /* FilzaJailedDSExploit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 830BE0EEE23644B7B3B0AB7E /* FilzaJailedDSExploit.swift */; };
+		17705130413C40D8B693CF02 /* FilzaSlopExploit.swift in Sources */ = {isa = PBXBuildFile; fileRef = F19F29BF4A3D4A15AE326492 /* FilzaSlopExploit.swift */; };
+		9967C7236D294D45ABE2E99B /* MCMFileManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32088065E6144D8093039240 /* MCMFileManager.swift */; };
+		9349A4823AC14170AF8FB834 /* LaraExploit.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40533B8889C4C51BC9631A0 /* LaraExploit.swift */; };
+		AB02EE7AC59B45F08E8180E7 /* FilzaJailedDSBridge.m in Sources */ = {isa = PBXBuildFile; fileRef = 665783566D3C49249D3BA04C /* FilzaJailedDSBridge.m */; };
+		458BDB05A5F74BB3823C8EAF /* apfs_own.m in Sources */ = {isa = PBXBuildFile; fileRef = A9E7898281024DDDBE4D2435 /* apfs_own.m */; };
+		C526485ED29740E4ABEEAA63 /* kexploit_opa334.m in Sources */ = {isa = PBXBuildFile; fileRef = 7B4B464F057F4A8487A8CDA9 /* kexploit_opa334.m */; };
+		88CBC1B3B7B1476F9665EB0B /* krw.m in Sources */ = {isa = PBXBuildFile; fileRef = 188EAADA636F4309A76D95F6 /* krw.m */; };
+		7766865B8126497B8E438DBA /* kutils.m in Sources */ = {isa = PBXBuildFile; fileRef = 077F8BF62E2B4209A5722B54 /* kutils.m */; };
+		52582507AFC244DF9416FF8E /* offsets.m in Sources */ = {isa = PBXBuildFile; fileRef = 1FE69280BCE848C1AA1D66F1 /* offsets.m */; };
+		4DA88010A9F343C0BFA13A2E /* vnode.m in Sources */ = {isa = PBXBuildFile; fileRef = DC2A9AAE42104B8EBC60E147 /* vnode.m */; };
+		26A5A7271CE54180AFCC3B41 /* patchfinder.m in Sources */ = {isa = PBXBuildFile; fileRef = 2564F1F182F64C848D279D55 /* patchfinder.m */; };
+		F0E06E73DF6545A6923747B0 /* sandbox_escape.m in Sources */ = {isa = PBXBuildFile; fileRef = 760CBDABCCA845398F15AC55 /* sandbox_escape.m */; };
+		7CA6C387D5AC43118521F6A2 /* MCMBridge.m in Sources */ = {isa = PBXBuildFile; fileRef = DDF4C6A113304BF0BA8B94FF /* MCMBridge.m */; };
+		292F88873D5349EBB9DAA01D /* Base64.c in Sources */ = {isa = PBXBuildFile; fileRef = 7B70933FEA324CA992C1730A /* Base64.c */; };
+		13C665C5EF1F4F1AA17A0C52 /* BufferedStream.c in Sources */ = {isa = PBXBuildFile; fileRef = 4F69C4280D354BEE9380186B /* BufferedStream.c */; };
+		38D2C4F5C4D244EF8F423631 /* CSBlob.c in Sources */ = {isa = PBXBuildFile; fileRef = 9CC3AB5DD05D42B5AB8B300D /* CSBlob.c */; };
+		B37FE5EFFFEF4268A22B4542 /* CodeDirectory.c in Sources */ = {isa = PBXBuildFile; fileRef = 560E3F39C9DB442084AC601C /* CodeDirectory.c */; };
+		B5B1EB23FFB242EF9951AF12 /* DER.c in Sources */ = {isa = PBXBuildFile; fileRef = BAE56AB7891843FD96D2F99F /* DER.c */; };
+		CF3DFEB4511C483090C7FFA5 /* DyldSharedCache.c in Sources */ = {isa = PBXBuildFile; fileRef = 7B80AF5678514A8C9745079B /* DyldSharedCache.c */; };
+		C6F13358F2064D8AA622CF97 /* Entitlements.c in Sources */ = {isa = PBXBuildFile; fileRef = 16E46DD63CB64F8DA3CC3F52 /* Entitlements.c */; };
+		F9CC342F7399461DA80E2B23 /* Fat.c in Sources */ = {isa = PBXBuildFile; fileRef = 717D7390096748BC8F634929 /* Fat.c */; };
+		8FBB9A02BBE242D8BB5891E0 /* FileStream.c in Sources */ = {isa = PBXBuildFile; fileRef = 0BF2141C93794DF7B62C3F31 /* FileStream.c */; };
+		743FC0FA883D41D3BBD46178 /* Host.c in Sources */ = {isa = PBXBuildFile; fileRef = C93F5AF743A749AAB2C64FEF /* Host.c */; };
+		94A31F9811C247AD855B9613 /* MachO.c in Sources */ = {isa = PBXBuildFile; fileRef = 6BA6D3D5343E429599826ADF /* MachO.c */; };
+		7A9026E7BF014CBAB04BBC29 /* MachOLoadCommand.c in Sources */ = {isa = PBXBuildFile; fileRef = DC25E175654E45B78FAE5503 /* MachOLoadCommand.c */; };
+		49AA8566817B49549A17D754 /* MemoryStream.c in Sources */ = {isa = PBXBuildFile; fileRef = C85D411EEC7D4AD0ACFF6457 /* MemoryStream.c */; };
+		276E903425944386817FDEC0 /* PatchFinder.c in Sources */ = {isa = PBXBuildFile; fileRef = 92797D2C8E92494CBA33EC3D /* PatchFinder.c */; };
+		6A0B8C0BADB1412A93D63326 /* PatchFinder_arm64.c in Sources */ = {isa = PBXBuildFile; fileRef = BE0494BFBE8C4605AA8497D2 /* PatchFinder_arm64.c */; };
+		7D2D9CC08D73490C9BE9C2BC /* Util.c in Sources */ = {isa = PBXBuildFile; fileRef = EB8C3BF0A43B461FA47CD5A2 /* Util.c */; };
+		15535BA4CFE4432592ECD02A /* arm64.c in Sources */ = {isa = PBXBuildFile; fileRef = 3779BA128C2F494C9E6390BB /* arm64.c */; };
+		FBDD6D043F6D4D22858DBABA /* bad_recovery.c in Sources */ = {isa = PBXBuildFile; fileRef = AD4228CBE0AD4344A482B412 /* bad_recovery.c */; };
+		432B5938BF2A44FAABFFBC96 /* common.c in Sources */ = {isa = PBXBuildFile; fileRef = FB920DB27F3D402B895CD657 /* common.c */; };
+		6FE091F363ED4E1F9B240CC8 /* decompress.c in Sources */ = {isa = PBXBuildFile; fileRef = 8CA08F93992C4BF0B53E55B8 /* decompress.c */; };
+		31D2C63989E149F4A80287E1 /* non_ppl.c in Sources */ = {isa = PBXBuildFile; fileRef = B8166FE09FE84A1F87228C95 /* non_ppl.c */; };
+		A0AE0A94D7E74F9B914D46C1 /* ppl.c in Sources */ = {isa = PBXBuildFile; fileRef = 3997F46FF4484B8C9E789271 /* ppl.c */; };
+		3A72EEB920B44C3E9379ECF1 /* xpf.c in Sources */ = {isa = PBXBuildFile; fileRef = 3366858E74E543DDAD6F9481 /* xpf.c */; };
+		F20E166F22CB465388DE4A38 /* file.c in Sources */ = {isa = PBXBuildFile; fileRef = 679D622B2B3342009B79065E /* file.c */; };
+		0B4302A7FE244B11826FD159 /* hexdump.c in Sources */ = {isa = PBXBuildFile; fileRef = B487EDFEDF9E4099B6945CEA /* hexdump.c */; };
+		C493B2C7686D46D0A6A5DC6F /* process.c in Sources */ = {isa = PBXBuildFile; fileRef = C9E309AF55FB4E91AFEF06AA /* process.c */; };
+		70A12939D25D4D4C98815828 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2279A05FB3CF4C60A52114A1 /* Assets.xcassets */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		F148B67E9DD9475B929101A0 /* App.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "App.swift"; sourceTree = "<group>"; };
-		6C8C83AF47004F139188C9E0 /* AuthViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AuthViews.swift"; sourceTree = "<group>"; };
-		F996AF54E50A42D5B2AD1B3A /* Config.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Config.swift"; sourceTree = "<group>"; };
-		2F7715A21BDA4DCCA756EFA6 /* DeviceManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DeviceManager.swift"; sourceTree = "<group>"; };
-		0E074E1176944E0D936155DA /* ExploitManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ExploitManager.swift"; sourceTree = "<group>"; };
-		7BA4ED3D5AAE4840BFC5389D /* ExploitSelectView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ExploitSelectView.swift"; sourceTree = "<group>"; };
-		E379C69CD01542479B0D9498 /* FileBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FileBridge.swift"; sourceTree = "<group>"; };
-		88C74F4D2538449CAFF216AF /* FileImplementations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FileImplementations.swift"; sourceTree = "<group>"; };
-		CE504DDA0D3B4D378F90B5A0 /* GameDirectoryResolver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GameDirectoryResolver.swift"; sourceTree = "<group>"; };
-		AB0D089DBFAA424DB9F4FE05 /* GeneratedResources.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GeneratedResources.swift"; sourceTree = "<group>"; };
-		19760E66DFA6480797718C7E /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "HomeView.swift"; sourceTree = "<group>"; };
-		8B1DD1C909A944B1AE2A4FFD /* LicenseManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LicenseManager.swift"; sourceTree = "<group>"; };
-		68AEE4610BDD444CB5B11833 /* ScriptRunner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ScriptRunner.swift"; sourceTree = "<group>"; };
-		0041D3F47E35496B98850C51 /* Sheets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sheets.swift"; sourceTree = "<group>"; };
-		8194025AC5544B1193ABDE13 /* Store.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Store.swift"; sourceTree = "<group>"; };
-		7F31BB93E6464FE9AF2F70D1 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Theme.swift"; sourceTree = "<group>"; };
-		BF334E5E2976451FB4D1BF66 /* WebViewContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "WebViewContainer.swift"; sourceTree = "<group>"; };
-		CE74D84ABC824D198C7FD8E4 /* FilzaExploit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FilzaExploit.swift"; sourceTree = "<group>"; };
-		BB0145F750914553B24D22C3 /* FilzaJailedDSExploit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FilzaJailedDSExploit.swift"; sourceTree = "<group>"; };
-		D2F42B61D8C94FC9B9A2995F /* FilzaSlopExploit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FilzaSlopExploit.swift"; sourceTree = "<group>"; };
-		A4B07921FE704E0EA182AD27 /* MCMFileManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MCMFileManager.swift"; sourceTree = "<group>"; };
-		B04E4F0E229F49B4A3BE3ADE /* LaraExploit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LaraExploit.swift"; sourceTree = "<group>"; };
-		172AE94260CC425D98AC82BB /* FilzaJailedDSBridge.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "FilzaJailedDSBridge.m"; sourceTree = "<group>"; };
-		B587C531577947479D117A85 /* apfs_own.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "apfs_own.m"; sourceTree = "<group>"; };
-		1772CBEB05434BCDB52022C3 /* kexploit_opa334.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "kexploit/kexploit_opa334.m"; sourceTree = "<group>"; };
-		D6EC7A0B34FC4133B1745838 /* krw.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "kexploit/krw.m"; sourceTree = "<group>"; };
-		EB0E42AE000E4E239F586E0F /* kutils.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "kexploit/kutils.m"; sourceTree = "<group>"; };
-		D5230DE408E8488795707FA9 /* offsets.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "kexploit/offsets.m"; sourceTree = "<group>"; };
-		E09A339B0510445BA5B14B38 /* vnode.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "kexploit/vnode.m"; sourceTree = "<group>"; };
-		7C0CE101DD61418DB6DE988A /* patchfinder.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "kpf/patchfinder.m"; sourceTree = "<group>"; };
-		3E85ABA2CBA14A1E8270A6DF /* sandbox_escape.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "sandbox_escape.m"; sourceTree = "<group>"; };
-		BBC8F058FE4B4C9D866C7E4F /* MCMBridge.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "MCMBridge.m"; sourceTree = "<group>"; };
-		5AC488882E974812A7BD56E3 /* Base64.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = "XPF/external/ChOma/src/Base64.c"; sourceTree = "<group>"; };
-		A36096288E4347E382952B95 /* BufferedStream.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = "XPF/external/ChOma/src/BufferedStream.c"; sourceTree = "<group>"; };
-		434151313E18439D88FCAB40 /* CSBlob.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = "XPF/external/ChOma/src/CSBlob.c"; sourceTree = "<group>"; };
-		D1C3C511BB054DF08D657685 /* CodeDirectory.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = "XPF/external/ChOma/src/CodeDirectory.c"; sourceTree = "<group>"; };
-		40BE5A73C4FC4584A3ADE69C /* DER.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = "XPF/external/ChOma/src/DER.c"; sourceTree = "<group>"; };
-		B5A26B805000481C84876F0E /* DyldSharedCache.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = "XPF/external/ChOma/src/DyldSharedCache.c"; sourceTree = "<group>"; };
-		5CB07DA3E20944E0B340B05E /* Entitlements.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = "XPF/external/ChOma/src/Entitlements.c"; sourceTree = "<group>"; };
-		477D9052C559474B828D0B1A /* Fat.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = "XPF/external/ChOma/src/Fat.c"; sourceTree = "<group>"; };
-		03D33251A510488A84C9410D /* FileStream.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = "XPF/external/ChOma/src/FileStream.c"; sourceTree = "<group>"; };
-		30A0788A72A444EDB8107C69 /* Host.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = "XPF/external/ChOma/src/Host.c"; sourceTree = "<group>"; };
-		15BFD5A7FFA247D5A76EB9DB /* MachO.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = "XPF/external/ChOma/src/MachO.c"; sourceTree = "<group>"; };
-		F5969797488545FF9FD71EB4 /* MachOLoadCommand.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = "XPF/external/ChOma/src/MachOLoadCommand.c"; sourceTree = "<group>"; };
-		8248AD23D0BC4B70A583ABF2 /* MemoryStream.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = "XPF/external/ChOma/src/MemoryStream.c"; sourceTree = "<group>"; };
-		353F6375CE2D48158656179D /* PatchFinder.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = "XPF/external/ChOma/src/PatchFinder.c"; sourceTree = "<group>"; };
-		6BBF5DCB80A3466A924930A8 /* PatchFinder_arm64.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = "XPF/external/ChOma/src/PatchFinder_arm64.c"; sourceTree = "<group>"; };
-		FD706863632A44A383F0BD09 /* Util.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = "XPF/external/ChOma/src/Util.c"; sourceTree = "<group>"; };
-		B7BEEC5446F14F14AB165FEC /* arm64.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = "XPF/external/ChOma/src/arm64.c"; sourceTree = "<group>"; };
-		87DC7A83E2AF4C709CAFC8F1 /* bad_recovery.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = "XPF/src/bad_recovery.c"; sourceTree = "<group>"; };
-		87F68B29CE244A7A9C640D61 /* common.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = "XPF/src/common.c"; sourceTree = "<group>"; };
-		3D02AEF422C64A0F897E1282 /* decompress.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = "XPF/src/decompress.c"; sourceTree = "<group>"; };
-		5B6D77D843954F45861B139D /* non_ppl.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = "XPF/src/non_ppl.c"; sourceTree = "<group>"; };
-		D4F5A42C847F45EBA202EE6D /* ppl.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = "XPF/src/ppl.c"; sourceTree = "<group>"; };
-		3826FC5DF8C34FDEB52CBDD8 /* xpf.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = "XPF/src/xpf.c"; sourceTree = "<group>"; };
-		EB84BEE9064643FDBE02B60C /* file.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = "utils/file.c"; sourceTree = "<group>"; };
-		621559A40DED475AADD1AF5D /* hexdump.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = "utils/hexdump.c"; sourceTree = "<group>"; };
-		1E3B93B7476C4A5FBA7CD8A0 /* process.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = "utils/process.c"; sourceTree = "<group>"; };
-		6B1035933A074A469DF9DF78 /* FilzaJailedDSBridge.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "FilzaJailedDSBridge.h"; sourceTree = "<group>"; };
-		9747BF7F841B4AABA25084A5 /* Base64.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "XPF/external/ChOma/src/Base64.h"; sourceTree = "<group>"; };
-		E660E31735074D72BA970B9A /* BufferedStream.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "XPF/external/ChOma/src/BufferedStream.h"; sourceTree = "<group>"; };
-		DDBFBDECCA28406D9F23F151 /* CSBlob.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "XPF/external/ChOma/src/CSBlob.h"; sourceTree = "<group>"; };
-		985C569B1DBB40F6BDB1A0D6 /* CachePatching.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "XPF/external/ChOma/src/CachePatching.h"; sourceTree = "<group>"; };
-		0B9B4555A0F8417F87435586 /* CodeDirectory.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "XPF/external/ChOma/src/CodeDirectory.h"; sourceTree = "<group>"; };
-		DDD1C1D40C7342DFB4BDC1E0 /* DER.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "XPF/external/ChOma/src/DER.h"; sourceTree = "<group>"; };
-		58D1DB7E6B0B453FAE1AFD47 /* DyldSharedCache.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "XPF/external/ChOma/src/DyldSharedCache.h"; sourceTree = "<group>"; };
-		9464CB25EEE6422686731A32 /* Entitlements.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "XPF/external/ChOma/src/Entitlements.h"; sourceTree = "<group>"; };
-		6BEB0A016BB34EF5AC9606E3 /* Fat.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "XPF/external/ChOma/src/Fat.h"; sourceTree = "<group>"; };
-		E3A864486E774495AB373302 /* FileStream.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "XPF/external/ChOma/src/FileStream.h"; sourceTree = "<group>"; };
-		C59B098B7244462F959F7864 /* Host.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "XPF/external/ChOma/src/Host.h"; sourceTree = "<group>"; };
-		094254CD29644DCEA3C1C9BD /* MachO.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "XPF/external/ChOma/src/MachO.h"; sourceTree = "<group>"; };
-		74DB1ED5174A43A0A1DA3A83 /* MachOByteOrder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "XPF/external/ChOma/src/MachOByteOrder.h"; sourceTree = "<group>"; };
-		875F0DFFDE504F19A26E9EA4 /* MachOLoadCommand.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "XPF/external/ChOma/src/MachOLoadCommand.h"; sourceTree = "<group>"; };
-		5EEE6CD3469A48398B29D2A4 /* MemoryStream.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "XPF/external/ChOma/src/MemoryStream.h"; sourceTree = "<group>"; };
-		B79B91810D524B818D020857 /* PatchFinder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "XPF/external/ChOma/src/PatchFinder.h"; sourceTree = "<group>"; };
-		A4C3812C5938442482671CC4 /* PatchFinder_arm64.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "XPF/external/ChOma/src/PatchFinder_arm64.h"; sourceTree = "<group>"; };
-		EB30C67BF10F43F29A648693 /* Util.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "XPF/external/ChOma/src/Util.h"; sourceTree = "<group>"; };
-		5FCD09BB69FA416FAF152052 /* arm64.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "XPF/external/ChOma/src/arm64.h"; sourceTree = "<group>"; };
-		7AF088E09986455496D2E08C /* dyld_cache_format.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "XPF/external/ChOma/src/dyld_cache_format.h"; sourceTree = "<group>"; };
-		62CECAF6DA1742C5869E347B /* fixup-chains.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "XPF/external/ChOma/src/fixup-chains.h"; sourceTree = "<group>"; };
-		FDC250BAD9804B8F9EB3FF5E /* bad_recovery.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "XPF/src/bad_recovery.h"; sourceTree = "<group>"; };
-		239FA3712C6642C9A694812B /* common.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "XPF/src/common.h"; sourceTree = "<group>"; };
-		4D97DFE532E74814953EB28C /* decompress.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "XPF/src/decompress.h"; sourceTree = "<group>"; };
-		79FF4764A77A47718B729AC5 /* non_ppl.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "XPF/src/non_ppl.h"; sourceTree = "<group>"; };
-		3ED29D1065994C6EB5C0112E /* ppl.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "XPF/src/ppl.h"; sourceTree = "<group>"; };
-		6C98762A067343039AB27E41 /* xpf.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "XPF/src/xpf.h"; sourceTree = "<group>"; };
-		46DE4BC6994F48FEB8CA1D28 /* apfs_own.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "apfs_own.h"; sourceTree = "<group>"; };
-		7E1FC41F3A0A46F78C684D2A /* kexploit_opa334.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "kexploit/kexploit_opa334.h"; sourceTree = "<group>"; };
-		6FBE4D7DFF92461C9A1A30EA /* krw.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "kexploit/krw.h"; sourceTree = "<group>"; };
-		FDC2E1F29B294EE2B18D970F /* kutils.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "kexploit/kutils.h"; sourceTree = "<group>"; };
-		2963D521A7234CA68AC2AC3E /* machine_info.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "kexploit/machine_info.h"; sourceTree = "<group>"; };
-		EB97E190253F4676BDEDF1BE /* offsets.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "kexploit/offsets.h"; sourceTree = "<group>"; };
-		407FC3629CC346CB86E75F78 /* vnode.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "kexploit/vnode.h"; sourceTree = "<group>"; };
-		03AB47A0E6264266ABBAAAF3 /* xpaci.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "kexploit/xpaci.h"; sourceTree = "<group>"; };
-		5DE17818DA094B3E96880CB5 /* patchfinder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "kpf/patchfinder.h"; sourceTree = "<group>"; };
-		156453A73E1149F7A3C9A451 /* sandbox_escape.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "sandbox_escape.h"; sourceTree = "<group>"; };
-		A87AE678EDA344B681183192 /* file.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "utils/file.h"; sourceTree = "<group>"; };
-		BD1C104860EC4570ADA09CEE /* hexdump.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "utils/hexdump.h"; sourceTree = "<group>"; };
-		531B151CC27D48D2AA13E9EF /* process.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "utils/process.h"; sourceTree = "<group>"; };
-		A4120499A690414EBC305F90 /* MCMBridge.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "MCMBridge.h"; sourceTree = "<group>"; };
-		84D057288AEA4EA48C9192E6 /* MoyuTool-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "MoyuTool-Bridging-Header.h"; sourceTree = "<group>"; };
-		DF571CDE927D46F0A5830888 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		C598CA7835E44A4F9730CB84 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		7C3A48AB2FF640C8AB420293 /* MoyuTool.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MoyuTool.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		9E745B56FD0244FAB36214E6 /* App.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "App.swift"; sourceTree = "<group>"; };
+		E23F2BF41DC64513AA192735 /* AuthViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AuthViews.swift"; sourceTree = "<group>"; };
+		D11E00B1E6CC4AB783A64C96 /* Config.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Config.swift"; sourceTree = "<group>"; };
+		45F9A9983880446F97DA9D63 /* DeviceManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DeviceManager.swift"; sourceTree = "<group>"; };
+		1AAA270F1F7B4C1184B01503 /* ExploitManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ExploitManager.swift"; sourceTree = "<group>"; };
+		3A34E6D0F1E74903AA91A993 /* ExploitSelectView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ExploitSelectView.swift"; sourceTree = "<group>"; };
+		F8B90FB5D6BF462C87BA16B6 /* FileBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FileBridge.swift"; sourceTree = "<group>"; };
+		1269ABB1DB274E90951B5AE8 /* FileImplementations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FileImplementations.swift"; sourceTree = "<group>"; };
+		9054B353BF8E446C90403E37 /* GameDirectoryResolver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GameDirectoryResolver.swift"; sourceTree = "<group>"; };
+		19FEC4E4CFCF40BEB82B0C60 /* GeneratedResources.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GeneratedResources.swift"; sourceTree = "<group>"; };
+		B9D1AA0332B247A186FD3F19 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "HomeView.swift"; sourceTree = "<group>"; };
+		489B70D5E9D94B9597319FFA /* LicenseManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LicenseManager.swift"; sourceTree = "<group>"; };
+		AF4481C59C764A479D580A9A /* ScriptRunner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ScriptRunner.swift"; sourceTree = "<group>"; };
+		65E4264B006144139FFAB30E /* Sheets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sheets.swift"; sourceTree = "<group>"; };
+		0881208B1E8742DBB7ADCE67 /* Store.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Store.swift"; sourceTree = "<group>"; };
+		A4EB3E1A81D34044B5326E26 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Theme.swift"; sourceTree = "<group>"; };
+		A5EF0C4721094639863E3992 /* WebViewContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "WebViewContainer.swift"; sourceTree = "<group>"; };
+		53BE789DC3444B9BAA8E2C34 /* FilzaExploit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FilzaExploit.swift"; sourceTree = "<group>"; };
+		830BE0EEE23644B7B3B0AB7E /* FilzaJailedDSExploit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FilzaJailedDSExploit.swift"; sourceTree = "<group>"; };
+		F19F29BF4A3D4A15AE326492 /* FilzaSlopExploit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FilzaSlopExploit.swift"; sourceTree = "<group>"; };
+		32088065E6144D8093039240 /* MCMFileManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MCMFileManager.swift"; sourceTree = "<group>"; };
+		D40533B8889C4C51BC9631A0 /* LaraExploit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LaraExploit.swift"; sourceTree = "<group>"; };
+		665783566D3C49249D3BA04C /* FilzaJailedDSBridge.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "FilzaJailedDSBridge.m"; sourceTree = "<group>"; };
+		A9E7898281024DDDBE4D2435 /* apfs_own.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "apfs_own.m"; sourceTree = "<group>"; };
+		7B4B464F057F4A8487A8CDA9 /* kexploit_opa334.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "kexploit/kexploit_opa334.m"; sourceTree = "<group>"; };
+		188EAADA636F4309A76D95F6 /* krw.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "kexploit/krw.m"; sourceTree = "<group>"; };
+		077F8BF62E2B4209A5722B54 /* kutils.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "kexploit/kutils.m"; sourceTree = "<group>"; };
+		1FE69280BCE848C1AA1D66F1 /* offsets.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "kexploit/offsets.m"; sourceTree = "<group>"; };
+		DC2A9AAE42104B8EBC60E147 /* vnode.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "kexploit/vnode.m"; sourceTree = "<group>"; };
+		2564F1F182F64C848D279D55 /* patchfinder.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "kpf/patchfinder.m"; sourceTree = "<group>"; };
+		760CBDABCCA845398F15AC55 /* sandbox_escape.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "sandbox_escape.m"; sourceTree = "<group>"; };
+		DDF4C6A113304BF0BA8B94FF /* MCMBridge.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "MCMBridge.m"; sourceTree = "<group>"; };
+		7B70933FEA324CA992C1730A /* Base64.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = "XPF/external/ChOma/src/Base64.c"; sourceTree = "<group>"; };
+		4F69C4280D354BEE9380186B /* BufferedStream.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = "XPF/external/ChOma/src/BufferedStream.c"; sourceTree = "<group>"; };
+		9CC3AB5DD05D42B5AB8B300D /* CSBlob.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = "XPF/external/ChOma/src/CSBlob.c"; sourceTree = "<group>"; };
+		560E3F39C9DB442084AC601C /* CodeDirectory.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = "XPF/external/ChOma/src/CodeDirectory.c"; sourceTree = "<group>"; };
+		BAE56AB7891843FD96D2F99F /* DER.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = "XPF/external/ChOma/src/DER.c"; sourceTree = "<group>"; };
+		7B80AF5678514A8C9745079B /* DyldSharedCache.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = "XPF/external/ChOma/src/DyldSharedCache.c"; sourceTree = "<group>"; };
+		16E46DD63CB64F8DA3CC3F52 /* Entitlements.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = "XPF/external/ChOma/src/Entitlements.c"; sourceTree = "<group>"; };
+		717D7390096748BC8F634929 /* Fat.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = "XPF/external/ChOma/src/Fat.c"; sourceTree = "<group>"; };
+		0BF2141C93794DF7B62C3F31 /* FileStream.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = "XPF/external/ChOma/src/FileStream.c"; sourceTree = "<group>"; };
+		C93F5AF743A749AAB2C64FEF /* Host.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = "XPF/external/ChOma/src/Host.c"; sourceTree = "<group>"; };
+		6BA6D3D5343E429599826ADF /* MachO.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = "XPF/external/ChOma/src/MachO.c"; sourceTree = "<group>"; };
+		DC25E175654E45B78FAE5503 /* MachOLoadCommand.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = "XPF/external/ChOma/src/MachOLoadCommand.c"; sourceTree = "<group>"; };
+		C85D411EEC7D4AD0ACFF6457 /* MemoryStream.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = "XPF/external/ChOma/src/MemoryStream.c"; sourceTree = "<group>"; };
+		92797D2C8E92494CBA33EC3D /* PatchFinder.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = "XPF/external/ChOma/src/PatchFinder.c"; sourceTree = "<group>"; };
+		BE0494BFBE8C4605AA8497D2 /* PatchFinder_arm64.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = "XPF/external/ChOma/src/PatchFinder_arm64.c"; sourceTree = "<group>"; };
+		EB8C3BF0A43B461FA47CD5A2 /* Util.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = "XPF/external/ChOma/src/Util.c"; sourceTree = "<group>"; };
+		3779BA128C2F494C9E6390BB /* arm64.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = "XPF/external/ChOma/src/arm64.c"; sourceTree = "<group>"; };
+		AD4228CBE0AD4344A482B412 /* bad_recovery.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = "XPF/src/bad_recovery.c"; sourceTree = "<group>"; };
+		FB920DB27F3D402B895CD657 /* common.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = "XPF/src/common.c"; sourceTree = "<group>"; };
+		8CA08F93992C4BF0B53E55B8 /* decompress.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = "XPF/src/decompress.c"; sourceTree = "<group>"; };
+		B8166FE09FE84A1F87228C95 /* non_ppl.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = "XPF/src/non_ppl.c"; sourceTree = "<group>"; };
+		3997F46FF4484B8C9E789271 /* ppl.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = "XPF/src/ppl.c"; sourceTree = "<group>"; };
+		3366858E74E543DDAD6F9481 /* xpf.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = "XPF/src/xpf.c"; sourceTree = "<group>"; };
+		679D622B2B3342009B79065E /* file.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = "utils/file.c"; sourceTree = "<group>"; };
+		B487EDFEDF9E4099B6945CEA /* hexdump.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = "utils/hexdump.c"; sourceTree = "<group>"; };
+		C9E309AF55FB4E91AFEF06AA /* process.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = "utils/process.c"; sourceTree = "<group>"; };
+		FBC5DBBB483E4E83A2C6274F /* FilzaJailedDSBridge.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "FilzaJailedDSBridge.h"; sourceTree = "<group>"; };
+		C9C50F5E3F08464DA5003A4B /* Base64.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "XPF/external/ChOma/src/Base64.h"; sourceTree = "<group>"; };
+		328755EB2B504A4889A66C32 /* BufferedStream.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "XPF/external/ChOma/src/BufferedStream.h"; sourceTree = "<group>"; };
+		C83DB4FF2C0C4FF3BAAF7C95 /* CSBlob.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "XPF/external/ChOma/src/CSBlob.h"; sourceTree = "<group>"; };
+		785D1C17E0A04E32AA3C767E /* CachePatching.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "XPF/external/ChOma/src/CachePatching.h"; sourceTree = "<group>"; };
+		0E559F6EE13944C280FE11FB /* CodeDirectory.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "XPF/external/ChOma/src/CodeDirectory.h"; sourceTree = "<group>"; };
+		FA27C5161A06418F9CBAB768 /* DER.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "XPF/external/ChOma/src/DER.h"; sourceTree = "<group>"; };
+		5ED18C37974341DFB64BF9DB /* DyldSharedCache.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "XPF/external/ChOma/src/DyldSharedCache.h"; sourceTree = "<group>"; };
+		4CF841F47E8E4DDDA08C7FDC /* Entitlements.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "XPF/external/ChOma/src/Entitlements.h"; sourceTree = "<group>"; };
+		6538827971E146AA87D81806 /* Fat.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "XPF/external/ChOma/src/Fat.h"; sourceTree = "<group>"; };
+		F532BC38E7B54C6AB32AB5D5 /* FileStream.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "XPF/external/ChOma/src/FileStream.h"; sourceTree = "<group>"; };
+		E8F69AEFC152472D81010F66 /* Host.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "XPF/external/ChOma/src/Host.h"; sourceTree = "<group>"; };
+		49541C1324154921A6A7177E /* MachO.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "XPF/external/ChOma/src/MachO.h"; sourceTree = "<group>"; };
+		C9AB0F2DD39E4CC782AA745D /* MachOByteOrder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "XPF/external/ChOma/src/MachOByteOrder.h"; sourceTree = "<group>"; };
+		A0824D73F3524F2395EC4842 /* MachOLoadCommand.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "XPF/external/ChOma/src/MachOLoadCommand.h"; sourceTree = "<group>"; };
+		4A7742B7C5274D9DA8B27881 /* MemoryStream.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "XPF/external/ChOma/src/MemoryStream.h"; sourceTree = "<group>"; };
+		E929CAD67F3144709346BFCB /* PatchFinder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "XPF/external/ChOma/src/PatchFinder.h"; sourceTree = "<group>"; };
+		7CEA727106964ECBA02CFAB9 /* PatchFinder_arm64.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "XPF/external/ChOma/src/PatchFinder_arm64.h"; sourceTree = "<group>"; };
+		DE6AD7CFFA474219ADE8CB4F /* Util.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "XPF/external/ChOma/src/Util.h"; sourceTree = "<group>"; };
+		428F48B480174A4EA296445D /* arm64.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "XPF/external/ChOma/src/arm64.h"; sourceTree = "<group>"; };
+		14D7749437E34266BB12170D /* dyld_cache_format.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "XPF/external/ChOma/src/dyld_cache_format.h"; sourceTree = "<group>"; };
+		B56AF238AFA34F12990280C8 /* fixup-chains.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "XPF/external/ChOma/src/fixup-chains.h"; sourceTree = "<group>"; };
+		14ADACB13F8C49ED8ED5E3BF /* bad_recovery.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "XPF/src/bad_recovery.h"; sourceTree = "<group>"; };
+		0298EE6633074D8C87055ABC /* common.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "XPF/src/common.h"; sourceTree = "<group>"; };
+		BA221083C7F348129AF0C636 /* decompress.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "XPF/src/decompress.h"; sourceTree = "<group>"; };
+		904C9197D72C43C6BE13AD7F /* non_ppl.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "XPF/src/non_ppl.h"; sourceTree = "<group>"; };
+		5E82BD047C5447EB8BCD9CC4 /* ppl.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "XPF/src/ppl.h"; sourceTree = "<group>"; };
+		3699EDA66ED44CFE96662E90 /* xpf.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "XPF/src/xpf.h"; sourceTree = "<group>"; };
+		5D67E9D94AB14E90BCE1CB3E /* apfs_own.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "apfs_own.h"; sourceTree = "<group>"; };
+		73B777C39A9048C0B6E95994 /* kexploit_opa334.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "kexploit/kexploit_opa334.h"; sourceTree = "<group>"; };
+		88EC236B09744F569AF38588 /* krw.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "kexploit/krw.h"; sourceTree = "<group>"; };
+		49EEAB5893E846BFAE23BB3A /* kutils.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "kexploit/kutils.h"; sourceTree = "<group>"; };
+		848313B85FD8492AB3D7675F /* machine_info.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "kexploit/machine_info.h"; sourceTree = "<group>"; };
+		1C86A82F1E004327BE561B99 /* offsets.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "kexploit/offsets.h"; sourceTree = "<group>"; };
+		11EB48BF7FA8487DBFC4FA4D /* vnode.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "kexploit/vnode.h"; sourceTree = "<group>"; };
+		364A0A58303C494DA8CBA162 /* xpaci.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "kexploit/xpaci.h"; sourceTree = "<group>"; };
+		FC7162A3EE0A44E799B518EE /* patchfinder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "kpf/patchfinder.h"; sourceTree = "<group>"; };
+		D77954B110ED4DA7BDCC4BE3 /* sandbox_escape.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "sandbox_escape.h"; sourceTree = "<group>"; };
+		421C7D31649F49C3AEE76C55 /* file.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "utils/file.h"; sourceTree = "<group>"; };
+		6F46387855E3464DB0F01AF4 /* hexdump.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "utils/hexdump.h"; sourceTree = "<group>"; };
+		096F2BEC8C7044B7B905702C /* process.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "utils/process.h"; sourceTree = "<group>"; };
+		FEEC60D82A4841CFA1100E78 /* MCMBridge.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "MCMBridge.h"; sourceTree = "<group>"; };
+		E1E9CF5FCC324C5E930A2021 /* MoyuTool-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "MoyuTool-Bridging-Header.h"; sourceTree = "<group>"; };
+		2279A05FB3CF4C60A52114A1 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		8EFB877E35DF4BC0AE5DB470 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		D5E85E9472C54AEEB79204AC /* MoyuTool.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MoyuTool.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		7C8A5F9A1D5E4C7A93715735 /* Frameworks */ = {
+		AF194AC38AE44CE685D004F1 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -186,176 +186,176 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		565FE324A0804A14B47F6A70 = {
+		69370678871E4900A02E7C8B = {
 			isa = PBXGroup;
 			children = (
-				FBA7921C0C12408B90071E35 /* MoyuTool */,
-				FE7D8DC9F50E45ACB708BA52 /* Exploits */,
-				82504F0841014F89BB548885 /* Products */,
+				E520DF14EA6F4FE68F38D89F /* MoyuTool */,
+				4066FA16A3C74D54AA96C5A4 /* Exploits */,
+				C544F06D75114C51B95CC952 /* Products */,
 			);
 			sourceTree = "<group>";
 		};
-		FBA7921C0C12408B90071E35 /* MoyuTool */ = {
+		E520DF14EA6F4FE68F38D89F /* MoyuTool */ = {
 			isa = PBXGroup;
 			children = (
-				F148B67E9DD9475B929101A0 /* App.swift */,
-				6C8C83AF47004F139188C9E0 /* AuthViews.swift */,
-				F996AF54E50A42D5B2AD1B3A /* Config.swift */,
-				2F7715A21BDA4DCCA756EFA6 /* DeviceManager.swift */,
-				0E074E1176944E0D936155DA /* ExploitManager.swift */,
-				7BA4ED3D5AAE4840BFC5389D /* ExploitSelectView.swift */,
-				E379C69CD01542479B0D9498 /* FileBridge.swift */,
-				88C74F4D2538449CAFF216AF /* FileImplementations.swift */,
-				CE504DDA0D3B4D378F90B5A0 /* GameDirectoryResolver.swift */,
-				AB0D089DBFAA424DB9F4FE05 /* GeneratedResources.swift */,
-				19760E66DFA6480797718C7E /* HomeView.swift */,
-				8B1DD1C909A944B1AE2A4FFD /* LicenseManager.swift */,
-				68AEE4610BDD444CB5B11833 /* ScriptRunner.swift */,
-				0041D3F47E35496B98850C51 /* Sheets.swift */,
-				8194025AC5544B1193ABDE13 /* Store.swift */,
-				7F31BB93E6464FE9AF2F70D1 /* Theme.swift */,
-				BF334E5E2976451FB4D1BF66 /* WebViewContainer.swift */,
-				84D057288AEA4EA48C9192E6 /* MoyuTool-Bridging-Header.h */,
-				FE91C02754C44663A455BD29 /* Resources */,
+				9E745B56FD0244FAB36214E6 /* App.swift */,
+				E23F2BF41DC64513AA192735 /* AuthViews.swift */,
+				D11E00B1E6CC4AB783A64C96 /* Config.swift */,
+				45F9A9983880446F97DA9D63 /* DeviceManager.swift */,
+				1AAA270F1F7B4C1184B01503 /* ExploitManager.swift */,
+				3A34E6D0F1E74903AA91A993 /* ExploitSelectView.swift */,
+				F8B90FB5D6BF462C87BA16B6 /* FileBridge.swift */,
+				1269ABB1DB274E90951B5AE8 /* FileImplementations.swift */,
+				9054B353BF8E446C90403E37 /* GameDirectoryResolver.swift */,
+				19FEC4E4CFCF40BEB82B0C60 /* GeneratedResources.swift */,
+				B9D1AA0332B247A186FD3F19 /* HomeView.swift */,
+				489B70D5E9D94B9597319FFA /* LicenseManager.swift */,
+				AF4481C59C764A479D580A9A /* ScriptRunner.swift */,
+				65E4264B006144139FFAB30E /* Sheets.swift */,
+				0881208B1E8742DBB7ADCE67 /* Store.swift */,
+				A4EB3E1A81D34044B5326E26 /* Theme.swift */,
+				A5EF0C4721094639863E3992 /* WebViewContainer.swift */,
+				E1E9CF5FCC324C5E930A2021 /* MoyuTool-Bridging-Header.h */,
+				38EA5403D3D54B7EBC4FCEAE /* Resources */,
 			);
 			path = MoyuTool;
 			sourceTree = "<group>";
 		};
-		FE91C02754C44663A455BD29 /* Resources */ = {
+		38EA5403D3D54B7EBC4FCEAE /* Resources */ = {
 			isa = PBXGroup;
 			children = (
-				C598CA7835E44A4F9730CB84 /* Info.plist */,
-				DF571CDE927D46F0A5830888 /* Assets.xcassets */,
+				8EFB877E35DF4BC0AE5DB470 /* Info.plist */,
+				2279A05FB3CF4C60A52114A1 /* Assets.xcassets */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
 		};
-		FE7D8DC9F50E45ACB708BA52 /* Exploits */ = {
+		4066FA16A3C74D54AA96C5A4 /* Exploits */ = {
 			isa = PBXGroup;
 			children = (
-				3BA92FD50ADE4927A1A18DDA /* Filza */,
-				433045A8C26D49FB96527998 /* FilzaJailedDS */,
-				83430F3CCA594BE8B1F96503 /* FilzaSlop */,
-				443C59BB808B4E7192017F57 /* Lara */,
+				3CCAE372743E4D7C874FE61D /* Filza */,
+				AA014899767F468CADD07D72 /* FilzaJailedDS */,
+				58FE9EB3E8084D3A97373AF2 /* FilzaSlop */,
+				A0C4F47B6B9245A89C266C97 /* Lara */,
 			);
 			path = Exploits;
 			sourceTree = "<group>";
 		};
-		3BA92FD50ADE4927A1A18DDA /* Filza */ = {
+		3CCAE372743E4D7C874FE61D /* Filza */ = {
 			isa = PBXGroup;
 			children = (
-				CE74D84ABC824D198C7FD8E4 /* FilzaExploit.swift */,
+				53BE789DC3444B9BAA8E2C34 /* FilzaExploit.swift */,
 			);
 			path = Filza;
 			sourceTree = "<group>";
 		};
-		433045A8C26D49FB96527998 /* FilzaJailedDS */ = {
+		AA014899767F468CADD07D72 /* FilzaJailedDS */ = {
 			isa = PBXGroup;
 			children = (
-				BB0145F750914553B24D22C3 /* FilzaJailedDSExploit.swift */,
-				172AE94260CC425D98AC82BB /* FilzaJailedDSBridge.m */,
-				B587C531577947479D117A85 /* apfs_own.m */,
-				1772CBEB05434BCDB52022C3 /* kexploit_opa334.m */,
-				D6EC7A0B34FC4133B1745838 /* krw.m */,
-				EB0E42AE000E4E239F586E0F /* kutils.m */,
-				D5230DE408E8488795707FA9 /* offsets.m */,
-				E09A339B0510445BA5B14B38 /* vnode.m */,
-				7C0CE101DD61418DB6DE988A /* patchfinder.m */,
-				3E85ABA2CBA14A1E8270A6DF /* sandbox_escape.m */,
-				6B1035933A074A469DF9DF78 /* FilzaJailedDSBridge.h */,
-				9747BF7F841B4AABA25084A5 /* Base64.h */,
-				E660E31735074D72BA970B9A /* BufferedStream.h */,
-				DDBFBDECCA28406D9F23F151 /* CSBlob.h */,
-				985C569B1DBB40F6BDB1A0D6 /* CachePatching.h */,
-				0B9B4555A0F8417F87435586 /* CodeDirectory.h */,
-				DDD1C1D40C7342DFB4BDC1E0 /* DER.h */,
-				58D1DB7E6B0B453FAE1AFD47 /* DyldSharedCache.h */,
-				9464CB25EEE6422686731A32 /* Entitlements.h */,
-				6BEB0A016BB34EF5AC9606E3 /* Fat.h */,
-				E3A864486E774495AB373302 /* FileStream.h */,
-				C59B098B7244462F959F7864 /* Host.h */,
-				094254CD29644DCEA3C1C9BD /* MachO.h */,
-				74DB1ED5174A43A0A1DA3A83 /* MachOByteOrder.h */,
-				875F0DFFDE504F19A26E9EA4 /* MachOLoadCommand.h */,
-				5EEE6CD3469A48398B29D2A4 /* MemoryStream.h */,
-				B79B91810D524B818D020857 /* PatchFinder.h */,
-				A4C3812C5938442482671CC4 /* PatchFinder_arm64.h */,
-				EB30C67BF10F43F29A648693 /* Util.h */,
-				5FCD09BB69FA416FAF152052 /* arm64.h */,
-				7AF088E09986455496D2E08C /* dyld_cache_format.h */,
-				62CECAF6DA1742C5869E347B /* fixup-chains.h */,
-				FDC250BAD9804B8F9EB3FF5E /* bad_recovery.h */,
-				239FA3712C6642C9A694812B /* common.h */,
-				4D97DFE532E74814953EB28C /* decompress.h */,
-				79FF4764A77A47718B729AC5 /* non_ppl.h */,
-				3ED29D1065994C6EB5C0112E /* ppl.h */,
-				6C98762A067343039AB27E41 /* xpf.h */,
-				46DE4BC6994F48FEB8CA1D28 /* apfs_own.h */,
-				7E1FC41F3A0A46F78C684D2A /* kexploit_opa334.h */,
-				6FBE4D7DFF92461C9A1A30EA /* krw.h */,
-				FDC2E1F29B294EE2B18D970F /* kutils.h */,
-				2963D521A7234CA68AC2AC3E /* machine_info.h */,
-				EB97E190253F4676BDEDF1BE /* offsets.h */,
-				407FC3629CC346CB86E75F78 /* vnode.h */,
-				03AB47A0E6264266ABBAAAF3 /* xpaci.h */,
-				5DE17818DA094B3E96880CB5 /* patchfinder.h */,
-				156453A73E1149F7A3C9A451 /* sandbox_escape.h */,
-				A87AE678EDA344B681183192 /* file.h */,
-				BD1C104860EC4570ADA09CEE /* hexdump.h */,
-				531B151CC27D48D2AA13E9EF /* process.h */,
-				5AC488882E974812A7BD56E3 /* Base64.c */,
-				A36096288E4347E382952B95 /* BufferedStream.c */,
-				434151313E18439D88FCAB40 /* CSBlob.c */,
-				D1C3C511BB054DF08D657685 /* CodeDirectory.c */,
-				40BE5A73C4FC4584A3ADE69C /* DER.c */,
-				B5A26B805000481C84876F0E /* DyldSharedCache.c */,
-				5CB07DA3E20944E0B340B05E /* Entitlements.c */,
-				477D9052C559474B828D0B1A /* Fat.c */,
-				03D33251A510488A84C9410D /* FileStream.c */,
-				30A0788A72A444EDB8107C69 /* Host.c */,
-				15BFD5A7FFA247D5A76EB9DB /* MachO.c */,
-				F5969797488545FF9FD71EB4 /* MachOLoadCommand.c */,
-				8248AD23D0BC4B70A583ABF2 /* MemoryStream.c */,
-				353F6375CE2D48158656179D /* PatchFinder.c */,
-				6BBF5DCB80A3466A924930A8 /* PatchFinder_arm64.c */,
-				FD706863632A44A383F0BD09 /* Util.c */,
-				B7BEEC5446F14F14AB165FEC /* arm64.c */,
-				87DC7A83E2AF4C709CAFC8F1 /* bad_recovery.c */,
-				87F68B29CE244A7A9C640D61 /* common.c */,
-				3D02AEF422C64A0F897E1282 /* decompress.c */,
-				5B6D77D843954F45861B139D /* non_ppl.c */,
-				D4F5A42C847F45EBA202EE6D /* ppl.c */,
-				3826FC5DF8C34FDEB52CBDD8 /* xpf.c */,
-				EB84BEE9064643FDBE02B60C /* file.c */,
-				621559A40DED475AADD1AF5D /* hexdump.c */,
-				1E3B93B7476C4A5FBA7CD8A0 /* process.c */,
+				830BE0EEE23644B7B3B0AB7E /* FilzaJailedDSExploit.swift */,
+				665783566D3C49249D3BA04C /* FilzaJailedDSBridge.m */,
+				A9E7898281024DDDBE4D2435 /* apfs_own.m */,
+				7B4B464F057F4A8487A8CDA9 /* kexploit_opa334.m */,
+				188EAADA636F4309A76D95F6 /* krw.m */,
+				077F8BF62E2B4209A5722B54 /* kutils.m */,
+				1FE69280BCE848C1AA1D66F1 /* offsets.m */,
+				DC2A9AAE42104B8EBC60E147 /* vnode.m */,
+				2564F1F182F64C848D279D55 /* patchfinder.m */,
+				760CBDABCCA845398F15AC55 /* sandbox_escape.m */,
+				FBC5DBBB483E4E83A2C6274F /* FilzaJailedDSBridge.h */,
+				C9C50F5E3F08464DA5003A4B /* Base64.h */,
+				328755EB2B504A4889A66C32 /* BufferedStream.h */,
+				C83DB4FF2C0C4FF3BAAF7C95 /* CSBlob.h */,
+				785D1C17E0A04E32AA3C767E /* CachePatching.h */,
+				0E559F6EE13944C280FE11FB /* CodeDirectory.h */,
+				FA27C5161A06418F9CBAB768 /* DER.h */,
+				5ED18C37974341DFB64BF9DB /* DyldSharedCache.h */,
+				4CF841F47E8E4DDDA08C7FDC /* Entitlements.h */,
+				6538827971E146AA87D81806 /* Fat.h */,
+				F532BC38E7B54C6AB32AB5D5 /* FileStream.h */,
+				E8F69AEFC152472D81010F66 /* Host.h */,
+				49541C1324154921A6A7177E /* MachO.h */,
+				C9AB0F2DD39E4CC782AA745D /* MachOByteOrder.h */,
+				A0824D73F3524F2395EC4842 /* MachOLoadCommand.h */,
+				4A7742B7C5274D9DA8B27881 /* MemoryStream.h */,
+				E929CAD67F3144709346BFCB /* PatchFinder.h */,
+				7CEA727106964ECBA02CFAB9 /* PatchFinder_arm64.h */,
+				DE6AD7CFFA474219ADE8CB4F /* Util.h */,
+				428F48B480174A4EA296445D /* arm64.h */,
+				14D7749437E34266BB12170D /* dyld_cache_format.h */,
+				B56AF238AFA34F12990280C8 /* fixup-chains.h */,
+				14ADACB13F8C49ED8ED5E3BF /* bad_recovery.h */,
+				0298EE6633074D8C87055ABC /* common.h */,
+				BA221083C7F348129AF0C636 /* decompress.h */,
+				904C9197D72C43C6BE13AD7F /* non_ppl.h */,
+				5E82BD047C5447EB8BCD9CC4 /* ppl.h */,
+				3699EDA66ED44CFE96662E90 /* xpf.h */,
+				5D67E9D94AB14E90BCE1CB3E /* apfs_own.h */,
+				73B777C39A9048C0B6E95994 /* kexploit_opa334.h */,
+				88EC236B09744F569AF38588 /* krw.h */,
+				49EEAB5893E846BFAE23BB3A /* kutils.h */,
+				848313B85FD8492AB3D7675F /* machine_info.h */,
+				1C86A82F1E004327BE561B99 /* offsets.h */,
+				11EB48BF7FA8487DBFC4FA4D /* vnode.h */,
+				364A0A58303C494DA8CBA162 /* xpaci.h */,
+				FC7162A3EE0A44E799B518EE /* patchfinder.h */,
+				D77954B110ED4DA7BDCC4BE3 /* sandbox_escape.h */,
+				421C7D31649F49C3AEE76C55 /* file.h */,
+				6F46387855E3464DB0F01AF4 /* hexdump.h */,
+				096F2BEC8C7044B7B905702C /* process.h */,
+				7B70933FEA324CA992C1730A /* Base64.c */,
+				4F69C4280D354BEE9380186B /* BufferedStream.c */,
+				9CC3AB5DD05D42B5AB8B300D /* CSBlob.c */,
+				560E3F39C9DB442084AC601C /* CodeDirectory.c */,
+				BAE56AB7891843FD96D2F99F /* DER.c */,
+				7B80AF5678514A8C9745079B /* DyldSharedCache.c */,
+				16E46DD63CB64F8DA3CC3F52 /* Entitlements.c */,
+				717D7390096748BC8F634929 /* Fat.c */,
+				0BF2141C93794DF7B62C3F31 /* FileStream.c */,
+				C93F5AF743A749AAB2C64FEF /* Host.c */,
+				6BA6D3D5343E429599826ADF /* MachO.c */,
+				DC25E175654E45B78FAE5503 /* MachOLoadCommand.c */,
+				C85D411EEC7D4AD0ACFF6457 /* MemoryStream.c */,
+				92797D2C8E92494CBA33EC3D /* PatchFinder.c */,
+				BE0494BFBE8C4605AA8497D2 /* PatchFinder_arm64.c */,
+				EB8C3BF0A43B461FA47CD5A2 /* Util.c */,
+				3779BA128C2F494C9E6390BB /* arm64.c */,
+				AD4228CBE0AD4344A482B412 /* bad_recovery.c */,
+				FB920DB27F3D402B895CD657 /* common.c */,
+				8CA08F93992C4BF0B53E55B8 /* decompress.c */,
+				B8166FE09FE84A1F87228C95 /* non_ppl.c */,
+				3997F46FF4484B8C9E789271 /* ppl.c */,
+				3366858E74E543DDAD6F9481 /* xpf.c */,
+				679D622B2B3342009B79065E /* file.c */,
+				B487EDFEDF9E4099B6945CEA /* hexdump.c */,
+				C9E309AF55FB4E91AFEF06AA /* process.c */,
 			);
 			path = FilzaJailedDS;
 			sourceTree = "<group>";
 		};
-		83430F3CCA594BE8B1F96503 /* FilzaSlop */ = {
+		58FE9EB3E8084D3A97373AF2 /* FilzaSlop */ = {
 			isa = PBXGroup;
 			children = (
-				D2F42B61D8C94FC9B9A2995F /* FilzaSlopExploit.swift */,
-				A4B07921FE704E0EA182AD27 /* MCMFileManager.swift */,
-				BBC8F058FE4B4C9D866C7E4F /* MCMBridge.m */,
-				A4120499A690414EBC305F90 /* MCMBridge.h */,
+				F19F29BF4A3D4A15AE326492 /* FilzaSlopExploit.swift */,
+				32088065E6144D8093039240 /* MCMFileManager.swift */,
+				DDF4C6A113304BF0BA8B94FF /* MCMBridge.m */,
+				FEEC60D82A4841CFA1100E78 /* MCMBridge.h */,
 			);
 			path = FilzaSlop;
 			sourceTree = "<group>";
 		};
-		443C59BB808B4E7192017F57 /* Lara */ = {
+		A0C4F47B6B9245A89C266C97 /* Lara */ = {
 			isa = PBXGroup;
 			children = (
-				B04E4F0E229F49B4A3BE3ADE /* LaraExploit.swift */,
+				D40533B8889C4C51BC9631A0 /* LaraExploit.swift */,
 			);
 			path = Lara;
 			sourceTree = "<group>";
 		};
-		82504F0841014F89BB548885 /* Products */ = {
+		C544F06D75114C51B95CC952 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				7C3A48AB2FF640C8AB420293 /* MoyuTool.app */,
+				D5E85E9472C54AEEB79204AC /* MoyuTool.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -363,13 +363,13 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		25C9F6D6556F43E599411051 /* MoyuTool */ = {
+		0B83F35565BA488D88BC4E13 /* MoyuTool */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = A85BC9FE45BA43EAA95A7FD7 /* Build configuration list for PBXNativeTarget "MoyuTool" */;
+			buildConfigurationList = C01FD3CB279C4EF6B15076E6 /* Build configuration list for PBXNativeTarget "MoyuTool" */;
 			buildPhases = (
-				8DC282258A574F74A0F1A97F /* Sources */,
-				7C8A5F9A1D5E4C7A93715735 /* Frameworks */,
-				03913A2C00F14D2D8F0699AC /* Resources */,
+				7D068FDEF7C9415D86A8940D /* Sources */,
+				AF194AC38AE44CE685D004F1 /* Frameworks */,
+				450533F0D01C43CCBF0A3261 /* Resources */,
 			);
 			buildRules = (
 			);
@@ -377,25 +377,25 @@
 			);
 			name = MoyuTool;
 			productName = MoyuTool;
-			productReference = 7C3A48AB2FF640C8AB420293 /* MoyuTool.app */;
+			productReference = D5E85E9472C54AEEB79204AC /* MoyuTool.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
-		E2F05D9AF12A4FBB8953256B /* Project object */ = {
+		7E9FE9A33A4346CA8F7A633F /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1500;
 				LastUpgradeCheck = 1500;
 				TargetAttributes = {
-					25C9F6D6556F43E599411051 = {
+					0B83F35565BA488D88BC4E13 = {
 						CreatedOnToolsVersion = 15.0;
 					};
 				};
 			};
-			buildConfigurationList = 1B40BB9F3DBA4F0B8D371FA1 /* Build configuration list for PBXProject "MoyuTool" */;
+			buildConfigurationList = 13B5DFE6E8B843F1AB818671 /* Build configuration list for PBXProject "MoyuTool" */;
 			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -403,97 +403,97 @@
 				en,
 				Base,
 			);
-			mainGroup = 565FE324A0804A14B47F6A70;
-			productRefGroup = 82504F0841014F89BB548885 /* Products */;
+			mainGroup = 69370678871E4900A02E7C8B;
+			productRefGroup = C544F06D75114C51B95CC952 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				25C9F6D6556F43E599411051 /* MoyuTool */,
+				0B83F35565BA488D88BC4E13 /* MoyuTool */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		03913A2C00F14D2D8F0699AC /* Resources */ = {
+		450533F0D01C43CCBF0A3261 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C5E1EA9D06224FFD8E6FBE59 /* Assets.xcassets in Resources */,
+				70A12939D25D4D4C98815828 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		8DC282258A574F74A0F1A97F /* Sources */ = {
+		7D068FDEF7C9415D86A8940D /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				08A415FACAF046EFBA508D2F /* App.swift in Sources */,
-				546757D1EFC045FFBB612EA8 /* AuthViews.swift in Sources */,
-				94175A049C56412A9329EA17 /* Config.swift in Sources */,
-				C5122539DE174147BA66CC7A /* DeviceManager.swift in Sources */,
-				E66C66ABCDEB43AE842A86ED /* ExploitManager.swift in Sources */,
-				4E9D8BC4606242B1955F1855 /* ExploitSelectView.swift in Sources */,
-				40868A1266A344199183A57F /* FileBridge.swift in Sources */,
-				8E7286310F1A47F59A169404 /* FileImplementations.swift in Sources */,
-				9EE8AB2BCEA84A62B780B125 /* GameDirectoryResolver.swift in Sources */,
-				B25539E0742D4CCCB203BA31 /* GeneratedResources.swift in Sources */,
-				9AAB61A75F4A4F5F8B4548D0 /* HomeView.swift in Sources */,
-				0932E54514334BF4850E73CB /* LicenseManager.swift in Sources */,
-				6267A9C1A7574013AD5D345D /* ScriptRunner.swift in Sources */,
-				C7E152CB34CD4E35911A35A1 /* Sheets.swift in Sources */,
-				B72D63B46B3C4E96ADF72858 /* Store.swift in Sources */,
-				73EE1E296C0347ABA97FB030 /* Theme.swift in Sources */,
-				99D46878356D46CF896636B4 /* WebViewContainer.swift in Sources */,
-				584187828C98470BAED50A04 /* FilzaExploit.swift in Sources */,
-				6AA9308CB0034179ABC74E68 /* FilzaJailedDSExploit.swift in Sources */,
-				CEEC1FE879A24FB981965C1F /* FilzaSlopExploit.swift in Sources */,
-				34B3B4898CCF4B3091E5ECB6 /* MCMFileManager.swift in Sources */,
-				6D70FBF497A74D67A3F47725 /* LaraExploit.swift in Sources */,
-				A17091900A9C4382BF4D32DA /* FilzaJailedDSBridge.m in Sources */,
-				C5024E515BAA4956A7CFCCEB /* apfs_own.m in Sources */,
-				073C1101F56E4B32B65CA178 /* kexploit_opa334.m in Sources */,
-				9BEDE58849DC46A18ABE4EC0 /* krw.m in Sources */,
-				3683E7B4A18545E0B9A5EAD7 /* kutils.m in Sources */,
-				F10442E255CD48CAA92864C0 /* offsets.m in Sources */,
-				F3361500637A4E1992F43F16 /* vnode.m in Sources */,
-				CB0F597C849D4BFE8ECC2266 /* patchfinder.m in Sources */,
-				D5B0EA4BDA1D463686B6237E /* sandbox_escape.m in Sources */,
-				3ABB229B939040E697225054 /* MCMBridge.m in Sources */,
-				0132F7EDA1DB41E1A99DAF6B /* Base64.c in Sources */,
-				DB3C02086F0645D5BA5C9B77 /* BufferedStream.c in Sources */,
-				3CE9D948DF9D43A1B1FF3856 /* CSBlob.c in Sources */,
-				7EF84B04023449E59F8D87F5 /* CodeDirectory.c in Sources */,
-				63E495F897DC480992CC82C3 /* DER.c in Sources */,
-				E9242F78CDCB464F864EF226 /* DyldSharedCache.c in Sources */,
-				7DC9B50AC57149D99BE7715F /* Entitlements.c in Sources */,
-				C50F4275A4AE4780B41EAB2D /* Fat.c in Sources */,
-				9BE54D31B3474D32B8F791C4 /* FileStream.c in Sources */,
-				A40576B69B72487EA0C53A72 /* Host.c in Sources */,
-				D5DC2362B5824266A9E97C71 /* MachO.c in Sources */,
-				0F0586544F8C48EFBED12ECD /* MachOLoadCommand.c in Sources */,
-				588883A0D275477A93A5E51F /* MemoryStream.c in Sources */,
-				E4E0D60B1409481DA047B01A /* PatchFinder.c in Sources */,
-				13B11CDA3C094D298580F2A4 /* PatchFinder_arm64.c in Sources */,
-				C7A88125795E4038BF987CA2 /* Util.c in Sources */,
-				E3A23DD35DDE4545A03EA915 /* arm64.c in Sources */,
-				8B0BF1E89D604F30B965E2B4 /* bad_recovery.c in Sources */,
-				7DD1C324431C42CD8DE84665 /* common.c in Sources */,
-				61CBA26F80234314B9FE96B5 /* decompress.c in Sources */,
-				88C2412CE2704C7AB3C817A8 /* non_ppl.c in Sources */,
-				CC0A15A96DCC4455BEE19604 /* ppl.c in Sources */,
-				0169C8E035584F718FE952F0 /* xpf.c in Sources */,
-				EAC2E754C81D429BB017FF3C /* file.c in Sources */,
-				5C4A11F851494D198C086B2B /* hexdump.c in Sources */,
-				75993D41D74A437F88703CB3 /* process.c in Sources */,
+				9B42906F9ADB4FB68F659DCF /* App.swift in Sources */,
+				4E9B8E55B533403AB925B79A /* AuthViews.swift in Sources */,
+				833C9F6C55134D1284A2F40C /* Config.swift in Sources */,
+				39EB624A58C7460E8CC7BDA3 /* DeviceManager.swift in Sources */,
+				C97558DECAE5480A9749A5BF /* ExploitManager.swift in Sources */,
+				AE7B3FEF86E049629F26C71D /* ExploitSelectView.swift in Sources */,
+				4E5991BBAAEB40BFB15F3C80 /* FileBridge.swift in Sources */,
+				5D2225269D3749AF9D113ED5 /* FileImplementations.swift in Sources */,
+				25FBFECF95B04C768B0DBEA3 /* GameDirectoryResolver.swift in Sources */,
+				1B8F5F540C0B47B3A8E9002C /* GeneratedResources.swift in Sources */,
+				577F1CBED8894C638D32514D /* HomeView.swift in Sources */,
+				3E363994E2144E4281FA8D3E /* LicenseManager.swift in Sources */,
+				26A65BBA461E40BAB91E1C6C /* ScriptRunner.swift in Sources */,
+				00DA39527CA7467F8F55B144 /* Sheets.swift in Sources */,
+				E7CBCA143CCA4935BBEDF0D3 /* Store.swift in Sources */,
+				3B738E75144B4F8E90C9AE48 /* Theme.swift in Sources */,
+				FA6B48592CC24A21BFE50D42 /* WebViewContainer.swift in Sources */,
+				F06852E288A54203B183E6EB /* FilzaExploit.swift in Sources */,
+				DD17A8D0537E4E62AA9FA1DB /* FilzaJailedDSExploit.swift in Sources */,
+				17705130413C40D8B693CF02 /* FilzaSlopExploit.swift in Sources */,
+				9967C7236D294D45ABE2E99B /* MCMFileManager.swift in Sources */,
+				9349A4823AC14170AF8FB834 /* LaraExploit.swift in Sources */,
+				AB02EE7AC59B45F08E8180E7 /* FilzaJailedDSBridge.m in Sources */,
+				458BDB05A5F74BB3823C8EAF /* apfs_own.m in Sources */,
+				C526485ED29740E4ABEEAA63 /* kexploit_opa334.m in Sources */,
+				88CBC1B3B7B1476F9665EB0B /* krw.m in Sources */,
+				7766865B8126497B8E438DBA /* kutils.m in Sources */,
+				52582507AFC244DF9416FF8E /* offsets.m in Sources */,
+				4DA88010A9F343C0BFA13A2E /* vnode.m in Sources */,
+				26A5A7271CE54180AFCC3B41 /* patchfinder.m in Sources */,
+				F0E06E73DF6545A6923747B0 /* sandbox_escape.m in Sources */,
+				7CA6C387D5AC43118521F6A2 /* MCMBridge.m in Sources */,
+				292F88873D5349EBB9DAA01D /* Base64.c in Sources */,
+				13C665C5EF1F4F1AA17A0C52 /* BufferedStream.c in Sources */,
+				38D2C4F5C4D244EF8F423631 /* CSBlob.c in Sources */,
+				B37FE5EFFFEF4268A22B4542 /* CodeDirectory.c in Sources */,
+				B5B1EB23FFB242EF9951AF12 /* DER.c in Sources */,
+				CF3DFEB4511C483090C7FFA5 /* DyldSharedCache.c in Sources */,
+				C6F13358F2064D8AA622CF97 /* Entitlements.c in Sources */,
+				F9CC342F7399461DA80E2B23 /* Fat.c in Sources */,
+				8FBB9A02BBE242D8BB5891E0 /* FileStream.c in Sources */,
+				743FC0FA883D41D3BBD46178 /* Host.c in Sources */,
+				94A31F9811C247AD855B9613 /* MachO.c in Sources */,
+				7A9026E7BF014CBAB04BBC29 /* MachOLoadCommand.c in Sources */,
+				49AA8566817B49549A17D754 /* MemoryStream.c in Sources */,
+				276E903425944386817FDEC0 /* PatchFinder.c in Sources */,
+				6A0B8C0BADB1412A93D63326 /* PatchFinder_arm64.c in Sources */,
+				7D2D9CC08D73490C9BE9C2BC /* Util.c in Sources */,
+				15535BA4CFE4432592ECD02A /* arm64.c in Sources */,
+				FBDD6D043F6D4D22858DBABA /* bad_recovery.c in Sources */,
+				432B5938BF2A44FAABFFBC96 /* common.c in Sources */,
+				6FE091F363ED4E1F9B240CC8 /* decompress.c in Sources */,
+				31D2C63989E149F4A80287E1 /* non_ppl.c in Sources */,
+				A0AE0A94D7E74F9B914D46C1 /* ppl.c in Sources */,
+				3A72EEB920B44C3E9379ECF1 /* xpf.c in Sources */,
+				F20E166F22CB465388DE4A38 /* file.c in Sources */,
+				0B4302A7FE244B11826FD159 /* hexdump.c in Sources */,
+				C493B2C7686D46D0A6A5DC6F /* process.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
-		30F977E09B9C42249F31D33B /* Debug */ = {
+		218847B9320745748D952D3D /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -521,7 +521,7 @@
 			};
 			name = Debug;
 		};
-		42D86A6CD4214340A86832DF /* Release */ = {
+		1E738B56A10D4C169FBC8412 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -548,7 +548,7 @@
 			};
 			name = Release;
 		};
-		22BA0145961547A99C4CE323 /* Debug */ = {
+		2EA01C56812842238EF2878E /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -609,7 +609,7 @@
 			};
 			name = Debug;
 		};
-		F7692B057AFA4CE18AC3C12A /* Release */ = {
+		1CEECC66FBC04B88B8DA7AC2 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -673,20 +673,20 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		1B40BB9F3DBA4F0B8D371FA1 /* Build configuration list for PBXProject "MoyuTool" */ = {
+		13B5DFE6E8B843F1AB818671 /* Build configuration list for PBXProject "MoyuTool" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				30F977E09B9C42249F31D33B /* Debug */,
-				42D86A6CD4214340A86832DF /* Release */,
+				218847B9320745748D952D3D /* Debug */,
+				1E738B56A10D4C169FBC8412 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		A85BC9FE45BA43EAA95A7FD7 /* Build configuration list for PBXNativeTarget "MoyuTool" */ = {
+		C01FD3CB279C4EF6B15076E6 /* Build configuration list for PBXNativeTarget "MoyuTool" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				22BA0145961547A99C4CE323 /* Debug */,
-				F7692B057AFA4CE18AC3C12A /* Release */,
+				2EA01C56812842238EF2878E /* Debug */,
+				1CEECC66FBC04B88B8DA7AC2 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -694,5 +694,5 @@
 /* End XCConfigurationList section */
 
 	};
-	rootObject = E2F05D9AF12A4FBB8953256B /* Project object */;
+	rootObject = 7E9FE9A33A4346CA8F7A633F /* Project object */;
 }
