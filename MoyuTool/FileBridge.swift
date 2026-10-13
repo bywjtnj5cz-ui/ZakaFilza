@@ -8,6 +8,11 @@ import WebKit
 //   - 自己服务器的 download_upload 链接自动附加会话凭证 (链接里不再暴露 admin_token)
 //   - 流式拷贝临时文件到目标, 不整包读进内存 (大 .pak 不再爆内存)
 //   - 独立 URLSession, 大文件资源超时放宽到 10 分钟
+enum DownloadOutcome {
+    case success(String)
+    case failure(String)
+}
+
 enum CloudDownloader {
 
     static func sanitizeFilename(_ name: String) -> String {
@@ -59,7 +64,7 @@ enum CloudDownloader {
                                   filename: String,
                                   targetDir: String?,
                                   handle: FileAccessHandle?,
-                                  completion: @escaping (Result<String, String>) -> Void) {
+                                  completion: @escaping (DownloadOutcome) -> Void) {
         guard let link = buildURL(urlString) else {
             completion(.failure("URL 无效: \(urlString)"))
             return
