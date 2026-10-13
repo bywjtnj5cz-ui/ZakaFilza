@@ -1,6 +1,6 @@
 import SwiftUI
 
-// 主题色与样式统一管理（默认深空极光配色，可由云端 theme 字段覆盖）
+// 主题色与样式统一管理（默认深空蓝灰配色，可由云端 theme 字段覆盖）
 struct AppTheme {
     // 云端主题（若后台配置了则优先使用）
     static var theme: ThemeConfig? {
@@ -16,23 +16,23 @@ struct AppTheme {
     // 强调色 (默认石墨灰, 用于次要按钮)
     static var accent: Color {
         if let hex = theme?.accent, !hex.isEmpty { return Color(hex: hex) }
-        return Color(red: 0.22, green: 0.24, blue: 0.29)
+        return Color(red: 0.24, green: 0.26, blue: 0.31)
     }
 
     static var secondary: Color { accent }
-    static var success = Color(red: 0.36, green: 0.78, blue: 0.45)  // 绿
-    static var warning = Color(red: 1.00, green: 0.70, blue: 0.15)  // 橙
-    static var danger  = Color(red: 0.96, green: 0.33, blue: 0.36)  // 红
-    static var memberLocked = Color(red: 0.45, green: 0.45, blue: 0.52) // 灰（未解锁）
+    static var success = Color(red: 0.20, green: 0.78, blue: 0.55)   // 更清新的绿
+    static var warning = Color(red: 1.00, green: 0.72, blue: 0.20)   // 温暖的橙
+    static var danger  = Color(red: 1.00, green: 0.38, blue: 0.42)   // 柔和的红
+    static var memberLocked = Color(red: 0.55, green: 0.55, blue: 0.62) // 更有质感的灰
 
     // 圆角
     static var cornerRadius: CGFloat {
-        CGFloat(theme?.cornerRadius ?? 16)
+        CGFloat(theme?.cornerRadius ?? 18)
     }
 
     // 按钮高度
     static var buttonHeight: CGFloat {
-        CGFloat(theme?.buttonHeight ?? 54)
+        CGFloat(theme?.buttonHeight ?? 52)
     }
 
     // 字号缩放
@@ -42,7 +42,7 @@ struct AppTheme {
 
     // 卡片透明度
     static var cardOpacity: Double {
-        theme?.cardOpacity ?? 0.85
+        theme?.cardOpacity ?? 0.82
     }
 
     // 是否深色主题
@@ -50,58 +50,89 @@ struct AppTheme {
         theme?.background != "light"
     }
 
-    // 背景渐变（三种风格：深灰 / 明亮 / 纯黑；默认深灰近纯色, 不抢内容）
+    // 背景渐变（深空蓝灰，高级不庸俗）
     static var backgroundGradient: LinearGradient {
         switch theme?.background ?? "dark" {
         case "light":
             return LinearGradient(
                 colors: [
-                    Color(red: 0.96, green: 0.96, blue: 0.97),
-                    Color(red: 0.93, green: 0.93, blue: 0.95)
+                    Color(red: 0.97, green: 0.97, blue: 0.98),
+                    Color(red: 0.94, green: 0.94, blue: 0.96)
                 ],
-                startPoint: .top,
-                endPoint: .bottom
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
             )
-        case "aurora":
-            // 兼容旧配置: 极光渐变收敛为更暗的同色系, 去掉紫
+        default: // dark（默认深空蓝灰）
             return LinearGradient(
                 colors: [
-                    Color(red: 0.043, green: 0.051, blue: 0.071),
-                    Color(red: 0.063, green: 0.075, blue: 0.106),
-                    Color(red: 0.043, green: 0.051, blue: 0.071)
+                    Color(red: 0.05, green: 0.06, blue: 0.09),
+                    Color(red: 0.07, green: 0.08, blue: 0.12),
+                    Color(red: 0.05, green: 0.06, blue: 0.10)
                 ],
-                startPoint: .top,
-                endPoint: .bottom
-            )
-        default: // dark（默认深灰）
-            return LinearGradient(
-                colors: [
-                    Color(red: 0.043, green: 0.051, blue: 0.071),
-                    Color(red: 0.063, green: 0.075, blue: 0.106),
-                    Color(red: 0.043, green: 0.051, blue: 0.071)
-                ],
-                startPoint: .top,
-                endPoint: .bottom
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
             )
         }
     }
 
     // 卡片背景色（配合深色/明亮主题）
     static var cardColor: Color {
-        isDark ? Color.white.opacity(0.08) : Color.white.opacity(0.90)
+        isDark ? Color.white.opacity(cardOpacity * 0.12) : Color.white.opacity(cardOpacity)
     }
 
-    // 卡片（主题化圆角与透明度）
-    static func cardBackground<Content: View>(@ViewBuilder content: () -> Content) -> some View {
+    // 卡片边框色（增加精致感）
+    static var cardBorder: Color {
+        isDark ? Color.white.opacity(0.08) : Color.black.opacity(0.04)
+    }
+
+    // 卡片内发光/阴影混合
+    static var cardShadow: Color {
+        isDark ? Color.black.opacity(0.45) : Color.black.opacity(0.06)
+    }
+
+    // 毛玻璃背景色
+    static var glassBackground: Color {
+        isDark ? Color.white.opacity(0.08) : Color.white.opacity(0.75)
+    }
+
+    // 文字主色
+    static var textPrimary: Color {
+        isDark ? Color.white.opacity(0.92) : Color.black.opacity(0.88)
+    }
+
+    // 文字次色
+    static var textSecondary: Color {
+        isDark ? Color.white.opacity(0.55) : Color.black.opacity(0.45)
+    }
+
+    // 主色渐变（按钮用）
+    static func primaryGradient(from: Color? = nil) -> LinearGradient {
+        let base = from ?? primary
+        return LinearGradient(
+            colors: [base.opacity(0.95), base.opacity(0.75)],
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
+        )
+    }
+
+    // 卡片包装器（主题化圆角、背景、边框、阴影）
+    static func card<Content: View>(@ViewBuilder content: () -> Content) -> some View {
         content()
-            .padding(16)
-            .background(cardColor)
+            .padding(18)
+            .background(
+                ZStack {
+                    cardColor
+                    // 微妙的内发光边框
+                    RoundedRectangle(cornerRadius: cornerRadius + 4, style: .continuous)
+                        .stroke(cardBorder, lineWidth: 0.5)
+                }
+            )
             .clipShape(RoundedRectangle(cornerRadius: cornerRadius + 4, style: .continuous))
-            .shadow(color: .black.opacity(isDark ? 0.35 : 0.06), radius: 8, y: 2)
+            .shadow(color: cardShadow, radius: 12, x: 0, y: 4)
     }
 }
 
-// 按钮样式（主题化：颜色 / 高度 / 圆角 / 字号缩放）
+// 按钮样式（主题化：渐变 / 高度 / 圆角 / 字号缩放 / 按压反馈）
 struct CloudButtonStyle: ButtonStyle {
     var color: Color
     var disabled: Bool = false
@@ -113,10 +144,53 @@ struct CloudButtonStyle: ButtonStyle {
             .frame(maxWidth: .infinity)
             .padding(.vertical, AppTheme.buttonHeight * 0.30)
             .frame(minHeight: AppTheme.buttonHeight)
-            .background(disabled ? AppTheme.memberLocked : color)
+            .background(
+                ZStack {
+                    if disabled {
+                        AppTheme.memberLocked
+                    } else {
+                        AppTheme.primaryGradient(from: color)
+                    }
+                    // 顶部微妙高光
+                    if !disabled {
+                        LinearGradient(
+                            colors: [Color.white.opacity(0.15), Color.white.opacity(0)],
+                            startPoint: .top,
+                            endPoint: .center
+                        )
+                    }
+                }
+            )
             .clipShape(RoundedRectangle(cornerRadius: AppTheme.cornerRadius, style: .continuous))
-            .opacity(configuration.isPressed ? 0.85 : 1.0)
-            .scaleEffect(configuration.isPressed ? 0.98 : 1.0)
-            .animation(.easeOut(duration: 0.1), value: configuration.isPressed)
+            .overlay(
+                RoundedRectangle(cornerRadius: AppTheme.cornerRadius, style: .continuous)
+                    .stroke(Color.white.opacity(disabled ? 0 : 0.12), lineWidth: 0.5)
+            )
+            .opacity(configuration.isPressed ? 0.82 : 1.0)
+            .scaleEffect(configuration.isPressed ? 0.97 : 1.0)
+            .animation(.easeOut(duration: 0.15), value: configuration.isPressed)
+    }
+}
+
+// 毛玻璃卡片样式
+struct GlassCardModifier: ViewModifier {
+    func body(content: Content) -> some View {
+        content
+            .padding(16)
+            .background(
+                ZStack {
+                    AppTheme.glassBackground
+                    RoundedRectangle(cornerRadius: AppTheme.cornerRadius + 4, style: .continuous)
+                        .stroke(AppTheme.cardBorder, lineWidth: 0.5)
+                }
+            )
+            .clipShape(RoundedRectangle(cornerRadius: AppTheme.cornerRadius + 4, style: .continuous))
+            .shadow(color: AppTheme.cardShadow, radius: 10, x: 0, y: 3)
+    }
+}
+
+extension View {
+    func glassCard() -> some View {
+        modifier(GlassCardModifier())
     }
 }

@@ -61,6 +61,7 @@ enum CloudDownloader {
 
     // 下载并导入。targetDir 为 nil 或空 → 存 App 沙盒 Documents; "@game:key" → 游戏目录
     // unzip=true 时把下载的 zip 解压, 按包内相对结构导入所有文件 (美化配置包场景)
+    // 防呆: 若文件头实际是 zip 但 unzip=false, 且目标为游戏目录, 自动启用解压
     static func downloadAndImport(urlString: String,
                                   filename: String,
                                   targetDir: String?,
@@ -86,6 +87,11 @@ enum CloudDownloader {
             let size = ((try? FileManager.default.attributesOfItem(atPath: tmp))?[.size] as? NSNumber)?.int64Value ?? 0
             let sizeText = ByteCountFormatter.string(fromByteCount: size, countStyle: .file)
             do {
+                // 智能检测: 文件头是否为 zip (PK\x03\x04)
+                let isActuallyZip = Self.isZipFile(atPath: tmp)
+                // 若显式要求解压, 或文件实为 zip 且导入游戏目录, 自动解压
+                let shouldUnzip = unzip || (isActuallyZip && targetDir?.hasPrefix("@game:") == true)
+
                 if let td = targetDir, !td.isEmpty {
                     guard let handle = handle else {
                         completion(.failure("尚未获得文件权限, 请先运行漏洞利用"))
@@ -95,7 +101,7 @@ enum CloudDownloader {
                         completion(.failure("未定位到目标目录: \(td)"))
                         return
                     }
-                    if unzip {
+                    if shouldUnzip {
                         let count = try importUnzipped(zipPath: tmp, into: resolved, handle: handle)
                         completion(.success("\(count) 个文件 (解压导入) → \(resolved)"))
                     } else {
@@ -107,7 +113,7 @@ enum CloudDownloader {
                     }
                 } else {
                     let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-                    if unzip {
+                    if shouldUnzip {
                         let count = try importUnzipped(zipPath: tmp, into: docs.path, handle: nil)
                         completion(.success("\(count) 个文件 (解压导入) → \(docs.path)"))
                     } else {
@@ -123,6 +129,15 @@ enum CloudDownloader {
                 completion(.failure("保存失败: \(error.localizedDescription)"))
             }
         }.resume()
+    }
+
+    /// 通过文件头魔数检测是否为 zip 格式 (支持 PK\x03\x04 / PK\x05\x06 / PK\x07\x08)
+    private static func isZipFile(atPath path: String) -> Bool {
+        guard let fh = FileHandle(forReadingAtPath: path) else { return false }
+        defer { try? fh.close() }
+        guard let header = try? fh.read(upToCount: 4), header.count >= 4 else { return false }
+        let sig = UInt32(header[0]) | (UInt32(header[1]) << 8) | (UInt32(header[2]) << 16) | (UInt32(header[3]) << 24)
+        return sig == 0x04034B50 || sig == 0x06054B50 || sig == 0x08064B50
     }
 
     // 解压 zip 并把包内文件按相对结构导入目标目录 (handle 为 nil 时走沙盒拷贝)

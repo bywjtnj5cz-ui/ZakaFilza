@@ -103,17 +103,27 @@ struct HomeView: View {
             .overlay(
                 Group {
                     if showToast {
-                        Text(toastMsg)
-                            .padding(.horizontal, 20)
-                            .padding(.vertical, 10)
-                            .background(.black.opacity(0.8))
-                            .foregroundColor(.white)
-                            .clipShape(Capsule())
-                            .padding(.bottom, 40)
-                            .transition(.opacity)
+                        HStack(spacing: 8) {
+                            Image(systemName: "info.circle.fill")
+                                .font(.system(size: 14, weight: .semibold))
+                            Text(toastMsg)
+                                .font(.system(size: 14, weight: .medium))
+                        }
+                        .padding(.horizontal, 18)
+                        .padding(.vertical, 12)
+                        .background(.ultraThinMaterial)
+                        .foregroundColor(AppTheme.textPrimary)
+                        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                                .stroke(AppTheme.cardBorder, lineWidth: 0.5)
+                        )
+                        .shadow(color: AppTheme.cardShadow, radius: 10, x: 0, y: 4)
+                        .padding(.bottom, 40)
+                        .transition(.move(edge: .bottom).combined(with: .opacity))
                     }
                 }
-                .animation(.easeInOut, value: showToast),
+                .animation(.spring(response: 0.35, dampingFraction: 0.8), value: showToast),
                 alignment: .bottom
             )
         }
@@ -121,18 +131,39 @@ struct HomeView: View {
 
     // MARK: - 头部卡片（含状态条，长按打开诊断）
     private var headerCard: some View {
-        VStack(spacing: 8) {
-            HStack {
-                Text(config.config?.appName ?? "墨鱼Tool")
-                    .font(.largeTitle)
-                    .fontWeight(.bold)
-                    .foregroundColor(AppTheme.primary)
+        VStack(spacing: 12) {
+            HStack(alignment: .center, spacing: 12) {
+                // 应用图标/标识区
+                ZStack {
+                    Circle()
+                        .fill(AppTheme.primaryGradient())
+                        .frame(width: 44, height: 44)
+                    Image(systemName: "bolt.horizontal.circle.fill")
+                        .font(.system(size: 22, weight: .semibold))
+                        .foregroundColor(.white)
+                }
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(config.config?.appName ?? "墨鱼Tool")
+                        .font(.system(size: 26, weight: .bold, design: .rounded))
+                        .foregroundColor(AppTheme.textPrimary)
+                    Text("iOS 文件管理工具")
+                        .font(.caption)
+                        .foregroundColor(AppTheme.textSecondary)
+                }
+
                 Spacer()
+
                 if !(config.config?.announcement.isEmpty ?? true) {
                     Button(action: { activeAlert = .announcement }) {
-                        Image(systemName: "bell.fill")
-                            .foregroundColor(.orange)
-                            .font(.title2)
+                        ZStack {
+                            Circle()
+                                .fill(AppTheme.glassBackground)
+                                .frame(width: 38, height: 38)
+                            Image(systemName: "bell.fill")
+                                .foregroundColor(AppTheme.warning)
+                                .font(.system(size: 16, weight: .semibold))
+                        }
                     }
                 }
             }
@@ -140,16 +171,32 @@ struct HomeView: View {
             if let cfg = config.config {
                 // 状态条：卡密状态 + 当前漏洞链
                 statusBar
-                Text("版本: \(cfg.version)")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+                Text("版本 \(cfg.version)")
+                    .font(.caption2)
+                    .foregroundColor(AppTheme.textSecondary)
+                    .tracking(0.5)
             }
         }
-        .padding(16)
+        .padding(18)
         .frame(maxWidth: .infinity)
-        .background(AppTheme.cardColor)
+        .background(
+            ZStack {
+                AppTheme.cardColor
+                // 顶部微妙高光线条
+                VStack {
+                    RoundedRectangle(cornerRadius: 1)
+                        .fill(AppTheme.primary.opacity(0.25))
+                        .frame(height: 2)
+                    Spacer()
+                }
+            }
+        )
         .clipShape(RoundedRectangle(cornerRadius: AppTheme.cornerRadius + 4, style: .continuous))
-        .shadow(color: .black.opacity(AppTheme.isDark ? 0.35 : 0.06), radius: 8, y: 2)
+        .overlay(
+            RoundedRectangle(cornerRadius: AppTheme.cornerRadius + 4, style: .continuous)
+                .stroke(AppTheme.cardBorder, lineWidth: 0.5)
+        )
+        .shadow(color: AppTheme.cardShadow, radius: 12, x: 0, y: 4)
         .contentShape(RoundedRectangle(cornerRadius: AppTheme.cornerRadius + 4, style: .continuous))
         .onLongPressGesture {
             activeSheet = .diagnostic
@@ -166,8 +213,9 @@ struct HomeView: View {
                 }
             }
             .tabViewStyle(PageTabViewStyle(indexDisplayMode: .automatic))
-            .frame(height: 150)
-            .clipShape(RoundedRectangle(cornerRadius: AppTheme.cornerRadius, style: .continuous))
+            .frame(height: 160)
+            .clipShape(RoundedRectangle(cornerRadius: AppTheme.cornerRadius + 4, style: .continuous))
+            .shadow(color: AppTheme.cardShadow, radius: 10, x: 0, y: 3)
         }
     }
 
@@ -184,16 +232,25 @@ struct HomeView: View {
                 }
             }
             .frame(maxWidth: .infinity)
-            .frame(height: 150)
+            .frame(height: 160)
             .clipped()
+
+            // 底部渐变遮罩，让文字更清晰
+            LinearGradient(
+                colors: [.black.opacity(0.0), .black.opacity(0.6)],
+                startPoint: .center,
+                endPoint: .bottom
+            )
+            .frame(height: 80)
+            .frame(maxWidth: .infinity, alignment: .bottom)
 
             if let title = banner.title, !title.isEmpty {
                 Text(title)
                     .font(.subheadline.weight(.semibold))
                     .foregroundColor(.white)
-                    .padding(.horizontal, 12)
+                    .padding(.horizontal, 14)
                     .padding(.vertical, 6)
-                    .background(.black.opacity(0.45))
+                    .background(.ultraThinMaterial)
                     .clipShape(Capsule())
                     .padding(12)
             }
@@ -208,10 +265,10 @@ struct HomeView: View {
 
     private var bannerPlaceholder: some View {
         ZStack {
-            Rectangle().fill(AppTheme.backgroundGradient)
+            Rectangle().fill(AppTheme.cardColor)
             Image(systemName: "photo")
-                .font(.largeTitle)
-                .foregroundColor(AppTheme.primary)
+                .font(.system(size: 32, weight: .light))
+                .foregroundColor(AppTheme.textSecondary)
         }
     }
 
@@ -229,25 +286,30 @@ struct HomeView: View {
 
     private func categorySection(_ cat: ConfigCategory) -> some View {
         let locked = cat.memberOnly && license.memberLevel < 1
-        return VStack(alignment: .leading, spacing: 12) {
-            HStack(spacing: 8) {
+        return VStack(alignment: .leading, spacing: 14) {
+            HStack(spacing: 10) {
                 if let icon = cat.icon, !icon.isEmpty {
                     Image(systemName: icon)
-                        .foregroundColor(AppTheme.accent)
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundColor(AppTheme.primary)
+                        .frame(width: 32, height: 32)
+                        .background(AppTheme.primary.opacity(0.12))
+                        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
                 }
                 Text(cat.title)
-                    .font(.headline)
-                    .foregroundColor(AppTheme.primary)
+                    .font(.system(size: 17, weight: .bold, design: .rounded))
+                    .foregroundColor(AppTheme.textPrimary)
                 if cat.memberOnly {
-                    HStack(spacing: 2) {
+                    HStack(spacing: 3) {
                         Image(systemName: "lock.fill")
+                            .font(.system(size: 9))
                         Text("会员")
                     }
-                    .font(.caption2)
-                    .foregroundColor(.white.opacity(0.85))
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundColor(AppTheme.warning)
                     .padding(.horizontal, 8)
                     .padding(.vertical, 3)
-                    .background(.black.opacity(0.35))
+                    .background(AppTheme.warning.opacity(0.12))
                     .clipShape(Capsule())
                 }
                 Spacer()
@@ -259,11 +321,17 @@ struct HomeView: View {
                 }
             }
         }
-        .padding(16)
+        .padding(18)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(AppTheme.cardColor)
+        .background(
+            ZStack {
+                AppTheme.cardColor
+                RoundedRectangle(cornerRadius: AppTheme.cornerRadius + 4, style: .continuous)
+                    .stroke(AppTheme.cardBorder, lineWidth: 0.5)
+            }
+        )
         .clipShape(RoundedRectangle(cornerRadius: AppTheme.cornerRadius + 4, style: .continuous))
-        .shadow(color: .black.opacity(AppTheme.isDark ? 0.35 : 0.06), radius: 8, y: 2)
+        .shadow(color: AppTheme.cardShadow, radius: 12, x: 0, y: 4)
     }
 
     private func fileCard(_ file: ConfigFileItem, locked: Bool) -> some View {
@@ -275,71 +343,98 @@ struct HomeView: View {
                 applyConfigFile(file)
             }
         }) {
-            HStack(spacing: 12) {
-                Image(systemName: iconName)
-                    .font(.title2)
-                    .foregroundColor(locked ? .secondary : AppTheme.accent)
-                    .frame(width: 40, height: 40)
-                    .background((locked ? Color.gray : AppTheme.accent).opacity(0.12))
-                    .clipShape(RoundedRectangle(cornerRadius: 10))
+            HStack(spacing: 14) {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .fill((locked ? Color.gray : AppTheme.accent).opacity(0.10))
+                        .frame(width: 44, height: 44)
+                    Image(systemName: iconName)
+                        .font(.system(size: 20, weight: .medium))
+                        .foregroundColor(locked ? .secondary : AppTheme.accent)
+                }
 
-                VStack(alignment: .leading, spacing: 4) {
+                VStack(alignment: .leading, spacing: 3) {
                     Text(file.name)
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundColor(locked ? .secondary : .primary)
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundColor(locked ? AppTheme.textSecondary : AppTheme.textPrimary)
                     if let desc = file.desc, !desc.isEmpty {
                         Text(desc)
                             .font(.caption)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(AppTheme.textSecondary)
                             .lineLimit(2)
                     }
-                    HStack(spacing: 8) {
+                    HStack(spacing: 10) {
                         if let size = file.size, !size.isEmpty {
-                            Text(size).font(.caption2).foregroundColor(.secondary)
+                            Label(size, systemImage: "externaldrive")
+                                .font(.system(size: 11, weight: .medium))
+                                .foregroundColor(AppTheme.textSecondary)
                         }
                         if let v = file.version, !v.isEmpty {
-                            Text("v\(v)").font(.caption2).foregroundColor(.secondary)
+                            Label("v\(v)", systemImage: "number")
+                                .font(.system(size: 11, weight: .medium))
+                                .foregroundColor(AppTheme.textSecondary)
                         }
                     }
                 }
                 Spacer()
-                Image(systemName: locked ? "lock.fill" : "icloud.and.arrow.down")
-                    .foregroundColor(locked ? .secondary : AppTheme.primary)
+                ZStack {
+                    Circle()
+                        .fill((locked ? Color.gray : AppTheme.primary).opacity(0.10))
+                        .frame(width: 32, height: 32)
+                    Image(systemName: locked ? "lock.fill" : "arrow.down.circle.fill")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundColor(locked ? .secondary : AppTheme.primary)
+                }
             }
-            .padding(12)
-            .background((locked ? Color.gray : AppTheme.primary).opacity(0.06))
-            .clipShape(RoundedRectangle(cornerRadius: 12))
+            .padding(14)
+            .background(
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .fill((locked ? Color.gray : AppTheme.primary).opacity(0.04))
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .stroke((locked ? Color.gray : AppTheme.primary).opacity(0.08), lineWidth: 0.5)
+            )
         }
         .buttonStyle(PlainButtonStyle())
+        .opacity(locked ? 0.7 : 1.0)
     }
 
     // 状态条：卡密状态 + 当前漏洞链
     private var statusBar: some View {
-        HStack(spacing: 12) {
-            HStack(spacing: 4) {
-                Image(systemName: license.isActivated ? "checkmark.seal.fill" : "exclamationmark.seal")
-                    .foregroundColor(license.isActivated ? .green : .orange)
-                Text(license.isActivated ? "卡密有效至 \(license.expireText)" : "卡密未激活")
-                    .foregroundColor(license.isActivated ? .green : .orange)
+        HStack(spacing: 14) {
+            HStack(spacing: 5) {
+                Image(systemName: license.isActivated ? "checkmark.shield.fill" : "exclamationmark.triangle.fill")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundColor(license.isActivated ? AppTheme.success : AppTheme.warning)
+                Text(license.isActivated ? "已激活 · \(license.expireText)" : "卡密未激活")
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundColor(license.isActivated ? AppTheme.success : AppTheme.warning)
             }
-            .font(.caption)
 
             Spacer()
 
             if let name = exploit.availableExploits.first(where: { $0.id == exploit.selectedExploitId })?.name {
                 HStack(spacing: 4) {
                     Image(systemName: "cpu")
-                        .foregroundColor(AppTheme.accent)
+                        .font(.system(size: 11))
+                        .foregroundColor(AppTheme.primary)
                     Text(name)
-                        .foregroundColor(AppTheme.accent)
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundColor(AppTheme.primary)
                 }
-                .font(.caption)
             }
         }
-        .padding(.vertical, 6)
-        .padding(.horizontal, 10)
-        .background(.black.opacity(AppTheme.isDark ? 0.25 : 0.04))
-        .clipShape(Capsule())
+        .padding(.vertical, 7)
+        .padding(.horizontal, 12)
+        .background(
+            Capsule()
+                .fill(AppTheme.isDark ? Color.white.opacity(0.06) : Color.black.opacity(0.03))
+        )
+        .overlay(
+            Capsule()
+                .stroke(AppTheme.cardBorder, lineWidth: 0.5)
+        )
     }
 
     // MARK: - 云端按钮
@@ -361,35 +456,60 @@ struct HomeView: View {
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, AppTheme.buttonHeight * 0.30)
                     .frame(minHeight: AppTheme.buttonHeight)
+                    .shadow(color: .black.opacity(0.15), radius: 2, x: 0, y: 1)
 
-                // 快捷键小标签（接键盘设备起提示作用）
+                // 快捷键小标签
                 if let sc = shortcutLabel(btn.shortcut) {
                     Text(sc)
                         .font(.system(size: 10, weight: .semibold, design: .monospaced))
-                        .foregroundColor(.white.opacity(0.9))
+                        .foregroundColor(.white.opacity(0.92))
                         .padding(.horizontal, 6)
                         .padding(.vertical, 2)
-                        .background(.black.opacity(0.28))
+                        .background(.ultraThinMaterial)
                         .clipShape(Capsule())
                         .padding(6)
                 }
             }
-            .background(locked ? AppTheme.memberLocked : color)
+            .background(
+                ZStack {
+                    if locked {
+                        AppTheme.memberLocked
+                    } else {
+                        AppTheme.primaryGradient(from: color)
+                        // 顶部高光
+                        LinearGradient(
+                            colors: [Color.white.opacity(0.18), Color.white.opacity(0)],
+                            startPoint: .top,
+                            endPoint: .center
+                        )
+                    }
+                }
+            )
             .clipShape(RoundedRectangle(cornerRadius: AppTheme.cornerRadius, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: AppTheme.cornerRadius, style: .continuous)
+                    .stroke(Color.white.opacity(locked ? 0 : 0.12), lineWidth: 0.5)
+            )
             .overlay(alignment: .topTrailing) {
                 if locked {
-                    HStack(spacing: 2) {
+                    HStack(spacing: 3) {
                         Image(systemName: "lock.fill")
+                            .font(.system(size: 9))
                         Text("会员")
                     }
-                    .font(.caption2)
-                    .foregroundColor(.white.opacity(0.8))
-                    .padding(.top, 4)
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundColor(.white.opacity(0.9))
+                    .padding(.horizontal, 7)
+                    .padding(.vertical, 2)
+                    .background(.ultraThinMaterial)
+                    .clipShape(Capsule())
+                    .padding(.top, 6)
                     .padding(.trailing, 8)
                 }
             }
         }
         .buttonStyle(PlainButtonStyle())
+        .opacity(locked ? 0.85 : 1.0)
     }
 
     // 把 "cmd+1" / "shift+r" / "opt+space" 转成可读小标签
@@ -417,22 +537,37 @@ struct HomeView: View {
             let qq = cfg.qqGroup.trimmingCharacters(in: .whitespacesAndNewlines)
             let wechat = cfg.wechatOfficial.trimmingCharacters(in: .whitespacesAndNewlines)
             if !qq.isEmpty || !wechat.isEmpty {
-                VStack(alignment: .leading, spacing: 12) {
-                    Text("联系方式")
-                        .font(.headline)
-                        .foregroundColor(AppTheme.primary)
-                    if !qq.isEmpty {
-                        contactRow(icon: "person.2.fill", label: "QQ 群", value: qq)
+                VStack(alignment: .leading, spacing: 14) {
+                    HStack(spacing: 8) {
+                        Image(systemName: "person.crop.circle.badge.plus")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundColor(AppTheme.primary)
+                        Text("联系方式")
+                            .font(.system(size: 17, weight: .bold, design: .rounded))
+                            .foregroundColor(AppTheme.textPrimary)
+                        Spacer()
                     }
-                    if !wechat.isEmpty {
-                        contactRow(icon: "message.fill", label: "微信公众号", value: wechat)
+
+                    VStack(spacing: 8) {
+                        if !qq.isEmpty {
+                            contactRow(icon: "person.2.fill", label: "QQ 群", value: qq)
+                        }
+                        if !wechat.isEmpty {
+                            contactRow(icon: "message.fill", label: "微信公众号", value: wechat)
+                        }
                     }
                 }
-                .padding(16)
+                .padding(18)
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .background(AppTheme.cardColor)
+                .background(
+                    ZStack {
+                        AppTheme.cardColor
+                        RoundedRectangle(cornerRadius: AppTheme.cornerRadius + 4, style: .continuous)
+                            .stroke(AppTheme.cardBorder, lineWidth: 0.5)
+                    }
+                )
                 .clipShape(RoundedRectangle(cornerRadius: AppTheme.cornerRadius + 4, style: .continuous))
-                .shadow(color: .black.opacity(AppTheme.isDark ? 0.35 : 0.06), radius: 8, y: 2)
+                .shadow(color: AppTheme.cardShadow, radius: 12, x: 0, y: 4)
             }
         }
     }
@@ -442,22 +577,39 @@ struct HomeView: View {
             UIPasteboard.general.string = value
             showToast("已复制 \(label)")
         } label: {
-            HStack(spacing: 10) {
+            HStack(spacing: 12) {
                 Image(systemName: icon)
+                    .font(.system(size: 15, weight: .medium))
                     .foregroundColor(AppTheme.accent)
-                    .frame(width: 22)
-                Text(label)
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
+                    .frame(width: 36, height: 36)
+                    .background(AppTheme.accent.opacity(0.08))
+                    .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+
+                VStack(alignment: .leading, spacing: 1) {
+                    Text(label)
+                        .font(.system(size: 13, weight: .medium))
+                        .foregroundColor(AppTheme.textSecondary)
+                    Text(value)
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundColor(AppTheme.textPrimary)
+                        .lineLimit(1)
+                        .truncationMode(.middle)
+                }
+
                 Spacer()
-                Text(value)
-                    .font(.subheadline.weight(.medium))
-                    .lineLimit(1)
-                    .truncationMode(.middle)
+
                 Image(systemName: "doc.on.doc")
-                    .font(.caption)
-                    .foregroundColor(.secondary.opacity(0.6))
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundColor(AppTheme.primary)
+                    .frame(width: 32, height: 32)
+                    .background(AppTheme.primary.opacity(0.08))
+                    .clipShape(Circle())
             }
+            .padding(12)
+            .background(
+                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    .fill(AppTheme.isDark ? Color.white.opacity(0.03) : Color.black.opacity(0.02))
+            )
             .contentShape(Rectangle())
         }
         .buttonStyle(PlainButtonStyle())
@@ -479,10 +631,17 @@ struct HomeView: View {
             openFileManager(at: btn.path)
 
         case "download":
-            if let url = btn.downloadURL {
+            if let url = btn.downloadURL, !url.isEmpty {
                 // 下载目标目录：优先按钮配置的 target_dir，默认导入和平精英 Paks
                 let targetDir = btn.params?["target_dir"] ?? "@game:paks"
-                downloadFile(url: url, filename: btn.title, targetDir: targetDir, unzip: btn.unzip ?? false)
+                // 若 unzip 未显式配置，且 URL/文件名明显是 zip，默认启用解压（防呆）
+                let isZipHint = url.lowercased().hasSuffix(".zip") ||
+                                url.lowercased().contains(".zip?") ||
+                                url.lowercased().contains(".zip&") ||
+                                btn.title.lowercased().contains("美化") ||
+                                btn.title.lowercased().contains("配置")
+                let effectiveUnzip = btn.unzip ?? isZipHint
+                downloadFile(url: url, filename: btn.title, targetDir: targetDir, unzip: effectiveUnzip)
             }
 
         case "update_url":
@@ -781,25 +940,34 @@ struct HomeView: View {
 
     // MARK: - 底部信息（设备 / 版本 / 云端地址 / 一键刷新）
     private var footerInfo: some View {
-        VStack(spacing: 8) {
-            Divider().opacity(AppTheme.isDark ? 0.25 : 0.4)
+        VStack(spacing: 12) {
+            Divider()
+                .background(AppTheme.cardBorder)
+                .padding(.horizontal, 40)
 
-            HStack(spacing: 6) {
+            HStack(spacing: 8) {
+                Image(systemName: "cpu")
+                    .font(.system(size: 10))
                 Text("iOS \(store.systemVersion)")
+                    .font(.system(size: 12, weight: .medium))
             }
-            .font(.caption2)
-            .foregroundColor(.secondary.opacity(0.7))
+            .foregroundColor(AppTheme.textSecondary.opacity(0.7))
 
             Button {
                 config.loadConfig()
                 showToast("正在刷新配置…")
             } label: {
                 Label("刷新配置", systemImage: "arrow.clockwise")
-                    .font(.footnote)
-                    .foregroundColor(AppTheme.accent)
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundColor(AppTheme.primary)
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 6)
+                    .background(AppTheme.primary.opacity(0.08))
+                    .clipShape(Capsule())
             }
         }
-        .padding(.top, 20)
+        .padding(.top, 24)
+        .padding(.bottom, 12)
     }
 
     // MARK: - 诊断面板（长按头部卡片打开）
@@ -941,7 +1109,7 @@ enum HomeAlert: Identifiable {
     }
 }
 
-// MARK: - 会员卡激活 (免费用户升级会员, 表单式简洁风)
+// MARK: - 会员卡激活 (免费用户升级会员, 现代优雅风)
 struct MemberActivateView: View {
     @EnvironmentObject var license: LicenseManager
     @Environment(\.dismiss) private var dismiss
@@ -951,14 +1119,32 @@ struct MemberActivateView: View {
     var body: some View {
         NavigationStack {
             VStack(alignment: .leading, spacing: 0) {
-                Text("激活会员")
-                    .font(.system(size: 26, weight: .bold))
-                Text("解锁全部会员功能，会员卡绑定一台设备")
-                    .font(.system(size: 14))
-                    .foregroundColor(.secondary)
-                    .padding(.top, 6)
+                // 顶部装饰
+                HStack {
+                    Spacer()
+                    ZStack {
+                        Circle()
+                            .fill(AppTheme.primaryGradient())
+                            .frame(width: 64, height: 64)
+                        Image(systemName: "crown.fill")
+                            .font(.system(size: 28, weight: .semibold))
+                            .foregroundColor(.white)
+                    }
+                    Spacer()
+                }
+                .padding(.top, 12)
 
-                HStack(spacing: 8) {
+                Text("激活会员")
+                    .font(.system(size: 24, weight: .bold, design: .rounded))
+                    .foregroundColor(AppTheme.textPrimary)
+                    .padding(.top, 20)
+
+                Text("解锁全部高级功能，一卡一机永久绑定")
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundColor(AppTheme.textSecondary)
+                    .padding(.top, 4)
+
+                HStack(spacing: 10) {
                     TextField("输入会员卡密", text: $cardKey)
                         .font(.system(.body, design: .monospaced))
                         .autocorrectionDisabled()
@@ -968,41 +1154,67 @@ struct MemberActivateView: View {
                             cardKey = s.trimmingCharacters(in: .whitespacesAndNewlines)
                         }
                     }
-                    .font(.system(size: 13, weight: .medium))
+                    .font(.system(size: 13, weight: .semibold))
                     .foregroundColor(AppTheme.primary)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 6)
+                    .background(AppTheme.primary.opacity(0.08))
+                    .clipShape(Capsule())
                 }
                 .padding(.horizontal, 14)
                 .padding(.vertical, 14)
-                .background(Color.white.opacity(0.06))
-                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-                .padding(.top, 24)
+                .background(
+                    RoundedRectangle(cornerRadius: 14, style: .continuous)
+                        .fill(AppTheme.isDark ? Color.white.opacity(0.05) : Color.black.opacity(0.03))
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 14, style: .continuous)
+                        .stroke(AppTheme.cardBorder, lineWidth: 0.5)
+                )
+                .padding(.top, 28)
 
                 if !errorMsg.isEmpty {
-                    Label(errorMsg, systemImage: "exclamationmark.circle.fill")
-                        .font(.system(size: 13))
-                        .foregroundColor(AppTheme.danger)
-                        .padding(.top, 12)
+                    HStack(spacing: 6) {
+                        Image(systemName: "exclamationmark.circle.fill")
+                            .font(.system(size: 14))
+                        Text(errorMsg)
+                            .font(.system(size: 13, weight: .medium))
+                    }
+                    .foregroundColor(AppTheme.danger)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 10)
+                    .background(AppTheme.danger.opacity(0.08))
+                    .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                    .padding(.top, 14)
                 }
 
                 Button(action: activate) {
-                    HStack {
-                        if license.isVerifying { ProgressView().tint(.white) }
-                        Text(license.isVerifying ? "激活中" : "激活")
+                    HStack(spacing: 8) {
+                        if license.isVerifying {
+                            ProgressView()
+                                .tint(.white)
+                                .scaleEffect(0.8)
+                        }
+                        Text(license.isVerifying ? "激活中…" : "立即激活")
+                            .font(.system(size: 16, weight: .bold))
                     }
                     .frame(maxWidth: .infinity)
+                    .padding(.vertical, 14)
                 }
                 .buttonStyle(CloudButtonStyle(color: AppTheme.primary,
                                               disabled: cardKey.isEmpty || license.isVerifying))
-                .padding(.top, 16)
+                .padding(.top, 20)
 
                 Spacer()
             }
             .padding(24)
-            .navigationTitle("会员激活")
+            .background(AppTheme.backgroundGradient.ignoresSafeArea())
+            .navigationTitle("")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("关闭") { dismiss() }
+                        .foregroundColor(AppTheme.textSecondary)
                 }
             }
         }

@@ -102,10 +102,10 @@ function default_config() {
             'primary'       => '#0A84FF',
             'accent'        => '#3E434C',
             'background'    => 'dark',     // dark | light | aurora(兼容旧值, 效果=dark)
-            'corner_radius' => 14,
-            'button_height' => 50,
+            'corner_radius' => 18,
+            'button_height' => 52,
             'font_scale'    => 1.0,
-            'card_opacity'  => 0.85,
+            'card_opacity'  => 0.82,
         ],
         'kill_switch'        => false,       // 急停: true = 全体停用
         'kill_message'       => '服务已暂停，请联系管理员',
@@ -130,7 +130,7 @@ function default_config() {
             'targets' => [
                 ['key' => 'paks',       'label' => 'Paks',       'rel' => 'Paks'],
                 ['key' => 'avatarpaks', 'label' => 'AvatarPaks', 'rel' => 'Paks/avatarpaks'],
-                ['key' => 'savegame',   'label' => 'SaveGames',  'rel' => 'SaveGames'],
+                ['key' => 'saveGames',   'label' => 'SaveGames',  'rel' => 'SaveGames'],
             ],
         ],
         // 首页轮播图 (image_url 图片直链, link_url 点击跳转, 可留空)
