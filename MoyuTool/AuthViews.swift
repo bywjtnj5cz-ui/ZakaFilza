@@ -1,99 +1,119 @@
 import SwiftUI
 
-// MARK: - 卡密验证页
+// MARK: - 卡密验证页 (左对齐表单式, 无渐变无大图标)
 struct LicenseView: View {
     @EnvironmentObject var license: LicenseManager
     @EnvironmentObject var config: ConfigManager
     @State private var cardKey = ""
-    @State private var showError = false
     @State private var errorMsg = ""
+    @State private var copiedUUID = false
 
     var body: some View {
-        VStack(spacing: 24) {
-            Spacer()
+        VStack(alignment: .leading, spacing: 0) {
+            Spacer(minLength: 24)
 
-            // Logo
-            Image(systemName: "lock.shield.fill")
-                .font(.system(size: 60))
-                .foregroundColor(AppTheme.primary)
-                .padding(.bottom, 8)
-
-            Text("卡密验证")
-                .font(.largeTitle)
-                .fontWeight(.bold)
-
-            Text("请输入您的卡密以激活应用")
-                .font(.subheadline)
-                .foregroundColor(.secondary)
-
-            // 卡密输入框
-            VStack(spacing: 12) {
-                TextField("请输入卡密", text: $cardKey)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .autocapitalization(.none)
-                    .disableAutocorrection(true)
-                    .padding(.horizontal)
-
-                if !errorMsg.isEmpty {
-                    Text(errorMsg)
-                        .font(.caption)
-                        .foregroundColor(.red)
-                }
+            // 品牌行
+            HStack(spacing: 8) {
+                Image(systemName: "shield.lefthalf.filled")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundColor(AppTheme.primary)
+                Text(config.config?.appName ?? "墨鱼Tool")
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundColor(.secondary)
             }
 
-            // 验证按钮
+            Spacer(minLength: 48)
+
+            Text("输入卡密")
+                .font(.system(size: 30, weight: .bold))
+            Text("激活后立即生效，会员卡绑定一台设备")
+                .font(.system(size: 14))
+                .foregroundColor(.secondary)
+                .padding(.top, 6)
+
+            // 卡密输入 + 粘贴
+            HStack(spacing: 8) {
+                TextField("XXXX-XXXX-XXXX-XXXX", text: $cardKey)
+                    .font(.system(.body, design: .monospaced))
+                    .autocorrectionDisabled()
+                    .textInputAutocapitalization(.never)
+                Button("粘贴") {
+                    if let s = UIPasteboard.general.string {
+                        cardKey = s.trimmingCharacters(in: .whitespacesAndNewlines)
+                    }
+                }
+                .font(.system(size: 13, weight: .medium))
+                .foregroundColor(AppTheme.primary)
+            }
+            .padding(.horizontal, 14)
+            .padding(.vertical, 14)
+            .background(Color.white.opacity(0.06))
+            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+            .padding(.top, 28)
+
+            if !errorMsg.isEmpty {
+                Label(errorMsg, systemImage: "exclamationmark.circle.fill")
+                    .font(.system(size: 13))
+                    .foregroundColor(AppTheme.danger)
+                    .padding(.top, 12)
+            }
+
             Button(action: verify) {
                 HStack {
-                    if license.isVerifying {
-                        ProgressView().tint(.white)
-                    } else {
-                        Image(systemName: "checkmark.seal.fill")
-                    }
-                    Text(license.isVerifying ? "验证中..." : "验证并激活")
+                    if license.isVerifying { ProgressView().tint(.white) }
+                    Text(license.isVerifying ? "验证中" : "激活")
                 }
+                .frame(maxWidth: .infinity)
             }
-            .buttonStyle(CloudButtonStyle(color: AppTheme.primary))
-            .disabled(cardKey.isEmpty || license.isVerifying)
-            .padding(.horizontal)
+            .buttonStyle(CloudButtonStyle(color: AppTheme.primary,
+                                          disabled: cardKey.isEmpty || license.isVerifying))
+            .padding(.top, 16)
 
-            // 设备信息
-            VStack(spacing: 4) {
-                Text("设备 UUID:")
-                    .font(.caption)
+            Spacer(minLength: 32)
+
+            // 设备码 (购买卡密时需要发给卖家)
+            HStack(spacing: 6) {
+                Text("设备码")
+                    .font(.system(size: 12))
                     .foregroundColor(.secondary)
                 Text(DeviceManager.shared.uuid)
-                    .font(.system(.caption, design: .monospaced))
+                    .font(.system(size: 12, design: .monospaced))
                     .foregroundColor(.secondary)
                     .lineLimit(1)
-                    .minimumScaleFactor(0.5)
+                    .minimumScaleFactor(0.6)
+                Spacer()
+                Button(copiedUUID ? "已复制" : "复制") {
+                    UIPasteboard.general.string = DeviceManager.shared.uuid
+                    copiedUUID = true
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { copiedUUID = false }
+                }
+                .font(.system(size: 12, weight: .medium))
+                .foregroundColor(AppTheme.primary)
             }
-            .padding(.top, 20)
+            .padding(.top, 16)
 
-            Spacer()
-
-            // 底部信息
+            // 底部信息 (云端配置, 留空隐藏)
             if let cfg = config.config {
-                Text("Q群: \(cfg.qqGroup)")
-                    .font(.caption)
-                    .foregroundColor(.secondary.opacity(0.6))
+                let contact = [cfg.qqGroup, cfg.wechatOfficial].compactMap { $0.isEmpty ? nil : $0 }.joined(separator: "  ·  ")
+                if !contact.isEmpty {
+                    Text(contact)
+                        .font(.system(size: 12))
+                        .foregroundColor(.secondary.opacity(0.5))
+                        .padding(.top, 16)
+                }
             }
         }
-        .padding()
+        .padding(.horizontal, 24)
+        .padding(.bottom, 20)
         .background(AppTheme.backgroundGradient.ignoresSafeArea())
-        .alert("验证失败", isPresented: $showError) {
-            Button("确定", role: .cancel) {}
-        } message: {
-            Text(errorMsg)
-        }
+        .preferredColorScheme(AppTheme.isDark ? .dark : .light)
     }
 
     private func verify() {
         errorMsg = ""
-        license.verify(cardKey: cardKey) { success, msg in
-            if !success {
-                errorMsg = msg ?? "验证失败"
-                showError = true
-            }
+        let key = cardKey.trimmingCharacters(in: .whitespacesAndNewlines)
+        license.verify(cardKey: key) { success, msg in
+            if !success { errorMsg = msg ?? "验证失败" }
         }
     }
 }
@@ -186,7 +206,7 @@ struct SystemCheckView: View {
             infoRow("最低支持", "iOS 15.0")
         }
         .padding(16)
-        .background(.white.opacity(0.9))
+        .background(AppTheme.cardColor)
         .clipShape(RoundedRectangle(cornerRadius: 16))
     }
 
@@ -276,7 +296,7 @@ struct SystemCheckView: View {
                 }
             }
             .padding(14)
-            .background(isSelected ? AppTheme.primary : Color.white.opacity(0.9))
+            .background(isSelected ? AppTheme.primary : AppTheme.cardColor)
             .clipShape(RoundedRectangle(cornerRadius: 14))
         }
         .buttonStyle(PlainButtonStyle())

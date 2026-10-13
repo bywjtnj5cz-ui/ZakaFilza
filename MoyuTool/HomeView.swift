@@ -938,7 +938,7 @@ enum HomeAlert: Identifiable {
     }
 }
 
-// MARK: - 会员卡激活 (免费用户升级会员)
+// MARK: - 会员卡激活 (免费用户升级会员, 表单式简洁风)
 struct MemberActivateView: View {
     @EnvironmentObject var license: LicenseManager
     @Environment(\.dismiss) private var dismiss
@@ -947,53 +947,54 @@ struct MemberActivateView: View {
 
     var body: some View {
         NavigationStack {
-            VStack(spacing: 20) {
-                Spacer()
-
-                Image(systemName: "crown.fill")
-                    .font(.system(size: 52))
-                    .foregroundColor(AppTheme.primary)
-
+            VStack(alignment: .leading, spacing: 0) {
                 Text("激活会员")
-                    .font(.largeTitle)
-                    .fontWeight(.bold)
-
-                Text("输入会员卡密，激活后解锁全部会员功能（一机一码）")
-                    .font(.subheadline)
+                    .font(.system(size: 26, weight: .bold))
+                Text("解锁全部会员功能，会员卡绑定一台设备")
+                    .font(.system(size: 14))
                     .foregroundColor(.secondary)
-                    .multilineTextAlignment(.center)
+                    .padding(.top, 6)
 
-                TextField("请输入会员卡密", text: $cardKey)
-                    .textFieldStyle(.roundedBorder)
-                    .autocapitalization(.none)
-                    .disableAutocorrection(true)
-                    .padding(.horizontal)
+                HStack(spacing: 8) {
+                    TextField("输入会员卡密", text: $cardKey)
+                        .font(.system(.body, design: .monospaced))
+                        .autocorrectionDisabled()
+                        .textInputAutocapitalization(.never)
+                    Button("粘贴") {
+                        if let s = UIPasteboard.general.string {
+                            cardKey = s.trimmingCharacters(in: .whitespacesAndNewlines)
+                        }
+                    }
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundColor(AppTheme.primary)
+                }
+                .padding(.horizontal, 14)
+                .padding(.vertical, 14)
+                .background(Color.white.opacity(0.06))
+                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                .padding(.top, 24)
 
                 if !errorMsg.isEmpty {
-                    Text(errorMsg)
-                        .font(.caption)
-                        .foregroundColor(.red)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal)
+                    Label(errorMsg, systemImage: "exclamationmark.circle.fill")
+                        .font(.system(size: 13))
+                        .foregroundColor(AppTheme.danger)
+                        .padding(.top, 12)
                 }
 
                 Button(action: activate) {
                     HStack {
-                        if license.isVerifying {
-                            ProgressView().tint(.white)
-                        } else {
-                            Image(systemName: "crown.fill")
-                        }
-                        Text(license.isVerifying ? "激活中..." : "激活会员")
+                        if license.isVerifying { ProgressView().tint(.white) }
+                        Text(license.isVerifying ? "激活中" : "激活")
                     }
+                    .frame(maxWidth: .infinity)
                 }
-                .buttonStyle(CloudButtonStyle(color: AppTheme.primary))
-                .disabled(cardKey.isEmpty || license.isVerifying)
-                .padding(.horizontal)
+                .buttonStyle(CloudButtonStyle(color: AppTheme.primary,
+                                              disabled: cardKey.isEmpty || license.isVerifying))
+                .padding(.top, 16)
 
                 Spacer()
             }
-            .padding()
+            .padding(24)
             .navigationTitle("会员激活")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -1002,11 +1003,13 @@ struct MemberActivateView: View {
                 }
             }
         }
+        .preferredColorScheme(AppTheme.isDark ? .dark : .light)
     }
 
     private func activate() {
         errorMsg = ""
-        license.verify(cardKey: cardKey) { success, msg in
+        let key = cardKey.trimmingCharacters(in: .whitespacesAndNewlines)
+        license.verify(cardKey: key) { success, msg in
             if success {
                 if license.memberLevel >= 1 {
                     dismiss()

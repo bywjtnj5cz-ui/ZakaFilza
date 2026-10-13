@@ -8,11 +8,11 @@
   "verify_server_url": "http://156.238.232.172/api/verify.php?action=verify",
   "min_version": "1.0.0",
   "theme": {
-    "primary": "#7C4DFF",
-    "accent": "#00E5FF",
-    "background": "aurora",
-    "corner_radius": 16,
-    "button_height": 54,
+    "primary": "#0A84FF",
+    "accent": "#3E434C",
+    "background": "dark",
+    "corner_radius": 14,
+    "button_height": 50,
     "font_scale": 1.0,
     "card_opacity": 0.85
   },
@@ -23,13 +23,13 @@
     {
       "title": "📁 文件管理",
       "action": "open_file_manager",
-      "color": "#7C4DFF",
+      "color": "#0A84FF",
       "shortcut": "cmd+1"
     },
     {
       "title": "⬇️ 下载中心",
       "action": "open_file_manager",
-      "color": "#00E5FF",
+      "color": "#3E434C",
       "shortcut": "cmd+2"
     },
     {
@@ -52,7 +52,7 @@
     {
       "title": "⚡ 一键美化",
       "action": "download",
-      "color": "#7C4DFF",
+      "color": "#0A84FF",
       "download_url": "",
       "member_only": true,
       "confirm_text": "确定要下载并导入美化包吗？",

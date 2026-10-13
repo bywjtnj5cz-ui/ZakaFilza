@@ -7,16 +7,16 @@ struct AppTheme {
         ConfigManager.shared.config?.theme
     }
 
-    // 主色
+    // 主色 (默认 iOS 系统蓝, 克制不花哨)
     static var primary: Color {
         if let hex = theme?.primary, !hex.isEmpty { return Color(hex: hex) }
-        return Color(red: 0.49, green: 0.30, blue: 1.00)       // 紫色
+        return Color(red: 0.04, green: 0.52, blue: 1.00)
     }
 
-    // 强调色
+    // 强调色 (默认石墨灰, 用于次要按钮)
     static var accent: Color {
         if let hex = theme?.accent, !hex.isEmpty { return Color(hex: hex) }
-        return Color(red: 0.00, green: 0.90, blue: 1.00)        // 霓虹青
+        return Color(red: 0.22, green: 0.24, blue: 0.29)
     }
 
     static var secondary: Color { accent }
@@ -50,36 +50,38 @@ struct AppTheme {
         theme?.background != "light"
     }
 
-    // 背景渐变（三种风格：极光 / 明亮 / 纯黑）
+    // 背景渐变（三种风格：深灰 / 明亮 / 纯黑；默认深灰近纯色, 不抢内容）
     static var backgroundGradient: LinearGradient {
-        switch theme?.background ?? "aurora" {
+        switch theme?.background ?? "dark" {
         case "light":
             return LinearGradient(
                 colors: [
-                    Color(red: 1.00, green: 0.92, blue: 0.95),
-                    Color(red: 0.92, green: 0.95, blue: 1.00)
-                ],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-        case "dark":
-            return LinearGradient(
-                colors: [
-                    Color(red: 0.02, green: 0.02, blue: 0.06),
-                    Color(red: 0.02, green: 0.02, blue: 0.06)
+                    Color(red: 0.96, green: 0.96, blue: 0.97),
+                    Color(red: 0.93, green: 0.93, blue: 0.95)
                 ],
                 startPoint: .top,
                 endPoint: .bottom
             )
-        default: // aurora（深空极光）
+        case "aurora":
+            // 兼容旧配置: 极光渐变收敛为更暗的同色系, 去掉紫
             return LinearGradient(
                 colors: [
-                    Color(red: 0.04, green: 0.04, blue: 0.16),
-                    Color(red: 0.12, green: 0.07, blue: 0.28),
-                    Color(red: 0.04, green: 0.10, blue: 0.24)
+                    Color(red: 0.043, green: 0.051, blue: 0.071),
+                    Color(red: 0.063, green: 0.075, blue: 0.106),
+                    Color(red: 0.043, green: 0.051, blue: 0.071)
                 ],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
+                startPoint: .top,
+                endPoint: .bottom
+            )
+        default: // dark（默认深灰）
+            return LinearGradient(
+                colors: [
+                    Color(red: 0.043, green: 0.051, blue: 0.071),
+                    Color(red: 0.063, green: 0.075, blue: 0.106),
+                    Color(red: 0.043, green: 0.051, blue: 0.071)
+                ],
+                startPoint: .top,
+                endPoint: .bottom
             )
         }
     }

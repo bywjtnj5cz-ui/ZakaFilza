@@ -99,11 +99,11 @@ function default_config() {
         'verify_server_url'  => '',  // 留空, App 用内置默认地址
         'min_version'        => '1.0.0',  // 最低可用版本, 低于此版本 App 启动即锁定 (版本封杀开关)
         'theme' => [
-            'primary'       => '#7C4DFF',
-            'accent'        => '#00E5FF',
-            'background'    => 'aurora',   // aurora | light | dark
-            'corner_radius' => 16,
-            'button_height' => 54,
+            'primary'       => '#0A84FF',
+            'accent'        => '#3E434C',
+            'background'    => 'dark',     // dark | light | aurora(兼容旧值, 效果=dark)
+            'corner_radius' => 14,
+            'button_height' => 50,
             'font_scale'    => 1.0,
             'card_opacity'  => 0.85,
         ],
@@ -111,14 +111,14 @@ function default_config() {
         'kill_message'       => '服务已暂停，请联系管理员',
         'sources'            => [],          // 备用配置线路 (主线路挂了自动切换)
         'buttons' => [
-            ['title' => '📁 文件管理', 'action' => 'open_file_manager', 'color' => '#7C4DFF', 'shortcut' => 'cmd+1'],
-            ['title' => '⬇️ 下载中心', 'action' => 'open_file_manager', 'color' => '#00E5FF', 'shortcut' => 'cmd+2'],
+            ['title' => '📁 文件管理', 'action' => 'open_file_manager', 'color' => '#0A84FF', 'shortcut' => 'cmd+1'],
+            ['title' => '⬇️ 下载中心', 'action' => 'open_file_manager', 'color' => '#3E434C', 'shortcut' => 'cmd+2'],
             ['title' => '🔄 更新地址', 'action' => 'update_url',         'color' => '#5CC873'],
             ['title' => '🔔 查看公告', 'action' => 'announcement',      'color' => '#FFA940'],
             ['title' => '🔍 目录检测', 'action' => 'game_diagnostic', 'color' => '#FF6B9D'],
         ],
         'member_buttons' => [
-            ['title' => '⚡ 一键美化', 'action' => 'download',     'color' => '#7C4DFF', 'download_url' => '', 'member_only' => true, 'confirm_text' => '确定要下载并导入美化包吗？', 'params' => ['target_dir' => '@game:paks']],
+            ['title' => '⚡ 一键美化', 'action' => 'download',     'color' => '#0A84FF', 'download_url' => '', 'member_only' => true, 'confirm_text' => '确定要下载并导入美化包吗？', 'params' => ['target_dir' => '@game:paks']],
             ['title' => '💎 高级配置', 'action' => 'run_script',  'color' => '#00BCD4', 'member_only' => true, 'script' => "// 云端 JS 脚本示例\nconsole.log('高级配置脚本已执行'); log('这是原生控制台输出');"],
             ['title' => '🎮 游戏目录', 'action' => 'open_file_manager', 'color' => '#FF4081', 'member_only' => true, 'path' => '@game:paks'],
             ['title' => '🗑️ 卸载美化', 'action' => 'uninstall',   'color' => '#F44336', 'member_only' => true, 'confirm_text' => '确定要卸载美化吗？将删除已配置的美化文件。', 'paths' => ['/var/mobile/Containers/Data/Application/Documents/Beautify']],
@@ -876,13 +876,13 @@ textarea { width: 100%; min-height: 320px; font-family: SFMono-Regular, Menlo, m
 
   <div class="card">
     <h3>🎨 外观主题</h3>
-    <div class="row"><label style="min-width:110px">主色</label><input id="c-theme-primary" placeholder="#7C4DFF"></div>
-    <div class="row"><label style="min-width:110px">强调色</label><input id="c-theme-accent" placeholder="#00E5FF"></div>
+    <div class="row"><label style="min-width:110px">主色</label><input id="c-theme-primary" placeholder="#0A84FF"></div>
+    <div class="row"><label style="min-width:110px">强调色</label><input id="c-theme-accent" placeholder="#3E434C"></div>
     <div class="row"><label style="min-width:110px">背景风格</label>
       <select id="c-theme-background">
-        <option value="aurora">深空极光</option>
+        <option value="dark">深灰（默认）</option>
         <option value="light">明亮</option>
-        <option value="dark">纯黑</option>
+        <option value="aurora">深灰·经典(旧极光)</option>
       </select>
     </div>
     <div class="row"><label style="min-width:110px">圆角</label><input id="c-theme-corner_radius" type="number" value="16"></div>
