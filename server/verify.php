@@ -130,7 +130,7 @@ function default_config() {
             'targets' => [
                 ['key' => 'paks',       'label' => 'Paks',       'rel' => 'Paks'],
                 ['key' => 'avatarpaks', 'label' => 'AvatarPaks', 'rel' => 'Paks/avatarpaks'],
-                ['key' => 'savegame',   'label' => 'SaveGame',   'rel' => 'Savegame'],
+                ['key' => 'savegame',   'label' => 'SaveGames',  'rel' => 'SaveGames'],
             ],
         ],
         // 首页轮播图 (image_url 图片直链, link_url 点击跳转, 可留空)

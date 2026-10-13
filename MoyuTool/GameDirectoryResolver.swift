@@ -2,7 +2,7 @@ import Foundation
 
 // 游戏目录解析器：把云控配置里的 "@game:<key>" 虚拟路径解析成设备上的绝对路径。
 // 客户端只负责「按 bundle id 定位容器根」这一技术原语，具体的 Saved 前缀、子目录
-// (Paks / avatarpaks / Savegame 等) 全部由服务端 game_dirs 配置下发，不写死任何业务路径。
+// (Paks / avatarpaks / SaveGames 等) 全部由服务端 game_dirs 配置下发，不写死任何业务路径。
 enum GameDirectoryResolver {
 
     // 定位过程的完整诊断信息 (目录检测页面展示用)

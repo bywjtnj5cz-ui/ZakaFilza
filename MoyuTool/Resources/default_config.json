@@ -90,7 +90,7 @@
     "targets": [
       { "key": "paks", "label": "Paks", "rel": "Paks" },
       { "key": "avatarpaks", "label": "AvatarPaks", "rel": "Paks/avatarpaks" },
-      { "key": "savegame", "label": "SaveGame", "rel": "Savegame" }
+      { "key": "savegame", "label": "SaveGames", "rel": "SaveGames" }
     ]
   },
   "banners": [],
