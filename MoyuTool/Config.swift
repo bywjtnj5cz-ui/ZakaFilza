@@ -20,6 +20,7 @@ struct AppConfig: Codable {
     var buttons: [ConfigButton]
     var memberButtons: [ConfigButton]  // 会员专属按钮
     var downloadShortcuts: [DownloadShortcut] // 一键下载直链
+    var gameDirs: GameDirsConfig?      // 游戏目录定位 (和平精英等)
 
     enum CodingKeys: String, CodingKey {
         case appName = "app_name"
@@ -39,6 +40,33 @@ struct AppConfig: Codable {
         case buttons
         case memberButtons = "member_buttons"
         case downloadShortcuts = "download_shortcuts"
+        case gameDirs = "game_dirs"
+    }
+}
+
+// 游戏目录定位配置 (云端控制, 客户端只按 bundle id 解析容器根路径)
+struct GameDirsConfig: Codable {
+    var bundleID: String          // 目标 App 包名, 如 com.tencent.tmgp.pubgmhd
+    var savedRel: String?         // "Saved" 目录相对容器根的路径, 如 Documents/ShadowTrackerExtra/Saved
+    var targets: [GameDirTarget]  // 可选子目录列表
+
+    enum CodingKeys: String, CodingKey {
+        case bundleID = "bundle_id"
+        case savedRel = "saved_rel"
+        case targets
+    }
+}
+
+struct GameDirTarget: Codable, Identifiable {
+    var id: String { key }
+    var key: String     // 唯一标识, 供 @game:<key> 引用
+    var label: String   // 显示名
+    var rel: String     // 相对 savedRel 的子路径
+
+    enum CodingKeys: String, CodingKey {
+        case key
+        case label
+        case rel
     }
 }
 

@@ -113,12 +113,21 @@ function default_config() {
             ['title' => '🔔 查看公告', 'action' => 'announcement',      'color' => '#FFA940'],
         ],
         'member_buttons' => [
-            ['title' => '⚡ 一键美化', 'action' => 'download',     'color' => '#7C4DFF', 'download_url' => '', 'member_only' => true, 'confirm_text' => '确定要下载并导入美化包吗？'],
+            ['title' => '⚡ 一键美化', 'action' => 'download',     'color' => '#7C4DFF', 'download_url' => '', 'member_only' => true, 'confirm_text' => '确定要下载并导入美化包吗？', 'params' => ['target_dir' => '@game:paks']],
             ['title' => '💎 高级配置', 'action' => 'run_script',  'color' => '#00BCD4', 'member_only' => true, 'script' => "// 云端 JS 脚本示例\nconsole.log('高级配置脚本已执行'); log('这是原生控制台输出');"],
-            ['title' => '🎮 游戏目录', 'action' => 'open_file_manager', 'color' => '#FF4081', 'member_only' => true, 'path' => '/var/mobile/Containers/Data/Application'],
+            ['title' => '🎮 游戏目录', 'action' => 'open_file_manager', 'color' => '#FF4081', 'member_only' => true, 'path' => '@game:paks'],
             ['title' => '🗑️ 卸载美化', 'action' => 'uninstall',   'color' => '#F44336', 'member_only' => true, 'confirm_text' => '确定要卸载美化吗？将删除已配置的美化文件。', 'paths' => ['/var/mobile/Containers/Data/Application/Documents/Beautify']],
         ],
         'download_shortcuts' => [],
+        'game_dirs' => [
+            'bundle_id' => 'com.tencent.tmgp.pubgmhd',
+            'saved_rel' => 'Documents/ShadowTrackerExtra/Saved',
+            'targets' => [
+                ['key' => 'paks',       'label' => 'Paks',       'rel' => 'Paks'],
+                ['key' => 'avatarpaks', 'label' => 'AvatarPaks', 'rel' => 'Paks/avatarpaks'],
+                ['key' => 'savegame',   'label' => 'SaveGame',   'rel' => 'Savegame'],
+            ],
+        ],
     ];
 }
 
@@ -142,7 +151,7 @@ function load_config() {
 function save_config_file($cfg) {
     // 只允许已知字段
     $allowed = ['app_name','qq_group','wechat_official','version','announcement',
-                'config_url','verify_server_url','min_version','buttons','member_buttons','download_shortcuts',
+                'config_url','verify_server_url','min_version','buttons','member_buttons','download_shortcuts','game_dirs',
                 'theme','kill_switch','kill_message','sources'];
     $clean = [];
     foreach ($allowed as $k) {
@@ -896,6 +905,18 @@ function renderButtons(fieldId, arr) {
         <input placeholder="open_url (action=open_url 时)" value="${esc(b.open_url ?? '')}" data-f="open_url">
         <label style="font-size:12px"><input type="checkbox" data-f="member_only" ${b.member_only ? 'checked' : ''}> 会员专属</label>
       </div>
+      <div class="row">
+        <input placeholder="path 跳转目录（支持 @game:paks）" value="${esc(b.path ?? '')}" data-f="path">
+      </div>
+      <div class="row">
+        <input placeholder="target_dir 下载目录（支持 @game:paks）" value="${esc(b.params?.target_dir ?? '')}" data-f="target_dir">
+      </div>
+      <div class="row">
+        <input placeholder="confirm_text 二次确认文案" value="${esc(b.confirm_text ?? '')}" data-f="confirm_text">
+      </div>
+      <div class="row">
+        <input placeholder="paths 逗号分隔 (uninstall 用)" value="${esc((b.paths ?? []).join(', '))}" data-f="paths">
+      </div>
     `;
     container.appendChild(div);
   });
@@ -914,6 +935,12 @@ function collectButtons(fieldId) {
     const sp = item.querySelector('[data-f="script_path"]').value; if (sp) b.script_path = sp;
     const ou = item.querySelector('[data-f="open_url"]').value; if (ou) b.open_url = ou;
     b.member_only = item.querySelector('[data-f="member_only"]').checked;
+    const path = item.querySelector('[data-f="path"]').value; if (path) b.path = path;
+    const targetDir = item.querySelector('[data-f="target_dir"]').value; if (targetDir) b.params = { target_dir: targetDir };
+    const confirmText = item.querySelector('[data-f="confirm_text"]').value; if (confirmText) b.confirm_text = confirmText;
+    const pathsRaw = item.querySelector('[data-f="paths"]').value;
+    const paths = pathsRaw.split(',').map(s => s.trim()).filter(s => s);
+    if (paths.length) b.paths = paths;
     out.push(b);
   });
   return out;

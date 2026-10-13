@@ -298,7 +298,9 @@ struct HomeView: View {
 
         case "download":
             if let url = btn.downloadURL {
-                downloadFile(url: url, filename: btn.title)
+                // 下载目标目录：优先按钮配置的 target_dir，默认导入和平精英 Paks
+                let targetDir = btn.params?["target_dir"] ?? "@game:paks"
+                downloadFile(url: url, filename: btn.title, targetDir: targetDir)
             }
 
         case "update_url":
@@ -335,15 +337,13 @@ struct HomeView: View {
         showFileManager = true
     }
 
-    // MARK: - 下载文件
-    private func downloadFile(url: String, filename: String) {
+    // MARK: - 下载文件 (导入到指定目录, 默认和平精英 Paks)
+    private func downloadFile(url: String, filename: String, targetDir: String? = nil) {
         showToast("开始下载: \(filename)")
         guard let link = URL(string: url) else {
             showToast("URL 无效")
             return
         }
-        let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-        let dest = docs.appendingPathComponent(filename)
 
         URLSession.shared.downloadTask(with: link) { tempURL, _, error in
             if let error = error {
@@ -352,8 +352,28 @@ struct HomeView: View {
             }
             guard let tempURL = tempURL else { return }
             do {
-                try FileManager.default.moveItem(at: tempURL, to: dest)
-                DispatchQueue.main.async { showToast("下载完成: \(filename)") }
+                let data = try Data(contentsOf: tempURL)
+                let savedName = link.lastPathComponent.isEmpty ? filename : link.lastPathComponent
+
+                if let td = targetDir, !td.isEmpty {
+                    guard let handle = ExploitManager.shared.fileHandle else {
+                        DispatchQueue.main.async { showToast("请先进入文件管理器获得文件系统权限") }
+                        return
+                    }
+                    guard let resolved = GameDirectoryResolver.resolve(td, fileHandle: handle) else {
+                        DispatchQueue.main.async { showToast("未定位到目标目录: \(td)") }
+                        return
+                    }
+                    try handle.createDirectory(at: resolved)
+                    let dest = (resolved as NSString).appendingPathComponent(savedName)
+                    try handle.writeFile(at: dest, data: data)
+                    DispatchQueue.main.async { showToast("已导入: \(savedName)") }
+                } else {
+                    let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+                    let dest = docs.appendingPathComponent(savedName)
+                    try data.write(to: dest)
+                    DispatchQueue.main.async { showToast("下载完成: \(savedName)") }
+                }
             } catch {
                 DispatchQueue.main.async { showToast("保存失败: \(error.localizedDescription)") }
             }

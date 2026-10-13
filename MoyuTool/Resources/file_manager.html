@@ -429,7 +429,7 @@ async function downloadURL() {
         const result = await callNative('download', {
             url: url,
             targetDir: currentPath,
-            filename: filename || undefined,
+            filename: filename || '',
             autoImport: true
         });
         showToast(`下载成功: ${formatSize(result.size)} -> ${result.path.split('/').pop()}`);
@@ -445,6 +445,7 @@ async function quickDownload(url, targetDir, name) {
         const result = await callNative('download', {
             url: url,
             targetDir: targetDir,
+            filename: name,
             autoImport: true
         });
         showToast(`导入成功: ${name}`);

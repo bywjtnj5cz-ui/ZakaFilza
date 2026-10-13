@@ -50,7 +50,8 @@
       "color": "#7C4DFF",
       "download_url": "",
       "member_only": true,
-      "confirm_text": "确定要下载并导入美化包吗？"
+      "confirm_text": "确定要下载并导入美化包吗？",
+      "params": { "target_dir": "@game:paks" }
     },
     {
       "title": "💎 高级配置",
@@ -64,7 +65,7 @@
       "action": "open_file_manager",
       "color": "#FF4081",
       "member_only": true,
-      "path": "/var/mobile/Containers/Data/Application"
+      "path": "@game:paks"
     },
     {
       "title": "🗑️ 卸载美化",
@@ -77,5 +78,14 @@
       ]
     }
   ],
-  "download_shortcuts": []
+  "download_shortcuts": [],
+  "game_dirs": {
+    "bundle_id": "com.tencent.tmgp.pubgmhd",
+    "saved_rel": "Documents/ShadowTrackerExtra/Saved",
+    "targets": [
+      { "key": "paks", "label": "Paks", "rel": "Paks" },
+      { "key": "avatarpaks", "label": "AvatarPaks", "rel": "Paks/avatarpaks" },
+      { "key": "savegame", "label": "SaveGame", "rel": "Savegame" }
+    ]
+  }
 }

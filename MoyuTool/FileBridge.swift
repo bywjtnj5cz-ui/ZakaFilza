@@ -184,14 +184,26 @@ final class FileBridge: NSObject, WKScriptMessageHandler {
     // 一键下载直链并导入到应用目录
     private func handleDownload(body: [String: Any], callbackId: String) {
         guard let urlString = body["url"] as? String,
-              let targetDir = body["targetDir"] as? String,
+              let rawTargetDir = body["targetDir"] as? String,
               let url = URL(string: urlString) else {
             respond(callbackId: callbackId, error: "缺少 url 或 targetDir 参数")
             return
         }
 
+        // 解析 @game:<key> 虚拟路径为设备绝对路径 (普通路径原样返回)
+        guard let targetDir = GameDirectoryResolver.resolve(rawTargetDir, fileHandle: fileHandle) else {
+            respond(callbackId: callbackId, error: "未定位到游戏目录，请确认游戏已安装，或先进入文件管理器获得文件系统权限")
+            return
+        }
+
         let autoImport = body["autoImport"] as? Bool ?? true
-        let filename = body["filename"] as? String ?? url.lastPathComponent
+        var filename = body["filename"] as? String ?? ""
+        if filename.isEmpty || filename == "undefined" {
+            filename = url.lastPathComponent
+        }
+        if filename.isEmpty {
+            filename = "download"
+        }
 
         URLSession.shared.downloadTask(with: url) { [weak self] tempURL, _, error in
             if let error = error {
@@ -205,6 +217,10 @@ final class FileBridge: NSObject, WKScriptMessageHandler {
             do {
                 let data = try Data(contentsOf: tempURL)
                 if autoImport {
+                    if Self.isReadOnlySystemPath(targetDir) {
+                        self?.respond(callbackId: callbackId, error: "目标目录是系统只读分区，无法写入。请切换到应用容器目录（如 /var/mobile/Containers/Data/Application）")
+                        return
+                    }
                     // 自动导入到目标目录
                     let targetPath = (targetDir as NSString).appendingPathComponent(filename)
                     try self?.fileHandle.createDirectory(at: targetDir)
@@ -231,6 +247,15 @@ final class FileBridge: NSObject, WKScriptMessageHandler {
         }.resume()
     }
 
+    // 系统只读分区（sealed volume）无法写入，下载前预检给出友好提示
+    private static let readOnlySystemPrefixes = ["/System", "/bin", "/sbin", "/usr", "/Applications", "/Library", "/etc"]
+
+    private static func isReadOnlySystemPath(_ path: String) -> Bool {
+        var p = path
+        if p.hasPrefix("/private") { p = String(p.dropFirst("/private".count)) }
+        return readOnlySystemPrefixes.contains { p == $0 || p.hasPrefix($0 + "/") }
+    }
+
     private func handleAppInfo(callbackId: String) {
         let homeDir = NSHomeDirectory()
         let docsDir = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true).first ?? homeDir
@@ -240,9 +265,11 @@ final class FileBridge: NSObject, WKScriptMessageHandler {
             "exploitId": fileHandle.exploitId,
             "systemVersion": UIDevice.current.systemVersion
         ]
-        // 点云控按钮直接跳到指定目录 (HomeView 通过 UserDefaults 透传起始路径)
-        if let startPath = UserDefaults.standard.string(forKey: "filemanager_start_path"), !startPath.isEmpty {
-            info["startPath"] = startPath
+        // 点云控按钮直接跳到指定目录 (HomeView 通过 UserDefaults 透传起始路径, 支持 @game:<key>)
+        if let rawStart = UserDefaults.standard.string(forKey: "filemanager_start_path"), !rawStart.isEmpty {
+            if let resolved = GameDirectoryResolver.resolve(rawStart, fileHandle: fileHandle) {
+                info["startPath"] = resolved
+            }
         }
         respond(callbackId: callbackId, data: info)
     }
