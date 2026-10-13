@@ -835,14 +835,14 @@ textarea { width: 100%; min-height: 320px; font-family: SFMono-Regular, Menlo, m
     <div class="row">
       数量 <input id="gen-count" type="number" value="1" min="1" max="100" style="max-width:80px">
       有效天数 <input id="gen-days" type="number" value="30" style="max-width:80px">
-      会员等级 <select id="gen-level"><option value="0">免费(不绑设备)</option><option value="1">会员(一机一码)</option></select>
+      会员等级 <select id="gen-level"><option value="0">免费(不绑设备)</option><option value="1">会员(一机一码)</option><option value="2">耳机(一机一码)</option></select>
       备注 <input id="gen-note" placeholder="备注(可选)">
       <button onclick="genCard()">生成</button>
     </div>
     <div id="gen-result" class="mono" style="white-space:pre-wrap;background:#f9f9f9;padding:10px;border-radius:6px;margin-top:8px;display:none"></div>
   </div>
   <div class="card">
-    <h3>📋 卡密列表</h3>
+    <h3>📋 卡密列表 <button class="gray" onclick="printCards()" style="float:right">🖨️ 打印</button></h3>
     <div class="row">
       <input id="search" placeholder="搜索卡密/UUID/备注" onkeydown="if(event.key==='Enter')loadList()">
       <button onclick="loadList()">搜索</button>
@@ -852,7 +852,7 @@ textarea { width: 100%; min-height: 320px; font-family: SFMono-Regular, Menlo, m
     <div style="overflow-x:auto">
       <table>
         <thead><tr>
-          <th>卡密</th><th>UUID</th><th>设备</th><th>系统</th><th>等级</th><th>到期时间</th><th>状态</th><th>操作</th>
+          <th>卡密</th><th>UUID</th><th>设备</th><th>系统</th><th>等级</th><th>到期时间</th><th>激活时间</th><th>备注</th><th>状态</th><th>操作</th>
         </tr></thead>
         <tbody id="card-list"></tbody>
       </table>
@@ -1044,6 +1044,19 @@ async function genCard() {
   loadStats(); loadList();
 }
 
+// member_level 数字 → 档位名
+function levelName(lv) {
+  if (lv >= 2) return '耳机';
+  if (lv >= 1) return '会员';
+  return '免费';
+}
+// 档位名 → tag 样式
+function levelTag(lv) {
+  if (lv >= 2) return '<span class="tag" style="background:#e8d5ff;color:#6a1fb0">耳机</span>';
+  if (lv >= 1) return '<span class="tag blue">会员</span>';
+  return '<span class="tag gray">免费</span>';
+}
+
 async function loadList() {
   const q = document.getElementById('search').value;
   const onlyActive = document.getElementById('onlyActive').checked ? '1' : '0';
@@ -1053,7 +1066,7 @@ async function loadList() {
   const tbody = document.getElementById('card-list');
   tbody.innerHTML = '';
   if (r.cards.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#999;padding:20px">无数据</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;color:#999;padding:20px">无数据</td></tr>';
     return;
   }
   for (const c of r.cards) {
@@ -1070,12 +1083,53 @@ async function loadList() {
       <td class="mono" style="max-width:180px;overflow:hidden;text-overflow:ellipsis">${esc(c.uuid) || '-'}</td>
       <td>${esc(c.model) || '-'}</td>
       <td>${esc(c.system_name) || ''} ${esc(c.system_version) || ''}</td>
-      <td>${c.member_level >= 1 ? '会员' : '免费'}</td>
+      <td>${levelTag(c.member_level)}</td>
       <td>${fmtDate(c.expire_at)}</td>
+      <td>${c.activated_at ? fmtDate(c.activated_at) : '-'}</td>
+      <td style="max-width:120px;overflow:hidden;text-overflow:ellipsis">${esc(c.note) || '-'}</td>
       <td>${statusTag}</td>
       <td>${actions.join('')}</td>`;
     tbody.appendChild(tr);
   }
+}
+
+// 打印全部卡密: 弹出可打印视图, 包含卡密/等级/到期/激活/UUID/设备/备注/状态
+function printCards() {
+  const rows = document.querySelectorAll('#card-list tr');
+  if (rows.length === 0 || rows[0].querySelector('td[colspan]')) { alert('没有数据'); return; }
+  let html = `<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><title>卡密列表</title>
+  <style>
+    body { font-family: "PingFang SC", sans-serif; padding: 20px; }
+    h1 { text-align: center; font-size: 20px; margin-bottom: 8px; }
+    .info { text-align: center; font-size: 12px; color: #888; margin-bottom: 16px; }
+    table { width: 100%; border-collapse: collapse; font-size: 11px; }
+    th, td { border: 1px solid #ccc; padding: 4px 6px; text-align: left; }
+    th { background: #f0f0f0; font-weight: 600; }
+    .mono { font-family: Menlo, monospace; font-size: 10px; }
+  </style></head><body>
+  <h1>墨鱼Tool 卡密列表</h1>
+  <div class="info">打印时间: ${new Date().toLocaleString('zh-CN')}</div>
+  <table><thead><tr>
+    <th>卡密</th><th>档位</th><th>状态</th><th>到期时间</th><th>激活时间</th><th>绑定设备(UUID)</th><th>设备型号</th><th>系统版本</th><th>备注</th>
+  </tr></thead><tbody>`;
+  rows.forEach(tr => {
+    const tds = tr.querySelectorAll('td');
+    const key = tds[0].textContent;
+    const uuid = tds[1].textContent;
+    const model = tds[2].textContent;
+    const sys = tds[3].textContent;
+    const level = tds[4].textContent;
+    const expire = tds[5].textContent;
+    const activated = tds[6].textContent;
+    const note = tds[7].textContent;
+    const status = tds[8].textContent;
+    html += `<tr><td class="mono">${key}</td><td>${level}</td><td>${status}</td><td>${expire}</td><td>${activated}</td><td class="mono">${uuid}</td><td>${model}</td><td>${sys}</td><td>${note}</td></tr>`;
+  });
+  html += '</tbody></table></body></html>';
+  const w = window.open('', '_blank');
+  w.document.write(html);
+  w.document.close();
+  setTimeout(() => w.print(), 500);
 }
 
 async function unbind(key) {
