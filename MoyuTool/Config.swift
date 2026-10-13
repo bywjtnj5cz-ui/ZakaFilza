@@ -107,12 +107,18 @@ struct ConfigButton: Codable, Identifiable {
     var script: String?         // action=run_script 时的内联脚本 (云端直发)
     var openURL: String?        // action=open_url 时的链接
     var memberOnly: Bool?       // 是否会员专属
+    var minMemberLevel: Int?    // 最低会员等级: 不设=按 memberOnly; 1=会员及以上; 2=仅耳机
     var shortcut: String?       // 快捷键, 如 "cmd+1" / "shift+r" / "opt+space"
     var confirmText: String?    // 二次确认文案 (留空则不确认)
     var path: String?           // 点按钮直接跳到该目录
     var paths: [String]?        // 路径数组 (uninstall 等批量操作使用)
     var params: [String: String]? // 其它参数 (如 target_dir)
     var unzip: Bool?            // true = 下载后解压导入包内文件 (zip 用)
+
+    // 实际所需等级: min_member_level 优先, 否则 member_only=true → 1, 否则 0
+    var requiredLevel: Int {
+        minMemberLevel ?? ((memberOnly ?? false) ? 1 : 0)
+    }
 
     enum CodingKeys: String, CodingKey {
         case title
@@ -123,6 +129,7 @@ struct ConfigButton: Codable, Identifiable {
         case script
         case openURL = "open_url"
         case memberOnly = "member_only"
+        case minMemberLevel = "min_member_level"
         case shortcut
         case confirmText = "confirm_text"
         case path
@@ -181,7 +188,13 @@ struct ConfigCategory: Codable, Identifiable {
     var type: String
     var icon: String?           // SF Symbol 名称, 可空
     var memberOnly: Bool        // 会员专属分类 (未解锁置灰)
+    var minMemberLevel: Int?    // 最低会员等级: 不设=按 memberOnly; 1=会员及以上; 2=仅耳机
     var files: [ConfigFileItem]
+
+    // 实际所需等级: min_member_level 优先, 否则 member_only=true → 1, 否则 0
+    var requiredLevel: Int {
+        minMemberLevel ?? (memberOnly ? 1 : 0)
+    }
 
     enum CodingKeys: String, CodingKey {
         case id
@@ -189,6 +202,7 @@ struct ConfigCategory: Codable, Identifiable {
         case type
         case icon
         case memberOnly = "member_only"
+        case minMemberLevel = "min_member_level"
         case files
     }
 }

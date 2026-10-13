@@ -376,7 +376,9 @@ struct HomeView: View {
     }
 
     private func categorySection(_ cat: ConfigCategory) -> some View {
-        let locked = cat.memberOnly && license.memberLevel < 1
+        let requiredLevel = cat.requiredLevel
+        let locked = requiredLevel > 0 && license.memberLevel < requiredLevel
+        let lockLabel = requiredLevel >= 2 ? "耳机" : "会员"
         return VStack(alignment: .leading, spacing: 14) {
             HStack(spacing: 10) {
                 if let icon = cat.icon, !icon.isEmpty {
@@ -390,11 +392,11 @@ struct HomeView: View {
                 Text(cat.title)
                     .font(.system(size: 17, weight: .bold, design: .rounded))
                     .foregroundColor(AppTheme.textPrimary)
-                if cat.memberOnly {
+                if cat.requiredLevel > 0 {
                     HStack(spacing: 3) {
                         Image(systemName: "lock.fill")
                             .font(.system(size: 9))
-                        Text("会员")
+                        Text(lockLabel)
                     }
                     .font(.system(size: 11, weight: .medium))
                     .foregroundColor(AppTheme.warning)
@@ -530,11 +532,15 @@ struct HomeView: View {
 
     // MARK: - 云端按钮
     private func cloudButton(_ btn: ConfigButton, isMember: Bool = false) -> some View {
-        let locked = isMember && license.memberLevel < 1
+        // member_buttons 区的按钮按 member_only 默认等级1, 可用 min_member_level=2 提到仅耳机
+        let baseLevel = btn.requiredLevel
+        let requiredLevel = isMember ? max(baseLevel, 1) : baseLevel
+        let locked = requiredLevel > 0 && license.memberLevel < requiredLevel
+        let lockLabel = requiredLevel >= 2 ? "耳机" : "会员"
         let color = btn.color.flatMap { Color(hex: $0) } ?? AppTheme.primary
 
         return Button(action: {
-            if isMember && locked {
+            if locked {
                 activeSheet = .memberActivate
             } else {
                 handleButton(btn)
@@ -586,7 +592,7 @@ struct HomeView: View {
                     HStack(spacing: 3) {
                         Image(systemName: "lock.fill")
                             .font(.system(size: 9))
-                        Text("会员")
+                        Text(lockLabel)
                     }
                     .font(.system(size: 11, weight: .medium))
                     .foregroundColor(.white.opacity(0.9))

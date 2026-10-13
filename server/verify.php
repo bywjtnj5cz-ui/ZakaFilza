@@ -935,7 +935,7 @@ textarea { width: 100%; min-height: 320px; font-family: SFMono-Regular, Menlo, m
   <div class="card">
     <h3>🗂️ 配置分类树（美化 / 画质 / 功能）</h3>
     <div style="font-size:12px;color:#888;margin-bottom:6px">
-      结构为分类数组，每项含 id / title / type / icon / member_only / files。files 每项字段：id、name、desc、download_url、target_dir（如 @game:paks）、unzip（true = zip 下载后自动解压导入包内文件）、size、version、icon。
+      结构为分类数组，每项含 id / title / type / icon / member_only / min_member_level / files。min_member_level：不设=按 member_only；1=会员及以上可见；2=仅耳机档位可见。files 每项字段：id、name、desc、download_url、target_dir（如 @game:paks）、unzip（true = zip 下载后自动解压导入包内文件）、size、version、icon。
     </div>
     <textarea id="c-raw-categories" style="min-height:260px"></textarea>
   </div>
@@ -1235,6 +1235,13 @@ function renderButtons(fieldId, arr) {
       <div class="row">
         <input placeholder="open_url (action=open_url 时)" value="${esc(b.open_url ?? '')}" data-f="open_url">
         <label style="font-size:12px"><input type="checkbox" data-f="member_only" ${b.member_only ? 'checked' : ''}> 会员专属</label>
+        <label style="font-size:12px">最低等级
+          <select data-f="min_member_level" style="max-width:150px;padding:4px 8px">
+            <option value="" ${b.min_member_level == null ? 'selected' : ''}>默认(按会员开关)</option>
+            <option value="1" ${b.min_member_level === 1 ? 'selected' : ''}>会员及以上</option>
+            <option value="2" ${b.min_member_level === 2 ? 'selected' : ''}>仅耳机</option>
+          </select>
+        </label>
       </div>
       <div class="row">
         <input placeholder="path 跳转目录（支持 @game:paks）" value="${esc(b.path ?? '')}" data-f="path">
@@ -1267,6 +1274,8 @@ function collectButtons(fieldId) {
     const sp = item.querySelector('[data-f="script_path"]').value; if (sp) b.script_path = sp;
     const ou = item.querySelector('[data-f="open_url"]').value; if (ou) b.open_url = ou;
     b.member_only = item.querySelector('[data-f="member_only"]').checked;
+    const ml = item.querySelector('[data-f="min_member_level"]').value;
+    if (ml !== '') b.min_member_level = parseInt(ml);
     const path = item.querySelector('[data-f="path"]').value; if (path) b.path = path;
     const targetDir = item.querySelector('[data-f="target_dir"]').value; if (targetDir) b.params = { target_dir: targetDir };
     if (item.querySelector('[data-f="unzip"]').checked) b.unzip = true;
