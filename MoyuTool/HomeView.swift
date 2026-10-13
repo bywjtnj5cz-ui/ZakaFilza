@@ -691,20 +691,55 @@ struct HomeView: View {
         var lines: [String] = []
         lines.append("【和平精英目录检测】")
         lines.append("bundle_id: \(gd.bundleID)")
+        if let name = exploit.availableExploits.first(where: { $0.id == exploit.selectedExploitId })?.name {
+            lines.append("漏洞方式: \(name) | iOS \(store.systemVersion)")
+        }
+        lines.append("")
 
-        // 1. 定位容器根
-        guard let root = GameDirectoryResolver.containerRoot(bundleID: gd.bundleID, fileHandle: handle) else {
+        // 1. 定位容器根 (MCM 枚举 → 句柄扫描, 带完整诊断)
+        let report = GameDirectoryResolver.lookup(bundleID: gd.bundleID, fileHandle: handle)
+        guard let root = report.root else {
             lines.append("❌ 未定位到应用容器")
-            lines.append("   检查项:")
-            lines.append("   1. 本机是否已安装 和平精英(国服)")
-            lines.append("   2. 后台 bundle_id 是否匹配: \(gd.bundleID)")
-            lines.append("      (国际服是 com.tencent.ig, 体验服 bundle 也不同)")
-            lines.append("   3. 重新运行漏洞利用后再点检测")
+            lines.append("")
+            lines.append("—— 诊断详情 ——")
+            lines.append("MCM bridge: \(report.mcmAvailable ? "可用" : "不可用")")
+            if report.mcmAvailable {
+                lines.append("MCM 枚举容器数: \(report.mcmEnumCount)")
+                lines.append("MCM 租约成功数: \(report.mcmLeaseOk)")
+            }
+            for n in report.notes {
+                lines.append("· \(n)")
+            }
+            if report.scanTried {
+                if report.scanFailed {
+                    lines.append("句柄扫描: 失败 (\(report.scanError))")
+                } else {
+                    lines.append("句柄扫描: 共扫 \(report.scanEntryCount) 个容器")
+                }
+            }
+            lines.append("")
+            if report.tencentBundles.isEmpty {
+                lines.append("⚠️ 未发现任何腾讯系应用容器")
+                lines.append("→ 本机很可能没有安装和平精英")
+                lines.append("→ 或游戏容器刚安装, 重启 App 后再试")
+            } else {
+                lines.append("本机检测到的腾讯系应用:")
+                for b in report.tencentBundles {
+                    lines.append("   \(b)")
+                }
+                lines.append("→ 上面没有 com.tencent.tmgp.pubgmhd 说明装的版本不对")
+                lines.append("  (国际服 com.tencent.ig / 体验服 bundle 不同)")
+            }
+            lines.append("")
+            lines.append("→ 到后台「游戏目录」把 bundle_id 改成上面列出的实际包名即可")
             scriptLogText = lines.joined(separator: "\n")
             activeSheet = .scriptLog
             return
         }
         lines.append("✅ 容器根: \(root)")
+        if report.notes.contains("命中会话缓存") {
+            lines.append("   (来自会话缓存)")
+        }
 
         var base = root
         if let sr = gd.savedRel, !sr.isEmpty {

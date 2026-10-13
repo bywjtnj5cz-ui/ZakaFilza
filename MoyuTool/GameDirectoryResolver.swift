@@ -5,6 +5,24 @@ import Foundation
 // (Paks / avatarpaks / Savegame 等) 全部由服务端 game_dirs 配置下发，不写死任何业务路径。
 enum GameDirectoryResolver {
 
+    // 定位过程的完整诊断信息 (目录检测页面展示用)
+    struct LookupReport {
+        var root: String? = nil
+        var mcmAvailable = false       // MCM bridge 是否可用 (FilzaSlop)
+        var mcmEnumCount = 0           // MCM 枚举到的容器数量
+        var mcmLeaseOk = 0             // MCM 租约成功的容器数量
+        var scanTried = false          // 是否尝试了句柄扫描 (FilzaJailedDS)
+        var scanEntryCount = 0         // 扫描到的容器数量
+        var scanFailed = false         // 扫描是否失败
+        var scanError = ""             // 扫描失败原因
+        var tencentBundles: [String] = [] // 扫描中看到的腾讯系应用包名 (最多 10 个)
+        var notes: [String] = []       // 附加说明
+    }
+
+    // 会话级缓存: bundleID -> 容器根目录。
+    // MCM 定位需要逐个容器申请租约, 枚举几百个容器较慢, 缓存避免每次下载都重复枚举。
+    private static var cachedRoots: [String: String] = [:]
+
     /// 解析路径。普通路径原样返回；"@game:<key>" 解析为容器内的绝对目录，失败返回 nil。
     static func resolve(_ raw: String, fileHandle: FileAccessHandle?) -> String? {
         guard raw.hasPrefix("@game:") else { return raw }
@@ -25,57 +43,85 @@ enum GameDirectoryResolver {
     }
 
     /// 按 bundle id 定位 App 数据容器根路径。
-    /// 优先走 MCM 枚举 (FilzaSlop 的 sandbox extension)，失败则用句柄扫描容器目录读 metadata plist 兜底。
     static func containerRoot(bundleID: String, fileHandle: FileAccessHandle?) -> String? {
-        // 1. MCM 枚举 + 租约 + metadata 匹配 (FilzaSlop 唯一可靠路径)
-        //    注意: MCM 租约的 identifier 是容器 UUID 而非 bundle id,
-        //    所以必须先枚举全部 UUID 再逐个读 metadata 匹配包名。
-        if MCMFileManager.shared.isAvailable,
-           let root = mcmContainerRoot(bundleID) {
-            return root
-        }
-
-        // 2. 兜底：用文件句柄扫描 Application 目录，逐个读 metadata plist 匹配包名
-        //    (FilzaJailedDS 内核漏洞有全盘权限, 这条路才走得通)
-        let base = "/var/mobile/Containers/Data/Application"
-        guard let handle = fileHandle,
-              let entries = try? handle.listDirectory(at: base) else {
-            return nil
-        }
-        for entry in entries where entry.isDirectory {
-            let metadata = (entry.path as NSString).appendingPathComponent(".com.apple.mobile_container_manager.metadata.plist")
-            guard let data = try? handle.readFile(at: metadata),
-                  let plist = try? PropertyListSerialization.propertyList(from: data, options: [], format: nil),
-                  let dict = plist as? [String: Any],
-                  let identifier = dict["MCMMetadataIdentifier"] as? String,
-                  identifier == bundleID else {
-                continue
-            }
-            return entry.path
-        }
-        return nil
+        lookup(bundleID: bundleID, fileHandle: fileHandle).root
     }
 
-    /// MCM 枚举定位：逐个容器申请租约并激活沙盒扩展，读 metadata plist 匹配 bundle id
-    private static func mcmContainerRoot(_ bundleID: String) -> String? {
-        let mcm = MCMFileManager.shared
-        let ids = mcm.enumerateIdentifiers(forClass: .appData, limit: 800)
-        guard !ids.isEmpty else { return nil }
+    /// 完整定位 + 诊断信息。
+    /// 1. MCM 枚举 (FilzaSlop)：枚举所有容器 UUID → 逐个租约激活 → 读 metadata plist 匹配包名
+    /// 2. 句柄扫描 (FilzaJailedDS)：列 Application 目录 → 逐个读 metadata plist 匹配包名
+    static func lookup(bundleID: String, fileHandle: FileAccessHandle?) -> LookupReport {
+        var r = LookupReport()
 
-        for uuid in ids {
-            // 申请租约并激活, 之后该容器根目录才可读
-            let lease = mcm.obtainLease(identifier: uuid, containerClass: .appData)
-            guard let root = lease.path else { continue }
-            let metadata = (root as NSString).appendingPathComponent(".com.apple.mobile_container_manager.metadata.plist")
-            guard let data = try? Data(contentsOf: URL(fileURLWithPath: metadata)),
-                  let plist = try? PropertyListSerialization.propertyList(from: data, options: [], format: nil),
-                  let dict = plist as? [String: Any],
-                  let identifier = dict["MCMMetadataIdentifier"] as? String,
-                  identifier == bundleID else {
-                continue
-            }
-            return root
+        if let hit = cachedRoots[bundleID] {
+            r.root = hit
+            r.notes.append("命中会话缓存")
+            return r
         }
-        return nil
+
+        // ---- 1. MCM 枚举路径 ----
+        r.mcmAvailable = MCMFileManager.shared.isAvailable
+        if r.mcmAvailable {
+            let ids = MCMFileManager.shared.enumerateIdentifiers(forClass: .appData, limit: 800)
+            r.mcmEnumCount = ids.count
+            if ids.isEmpty {
+                r.notes.append("MCM 枚举返回 0 个容器 (系统拒绝了枚举请求)")
+            }
+            for uuid in ids {
+                let lease = MCMFileManager.shared.obtainLease(identifier: uuid, containerClass: .appData)
+                guard let root = lease.path else { continue }
+                r.mcmLeaseOk += 1
+                let metadata = (root as NSString).appendingPathComponent(".com.apple.mobile_container_manager.metadata.plist")
+                guard let data = try? Data(contentsOf: URL(fileURLWithPath: metadata)),
+                      let plist = try? PropertyListSerialization.propertyList(from: data, options: [], format: nil),
+                      let dict = plist as? [String: Any],
+                      let identifier = dict["MCMMetadataIdentifier"] as? String else {
+                    continue
+                }
+                if identifier.hasPrefix("com.tencent"), r.tencentBundles.count < 10 {
+                    r.tencentBundles.append(identifier)
+                }
+                if identifier == bundleID {
+                    r.root = root
+                    cachedRoots[bundleID] = root
+                    return r
+                }
+            }
+        } else {
+            r.notes.append("MCM bridge 不可用 (当前漏洞方式可能不支持)")
+        }
+
+        // ---- 2. 句柄扫描路径 ----
+        guard let handle = fileHandle else {
+            r.notes.append("无文件句柄, 跳过扫描")
+            return r
+        }
+        r.scanTried = true
+        let base = "/var/mobile/Containers/Data/Application"
+        do {
+            let entries = try handle.listDirectory(at: base)
+            r.scanEntryCount = entries.count
+            for entry in entries where entry.isDirectory {
+                let metadata = (entry.path as NSString).appendingPathComponent(".com.apple.mobile_container_manager.metadata.plist")
+                guard let data = try? handle.readFile(at: metadata),
+                      let plist = try? PropertyListSerialization.propertyList(from: data, options: [], format: nil),
+                      let dict = plist as? [String: Any],
+                      let identifier = dict["MCMMetadataIdentifier"] as? String else {
+                    continue
+                }
+                if identifier.hasPrefix("com.tencent"), r.tencentBundles.count < 10 {
+                    r.tencentBundles.append(identifier)
+                }
+                if identifier == bundleID {
+                    r.root = entry.path
+                    cachedRoots[bundleID] = entry.path
+                    return r
+                }
+            }
+        } catch {
+            r.scanFailed = true
+            r.scanError = error.localizedDescription
+        }
+        return r
     }
 }
