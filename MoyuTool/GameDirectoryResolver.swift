@@ -49,7 +49,16 @@ enum GameDirectoryResolver {
         lookup(bundleID: bundleID, fileHandle: fileHandle).root
     }
 
+    /// 成功定位后登记 UUID → bundle id 映射 (写入层申请租约用, metadata plist 常读不到)
+    private static func registerMapping(root: String, bundleID: String) {
+        let uuid = (root as NSString).lastPathComponent
+        if uuid.contains("-") {
+            MCMFileManager.registerUUID(uuid, identifier: bundleID)
+        }
+    }
+
     /// 完整定位 + 诊断信息。
+    /// 0. 按 bundle id 直接租约 (FilzaSlop 正统用法, 需要 MHA 签名身份) — iOS 26 首选
     /// 1. MCM 枚举 (FilzaSlop)：枚举所有容器 UUID → 逐个租约激活 → 读 metadata plist 匹配包名
     /// 2. 句柄扫描 (FilzaJailedDS)：列 Application 目录 → 逐个读 metadata plist 匹配包名
     static func lookup(bundleID: String, fileHandle: FileAccessHandle?) -> LookupReport {
@@ -58,6 +67,7 @@ enum GameDirectoryResolver {
         if let hit = cachedRoots[bundleID] {
             r.root = hit
             r.notes.append("命中会话缓存")
+            registerMapping(root: hit, bundleID: bundleID)
             return r
         }
 
@@ -69,6 +79,7 @@ enum GameDirectoryResolver {
             r.root = path
             r.notes.append("bundle id 直查成功")
             cachedRoots[bundleID] = path
+            registerMapping(root: path, bundleID: bundleID)
             return r
         } else {
             r.directError = direct.error ?? "未知错误"
@@ -100,6 +111,7 @@ enum GameDirectoryResolver {
                 if identifier == bundleID {
                     r.root = root
                     cachedRoots[bundleID] = root
+                    registerMapping(root: root, bundleID: bundleID)
                     return r
                 }
             }
@@ -131,6 +143,7 @@ enum GameDirectoryResolver {
                 if identifier == bundleID {
                     r.root = entry.path
                     cachedRoots[bundleID] = entry.path
+                    registerMapping(root: entry.path, bundleID: bundleID)
                     return r
                 }
             }
