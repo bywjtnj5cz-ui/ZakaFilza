@@ -695,7 +695,11 @@ struct HomeView: View {
         // 1. 定位容器根
         guard let root = GameDirectoryResolver.containerRoot(bundleID: gd.bundleID, fileHandle: handle) else {
             lines.append("❌ 未定位到应用容器")
-            lines.append("   请确认和平精英已安装，或后台 bundle_id 是否正确")
+            lines.append("   检查项:")
+            lines.append("   1. 本机是否已安装 和平精英(国服)")
+            lines.append("   2. 后台 bundle_id 是否匹配: \(gd.bundleID)")
+            lines.append("      (国际服是 com.tencent.ig, 体验服 bundle 也不同)")
+            lines.append("   3. 重新运行漏洞利用后再点检测")
             scriptLogText = lines.joined(separator: "\n")
             activeSheet = .scriptLog
             return

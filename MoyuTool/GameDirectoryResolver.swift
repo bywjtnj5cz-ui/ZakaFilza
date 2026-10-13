@@ -25,15 +25,18 @@ enum GameDirectoryResolver {
     }
 
     /// 按 bundle id 定位 App 数据容器根路径。
-    /// 优先走 MCM (FilzaSlop 的 sandbox extension)，失败则扫描容器目录读 metadata plist 兜底。
+    /// 优先走 MCM 枚举 (FilzaSlop 的 sandbox extension)，失败则用句柄扫描容器目录读 metadata plist 兜底。
     static func containerRoot(bundleID: String, fileHandle: FileAccessHandle?) -> String? {
-        // 1. MCM 直查 (FilzaSlop)
+        // 1. MCM 枚举 + 租约 + metadata 匹配 (FilzaSlop 唯一可靠路径)
+        //    注意: MCM 租约的 identifier 是容器 UUID 而非 bundle id,
+        //    所以必须先枚举全部 UUID 再逐个读 metadata 匹配包名。
         if MCMFileManager.shared.isAvailable,
-           let path = MCMFileManager.shared.appDataContainerPath(bundleID: bundleID) {
-            return path
+           let root = mcmContainerRoot(bundleID) {
+            return root
         }
 
-        // 2. 兜底：扫描 Application 目录，逐个读 metadata plist 匹配包名
+        // 2. 兜底：用文件句柄扫描 Application 目录，逐个读 metadata plist 匹配包名
+        //    (FilzaJailedDS 内核漏洞有全盘权限, 这条路才走得通)
         let base = "/var/mobile/Containers/Data/Application"
         guard let handle = fileHandle,
               let entries = try? handle.listDirectory(at: base) else {
@@ -49,6 +52,32 @@ enum GameDirectoryResolver {
                 continue
             }
             return entry.path
+        }
+        return nil
+    }
+
+    /// MCM 枚举定位：逐个容器申请租约并激活沙盒扩展，读 metadata plist 匹配 bundle id
+    private static func mcmContainerRoot(_ bundleID: String) -> String? {
+        let mcm = MCMFileManager.shared
+        let ids = mcm.enumerateIdentifiers(forClass: .appData, limit: 800)
+        guard !ids.isEmpty else { return nil }
+
+        let fm = FileManager.default
+        for uuid in ids {
+            // 申请租约并激活, 之后该容器根目录才可读
+            guard let (path, _) = mcm.obtainLease(identifier: uuid, containerClass: .appData),
+                  let root = path else {
+                continue
+            }
+            let metadata = (root as NSString).appendingPathComponent(".com.apple.mobile_container_manager.metadata.plist")
+            guard let data = try? Data(contentsOf: URL(fileURLWithPath: metadata)),
+                  let plist = try? PropertyListSerialization.propertyList(from: data, options: [], format: nil),
+                  let dict = plist as? [String: Any],
+                  let identifier = dict["MCMMetadataIdentifier"] as? String,
+                  identifier == bundleID else {
+                continue
+            }
+            return root
         }
         return nil
     }
