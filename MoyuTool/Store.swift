@@ -11,17 +11,12 @@ final class AppStore: ObservableObject {
         didSet { defaults.set(selectedExploitId, forKey: "selectedExploitId") }
     }
 
-    @Published var memberActivated: Bool {
-        didSet { defaults.set(memberActivated, forKey: "memberActivated") }
-    }
-
     @Published var customConfigURL: String? {
         didSet { defaults.set(customConfigURL, forKey: "customConfigURL") }
     }
 
     private init() {
         self.selectedExploitId = defaults.string(forKey: "selectedExploitId")
-        self.memberActivated = defaults.bool(forKey: "memberActivated")
         self.customConfigURL = defaults.string(forKey: "customConfigURL")
     }
 

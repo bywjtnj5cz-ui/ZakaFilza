@@ -78,6 +78,8 @@ struct HomeView: View {
                     scriptLogSheet
                 case .updateURL:
                     updateURLSheet
+                case .memberActivate:
+                    MemberActivateView()
                 }
             }
             .overlay(
@@ -167,10 +169,16 @@ struct HomeView: View {
 
     // MARK: - 云端按钮
     private func cloudButton(_ btn: ConfigButton, isMember: Bool = false) -> some View {
-        let locked = isMember && !store.memberActivated
+        let locked = isMember && license.memberLevel < 1
         let color = btn.color.flatMap { Color(hex: $0) } ?? AppTheme.primary
 
-        return Button(action: { handleButton(btn) }) {
+        return Button(action: {
+            if isMember && locked {
+                activeSheet = .memberActivate
+            } else {
+                handleButton(btn)
+            }
+        }) {
             ZStack(alignment: .bottomTrailing) {
                 Text(btn.title)
                     .font(.system(size: 15 * AppTheme.fontScale, weight: .semibold))
@@ -207,7 +215,6 @@ struct HomeView: View {
             }
         }
         .buttonStyle(PlainButtonStyle())
-        .disabled(locked)
     }
 
     // 把 "cmd+1" / "shift+r" / "opt+space" 转成可读小标签
@@ -315,8 +322,7 @@ struct HomeView: View {
             }
 
         case "activate_member":
-            store.memberActivated = true
-            showToast("会员已激活")
+            activeSheet = .memberActivate
 
         case "uninstall":
             uninstallPaths(btn.paths)
@@ -596,6 +602,7 @@ enum HomeSheet: String, Identifiable {
     case diagnostic
     case scriptLog
     case updateURL
+    case memberActivate
     var id: String { rawValue }
 }
 
@@ -606,6 +613,88 @@ enum HomeAlert: Identifiable {
         switch self {
         case .announcement: return "announcement"
         case .confirm: return "confirm"
+        }
+    }
+}
+
+// MARK: - 会员卡激活 (免费用户升级会员)
+struct MemberActivateView: View {
+    @EnvironmentObject var license: LicenseManager
+    @Environment(\.dismiss) private var dismiss
+    @State private var cardKey = ""
+    @State private var errorMsg = ""
+
+    var body: some View {
+        NavigationStack {
+            VStack(spacing: 20) {
+                Spacer()
+
+                Image(systemName: "crown.fill")
+                    .font(.system(size: 52))
+                    .foregroundColor(AppTheme.primary)
+
+                Text("激活会员")
+                    .font(.largeTitle)
+                    .fontWeight(.bold)
+
+                Text("输入会员卡密，激活后解锁全部会员功能（一机一码）")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.center)
+
+                TextField("请输入会员卡密", text: $cardKey)
+                    .textFieldStyle(.roundedBorder)
+                    .autocapitalization(.none)
+                    .disableAutocorrection(true)
+                    .padding(.horizontal)
+
+                if !errorMsg.isEmpty {
+                    Text(errorMsg)
+                        .font(.caption)
+                        .foregroundColor(.red)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal)
+                }
+
+                Button(action: activate) {
+                    HStack {
+                        if license.isVerifying {
+                            ProgressView().tint(.white)
+                        } else {
+                            Image(systemName: "crown.fill")
+                        }
+                        Text(license.isVerifying ? "激活中..." : "激活会员")
+                    }
+                }
+                .buttonStyle(CloudButtonStyle(color: AppTheme.primary))
+                .disabled(cardKey.isEmpty || license.isVerifying)
+                .padding(.horizontal)
+
+                Spacer()
+            }
+            .padding()
+            .navigationTitle("会员激活")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("关闭") { dismiss() }
+                }
+            }
+        }
+    }
+
+    private func activate() {
+        errorMsg = ""
+        license.verify(cardKey: cardKey) { success, msg in
+            if success {
+                if license.memberLevel >= 1 {
+                    dismiss()
+                } else {
+                    errorMsg = "该卡密为免费卡，请输入会员卡密"
+                }
+            } else {
+                errorMsg = msg ?? "激活失败"
+            }
         }
     }
 }

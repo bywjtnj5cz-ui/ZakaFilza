@@ -263,36 +263,37 @@ case 'verify':
         out(['success' => false, 'message' => '卡密不存在']);
     }
     $card = $cards[$idx];
+    $memberLevel = (int)($card['member_level'] ?? 1);   // 旧卡默认视为会员, 保持向后兼容
+    $isMemberCard = $memberLevel >= 1;
 
-    if (empty($card['uuid'])) {
-        // 首次激活: 绑定设备
-        $cards[$idx]['uuid']           = $uuid;
+    if ($isMemberCard) {
+        // 会员卡: 一机一码, 首次激活绑定设备, 换设备需管理员解绑
+        if (empty($card['uuid'])) {
+            $cards[$idx]['uuid']           = $uuid;
+            $cards[$idx]['activated_at']   = now_iso();
+            save_cards($cards);
+            $card = $cards[$idx];
+        } elseif ($card['uuid'] !== $uuid) {
+            out(['success' => false, 'message' => '该会员卡已绑定其他设备, 请联系管理员解绑']);
+        }
+        // 会员卡记录设备信息 (刷新机型/系统)
         $cards[$idx]['model']          = $model;
         $cards[$idx]['system_version'] = $sysVer;
         $cards[$idx]['system_name']    = $sysName;
-        $cards[$idx]['activated_at']   = now_iso();
         save_cards($cards);
-        $card = $cards[$idx];
-    } elseif ($card['uuid'] !== $uuid) {
-        out(['success' => false, 'message' => '该卡密已绑定其他设备, 请联系管理员解绑']);
     }
+    // 免费卡: 密码式, 不绑定设备, 只校验卡密本身与有效期 (可多人共用)
 
     $expireTs = strtotime($card['expire_at'] ?? '');
     if ($expireTs === false || $expireTs < time()) {
         out(['success' => false, 'message' => '卡密已过期']);
     }
 
-    // 更新设备信息 (即使已绑定也刷新机型/系统)
-    $cards[$idx]['model']          = $model;
-    $cards[$idx]['system_version'] = $sysVer;
-    $cards[$idx]['system_name']    = $sysName;
-    save_cards($cards);
-
     out([
         'success'       => true,
         'message'       => '验证成功',
         'expire_at'     => date('c', $expireTs),
-        'member_level'  => (int)$card['member_level'],
+        'member_level'  => $memberLevel,
         'session_token' => session_token($cardKey, $uuid),
     ]);
     break;
@@ -330,15 +331,17 @@ case 'config':
             $lockReason = '卡密不存在或已被删除';
         } else {
             $card = $cards[$idx];
+            $memberLevel = (int)($card['member_level'] ?? 1);
+            $isMemberCard = $memberLevel >= 1;
             $expireTs = strtotime($card['expire_at'] ?? '');
             $notExpired = ($expireTs !== false && $expireTs >= time());
-            $uuidMatch = (!empty($card['uuid']) && $card['uuid'] === $uuid);
+            // 会员卡: 必须设备匹配 (一机一码); 免费卡: 密码式, 不校验设备绑定
+            $uuidMatch = $isMemberCard ? (!empty($card['uuid']) && $card['uuid'] === $uuid) : true;
             $tokenOk = hash_equals(session_token($cardKey, $uuid), $token);
             $authorized = $notExpired && $uuidMatch && $tokenOk;
             if (!$authorized) {
                 if (!$notExpired)               $lockReason = '卡密已过期';
-                elseif (empty($card['uuid']))   $lockReason = '卡密尚未激活(未绑定设备)';
-                elseif (!$uuidMatch)            $lockReason = '设备UUID不匹配(卡密已绑定其他设备)';
+                elseif (!$uuidMatch)            $lockReason = '设备UUID不匹配(会员卡已绑定其他设备)';
                 elseif (!$tokenOk)              $lockReason = '会话token失效(需重新验证卡密)';
             }
         }
@@ -625,7 +628,7 @@ textarea { width: 100%; min-height: 320px; font-family: SFMono-Regular, Menlo, m
     <div class="row">
       数量 <input id="gen-count" type="number" value="1" min="1" max="100" style="max-width:80px">
       有效天数 <input id="gen-days" type="number" value="30" style="max-width:80px">
-      会员等级 <select id="gen-level"><option value="1">普通</option><option value="2">高级</option><option value="3">VIP</option></select>
+      会员等级 <select id="gen-level"><option value="0">免费(不绑设备)</option><option value="1">会员(一机一码)</option></select>
       备注 <input id="gen-note" placeholder="备注(可选)">
       <button onclick="genCard()">生成</button>
     </div>
@@ -810,7 +813,7 @@ async function loadList() {
       <td class="mono" style="max-width:180px;overflow:hidden;text-overflow:ellipsis">${esc(c.uuid) || '-'}</td>
       <td>${esc(c.model) || '-'}</td>
       <td>${esc(c.system_name) || ''} ${esc(c.system_version) || ''}</td>
-      <td>L${c.member_level}</td>
+      <td>${c.member_level >= 1 ? '会员' : '免费'}</td>
       <td>${fmtDate(c.expire_at)}</td>
       <td>${statusTag}</td>
       <td>${actions.join('')}</td>`;
