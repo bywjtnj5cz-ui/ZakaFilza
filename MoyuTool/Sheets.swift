@@ -56,7 +56,6 @@ struct SheetsView: View {
             Section("支持的漏洞") {
                 Text("FilzaJailedDS - iOS 17.0–26.0.1")
                 Text("FilzaSlop - iOS 18, 26, 27 beta")
-                Text("Filza - 巨魔全版本")
             }
         }
     }

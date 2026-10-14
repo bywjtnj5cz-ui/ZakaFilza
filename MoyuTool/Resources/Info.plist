@@ -53,12 +53,8 @@
 	<true/>
 	<key>LSApplicationQueriesSchemes</key>
 	<array>
-		<string>apple-magnifier</string>
-		<string>filza</string>
 		<string>filzajaileds</string>
 		<string>filzaslop</string>
-		<string>filzaescaped</string>
-		<string>lara</string>
 	</array>
 </dict>
 </plist>
