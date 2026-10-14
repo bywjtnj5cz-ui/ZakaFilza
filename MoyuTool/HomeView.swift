@@ -50,6 +50,15 @@ struct HomeView: View {
                                 }
                             }
                         }
+
+                        // 耳机按钮（一机一码专属，仅 member_level >= 2 解锁）
+                        if let earphones = cfg.earphoneButtons, !earphones.isEmpty {
+                            LazyVGrid(columns: columns, spacing: 12) {
+                                ForEach(earphones) { btn in
+                                    cloudButton(btn, isEarphone: true)
+                                }
+                            }
+                        }
                     }
 
                     // 联系方式卡片（QQ群 / 公众号，云端配置，留空自动隐藏）
@@ -531,10 +540,10 @@ struct HomeView: View {
     }
 
     // MARK: - 云端按钮
-    private func cloudButton(_ btn: ConfigButton, isMember: Bool = false) -> some View {
-        // member_buttons 区的按钮按 member_only 默认等级1, 可用 min_member_level=2 提到仅耳机
+    private func cloudButton(_ btn: ConfigButton, isMember: Bool = false, isEarphone: Bool = false) -> some View {
+        // member_buttons 区默认等级1, earphone_buttons 区默认等级2, 可用 min_member_level 覆盖
         let baseLevel = btn.requiredLevel
-        let requiredLevel = isMember ? max(baseLevel, 1) : baseLevel
+        let requiredLevel = isEarphone ? max(baseLevel, 2) : (isMember ? max(baseLevel, 1) : baseLevel)
         let locked = requiredLevel > 0 && license.memberLevel < requiredLevel
         let lockLabel = requiredLevel >= 2 ? "耳机" : "会员"
         let color = btn.color.flatMap { Color(hex: $0) } ?? AppTheme.primary

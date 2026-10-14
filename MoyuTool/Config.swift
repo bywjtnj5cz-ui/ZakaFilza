@@ -19,6 +19,7 @@ struct AppConfig: Codable {
     var sources: [String]?             // 备用线路 (主线路挂了自动切换)
     var buttons: [ConfigButton]
     var memberButtons: [ConfigButton]  // 会员专属按钮
+    var earphoneButtons: [ConfigButton]? // 耳机档位专属按钮 (member_level = 2), 旧服务端可能缺失
     var downloadShortcuts: [DownloadShortcut] // 一键下载直链
     var gameDirs: GameDirsConfig?      // 游戏目录定位 (和平精英等)
     var banners: [Banner]?             // 首页轮播图
@@ -42,6 +43,7 @@ struct AppConfig: Codable {
         case sources
         case buttons
         case memberButtons = "member_buttons"
+        case earphoneButtons = "earphone_buttons"
         case downloadShortcuts = "download_shortcuts"
         case gameDirs = "game_dirs"
         case banners

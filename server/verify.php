@@ -123,6 +123,9 @@ function default_config() {
             ['title' => '🎮 游戏目录', 'action' => 'open_file_manager', 'color' => '#FF4081', 'member_only' => true, 'path' => '@game:paks'],
             ['title' => '🗑️ 卸载美化', 'action' => 'uninstall',   'color' => '#F44336', 'member_only' => true, 'confirm_text' => '确定要卸载美化吗？将删除已配置的美化文件。', 'paths' => ['/var/mobile/Containers/Data/Application/Documents/Beautify']],
         ],
+        'earphone_buttons' => [
+            // 耳机档位专属按钮 (member_level = 2 可见), 默认空
+        ],
         'download_shortcuts' => [],
         'game_dirs' => [
             'bundle_id' => 'com.tencent.tmgp.pubgmhd',
@@ -179,7 +182,7 @@ function load_config() {
 function save_config_file($cfg) {
     // 只允许已知字段
     $allowed = ['app_name','qq_group','wechat_official','version','announcement',
-                'config_url','verify_server_url','min_version','buttons','member_buttons','download_shortcuts','game_dirs',
+                'config_url','verify_server_url','min_version','buttons','member_buttons','earphone_buttons','download_shortcuts','game_dirs',
                 'theme','kill_switch','kill_message','sources','banners','auto_beautify','categories'];
     $clean = [];
     foreach ($allowed as $k) {
@@ -452,6 +455,7 @@ case 'config':
             'locked_reason'     => $lockReason,
             'buttons'           => [],
             'member_buttons'    => [],
+            'earphone_buttons'  => [],
             'download_shortcuts'=> [],
         ];
         echo json_encode($locked, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
@@ -914,6 +918,12 @@ textarea { width: 100%; min-height: 320px; font-family: SFMono-Regular, Menlo, m
   </div>
 
   <div class="card">
+    <h3>🎧 耳机按钮 <button class="gray" onclick="addButton('earphone_buttons')" style="float:right">+ 添加按钮</button></h3>
+    <div id="c-earphone_buttons"></div>
+    <div style="font-size:12px;color:#888">耳机档位（一机一码）专属按钮，仅 member_level=2 的卡密可见，会员和免费用户看不到。</div>
+  </div>
+
+  <div class="card">
     <h3>⬇️ 一键下载直链 <button class="gray" onclick="addShortcut()" style="float:right">+ 添加</button></h3>
     <div id="c-download_shortcuts"></div>
   </div>
@@ -1172,6 +1182,7 @@ function renderConfigForm(cfg) {
   document.getElementById('c-announcement').value = cfg.announcement ?? '';
   renderButtons('buttons', cfg.buttons ?? []);
   renderButtons('member_buttons', cfg.member_buttons ?? []);
+  renderButtons('earphone_buttons', cfg.earphone_buttons ?? []);
   renderShortcuts(cfg.download_shortcuts ?? []);
   renderBanners(cfg.banners ?? []);
   document.getElementById('c-auto_enabled').checked = !!(cfg.auto_beautify && cfg.auto_beautify.enabled);
@@ -1194,6 +1205,7 @@ function collectConfig() {
   cfg.announcement = document.getElementById('c-announcement').value;
   cfg.buttons = collectButtons('buttons');
   cfg.member_buttons = collectButtons('member_buttons');
+  cfg.earphone_buttons = collectButtons('earphone_buttons');
   cfg.download_shortcuts = collectShortcuts();
   cfg.banners = collectBanners();
   cfg.auto_beautify = {
@@ -1291,7 +1303,7 @@ function collectButtons(fieldId) {
 function addButton(fieldId) {
   const cfg = CURRENT_CONFIG || {};
   cfg[fieldId] = cfg[fieldId] || [];
-  cfg[fieldId].push({ title: '新按钮', action: 'open_file_manager', color: '#FF6B9D', member_only: fieldId === 'member_buttons' });
+  cfg[fieldId].push({ title: '新按钮', action: 'open_file_manager', color: '#FF6B9D', member_only: fieldId === 'member_buttons', min_member_level: fieldId === 'earphone_buttons' ? 2 : undefined });
   renderButtons(fieldId, cfg[fieldId]);
 }
 
