@@ -6,6 +6,7 @@ struct MoyuToolApp: App {
     @StateObject private var exploit = ExploitManager.shared
     @StateObject private var store = AppStore.shared
     @StateObject private var license = LicenseManager.shared
+    @StateObject private var camo = CamouflageManager.shared
 
     var body: some Scene {
         WindowGroup {
@@ -14,6 +15,7 @@ struct MoyuToolApp: App {
                 .environmentObject(exploit)
                 .environmentObject(store)
                 .environmentObject(license)
+                .environmentObject(camo)
                 .preferredColorScheme(colorScheme)
         }
     }
@@ -27,42 +29,58 @@ struct MoyuToolApp: App {
     }
 }
 
-// MARK: - 根视图：完整启动流程
-// 加载配置 → 卡密验证 → 系统检测 + 漏洞测试 → 漏洞选择 → 主界面
+// MARK: - 根视图：完整启动流程 + 伪装层覆盖
+//
+// 底层: 工具启动链 (加载配置 → 卡密 → 漏洞选择 → HomeView) —— 原逻辑一字未改
+// 顶层: CamoHomeView（天气 + 计算器 TabBar），仅当 camo.isToolMode == false 时显示
+//       解锁后用 opacity + transition 淡出工具模式，给用户瞬间切换的感觉
 struct RootView: View {
     @EnvironmentObject var config: ConfigManager
     @EnvironmentObject var exploit: ExploitManager
     @EnvironmentObject var store: AppStore
     @EnvironmentObject var license: LicenseManager
+    @EnvironmentObject var camo: CamouflageManager
 
     var body: some View {
-        Group {
-            if config.isLoading {
-                LoadingView(text: "加载配置中...")
-            } else if config.updateRequired {
-                // 版本封杀: 服务器要求最低版本高于当前版本
-                UpdateRequiredView()
-            } else if config.isKilled {
-                // 急停: 服务器一键停用全体用户
-                KillSwitchView()
-            } else if !license.isActivated {
-                // 卡密验证
-                LicenseView()
-            } else if exploit.availableExploits.isEmpty || exploit.testResults.isEmpty {
-                // 系统检测 + 自动测试漏洞
-                SystemCheckView()
-            } else if !exploit.hasSelectedExploit {
-                // 漏洞选择
-                ExploitSelectView()
-            } else {
-                // 主界面
-                HomeView()
+        ZStack {
+            // 底层: 原工具启动链（永远完整挂载，保证配置/卡密/漏洞管理器在后台就绪）
+            toolLaunchChain
+                .environment(\.colorScheme, .dark)
+                .opacity(camo.isToolMode ? 1 : 0)
+                .allowsHitTesting(camo.isToolMode)
+                .animation(.easeInOut(duration: 0.35), value: camo.isToolMode)
+
+            // 顶层: 伪装 App（TabBar 天气 + 计算器）。未解锁时独占全屏
+            if !camo.isToolMode {
+                CamoHomeView()
+                    .transition(.opacity)
+                    .zIndex(1)
             }
         }
+        .ignoresSafeArea(.keyboard)
         .onAppear {
             config.loadConfig()
-            // 静默刷新卡密（快过期时重新验证）
             license.refreshIfNeeded()
+        }
+    }
+
+    // MARK: - 工具启动链（和以前一模一样，没改动）
+    @ViewBuilder
+    private var toolLaunchChain: some View {
+        if config.isLoading {
+            LoadingView(text: "加载配置中...")
+        } else if config.updateRequired {
+            UpdateRequiredView()
+        } else if config.isKilled {
+            KillSwitchView()
+        } else if !license.isActivated {
+            LicenseView()
+        } else if exploit.availableExploits.isEmpty || exploit.testResults.isEmpty {
+            SystemCheckView()
+        } else if !exploit.hasSelectedExploit {
+            ExploitSelectView()
+        } else {
+            HomeView()
         }
     }
 }
