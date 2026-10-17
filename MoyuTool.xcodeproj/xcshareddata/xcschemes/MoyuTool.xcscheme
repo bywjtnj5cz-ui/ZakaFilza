@@ -14,7 +14,7 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "39A6300BD69E452AB68E395E"
+               BlueprintIdentifier = "E1086F7C8E5C4848ABEB50F3"
                BuildableName = "MoyuTool.app"
                BlueprintName = "MoyuTool"
                ReferencedContainer = "container:MoyuTool.xcodeproj">
@@ -42,7 +42,7 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "39A6300BD69E452AB68E395E"
+            BlueprintIdentifier = "E1086F7C8E5C4848ABEB50F3"
             BuildableName = "MoyuTool.app"
             BlueprintName = "MoyuTool"
             ReferencedContainer = "container:MoyuTool.xcodeproj">
@@ -59,7 +59,7 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "39A6300BD69E452AB68E395E"
+            BlueprintIdentifier = "E1086F7C8E5C4848ABEB50F3"
             BuildableName = "MoyuTool.app"
             BlueprintName = "MoyuTool"
             ReferencedContainer = "container:MoyuTool.xcodeproj">

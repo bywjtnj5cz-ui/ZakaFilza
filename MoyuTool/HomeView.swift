@@ -96,6 +96,13 @@ struct HomeView: View {
                         primaryButton: .destructive(Text("确认")) { executeAction(btn) },
                         secondaryButton: .cancel(Text("取消"))
                     )
+                case .logoutConfirm:
+                    return Alert(
+                        title: Text("注销卡密"),
+                        message: Text("确定要解绑当前设备吗？解绑后卡密可在其他设备重新激活。"),
+                        primaryButton: .destructive(Text("注销")) { license.logout() },
+                        secondaryButton: .cancel(Text("取消"))
+                    )
                 }
             }
             .sheet(item: $activeSheet) { sheet in
@@ -271,10 +278,20 @@ struct HomeView: View {
             if let cfg = config.config {
                 // 状态条：卡密状态 + 当前漏洞链
                 statusBar
-                Text("版本 \(cfg.version)")
-                    .font(.caption2)
-                    .foregroundColor(AppTheme.textSecondary)
-                    .tracking(0.5)
+                HStack(alignment: .center) {
+                    Text("版本 \(cfg.version)")
+                        .font(.caption2)
+                        .foregroundColor(AppTheme.textSecondary)
+                        .tracking(0.5)
+                    Spacer()
+                    Button(action: { activeAlert = .logoutConfirm }) {
+                        Image(systemName: "lock.rotation")
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundColor(AppTheme.textSecondary.opacity(0.7))
+                    }
+                    .buttonStyle(.plain)
+                    .help("注销卡密")
+                }
             }
         }
         .padding(18)
@@ -1213,10 +1230,12 @@ enum HomeSheet: String, Identifiable {
 enum HomeAlert: Identifiable {
     case announcement
     case confirm(ConfigButton)
+    case logoutConfirm
     var id: String {
         switch self {
         case .announcement: return "announcement"
         case .confirm: return "confirm"
+        case .logoutConfirm: return "logoutConfirm"
         }
     }
 }
