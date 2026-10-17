@@ -104,8 +104,6 @@ struct CamoCalculatorView: View {
             : Color(white: 0.20)
         let fgColor: Color = isFunction ? .black : .white
 
-        let cornerRadius = height / 2
-
         return Button(action: {
             handlePress(title: title, isOperator: isOperator, isFunction: isFunction)
         }) {

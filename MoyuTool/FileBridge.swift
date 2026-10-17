@@ -68,7 +68,7 @@ enum CloudDownloader {
         cfg.httpShouldUsePipelining = true
         cfg.allowsCellularAccess = true
         if #available(iOS 11.0, *) {
-            cfg.waitForConnectivity = true
+            cfg.waitsForConnectivity = true
         }
         // 清空缓存: 下载的大文件只落临时文件, 不需要磁盘缓存
         cfg.urlCache = nil
@@ -130,7 +130,7 @@ enum CloudDownloader {
         cfg.urlCache = nil
         cfg.requestCachePolicy = .reloadIgnoringLocalCacheData
         cfg.httpCookieStorage = nil
-        if #available(iOS 11.0, *) { cfg.waitForConnectivity = true }
+        if #available(iOS 11.0, *) { cfg.waitsForConnectivity = true }
         let sess = URLSession(configuration: cfg, delegate: delegate, delegateQueue: nil)
         sess.downloadTask(with: link).resume()
     }

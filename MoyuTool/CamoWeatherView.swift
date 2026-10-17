@@ -170,7 +170,7 @@ struct CamoWeatherView: View {
         LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 12), count: 2),
                   spacing: 12) {
             gridCell(title: "体感温度", value: "\(weatherData.feelsLike)°",
-                     detail: weatherData.feelsLikeNote)
+                     detail: "")
             gridCell(title: "UV 指数", value: "\(weatherData.uv)",
                      detail: weatherData.uvNote)
             gridCell(title: "降水量", value: "\(weatherData.precipMM) mm",
@@ -264,16 +264,14 @@ struct CamoWeatherView: View {
     }
 
     private func loadWeather() async {
-        // 尝试 WeatherKit（iOS 16+）
-        if #available(iOS 16.0, *) {
-            if let loc = locationManager.location {
-                do {
-                    let wk = try await WeatherService().fetchWeather(for: loc)
-                    self.weatherData = wk
-                    return
-                } catch {
-                    // 网络/权限问题，回退 mock
-                }
+        // 尝试 WeatherKit（真机有配置时走真实数据，失败回退 mock）
+        if let loc = locationManager.location {
+            do {
+                let wk = try await WeatherService().fetchWeather(for: loc)
+                self.weatherData = wk
+                return
+            } catch {
+                // 网络/权限问题，回退 mock
             }
         }
         // 回退 mock（按当前时间微调，让数据看起来不那么"模板化"）
@@ -291,16 +289,16 @@ struct CamoWeatherView: View {
 
 private struct HourForecast {
     let index: Int
-    let label: String   // "现在" / "10" / "11" ...
-    let temp: Int
-    let symbol: String
+    var label: String   // "现在" / "10" / "11" ...
+    var temp: Int
+    var symbol: String
 }
 
 private struct DailyForecast {
-    let dayLabel: String
-    let symbol: String
-    let high: Int
-    let low: Int
+    var dayLabel: String
+    var symbol: String
+    var high: Int
+    var low: Int
 }
 
 private struct WeatherSnapshot {
