@@ -14,7 +14,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 PROJECT_NAME = "MoyuTool"
 BUNDLE_ID = "com.apple.mobile.MobileHouseArrest"
-APP_DISPLAY_NAME = "墨鱼Tool"
+APP_DISPLAY_NAME = "实用"
 IOS_DEPLOYMENT_TARGET = "16.0"
 
 # 生成唯一 ID（24位十六进制）

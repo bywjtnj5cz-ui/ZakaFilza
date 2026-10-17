@@ -244,7 +244,7 @@ struct HomeView: View {
                 appIconView
 
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(config.config?.appName ?? "墨鱼Tool")
+                    Text(config.config?.appName ?? "实用")
                         .font(.system(size: 26, weight: .bold, design: .rounded))
                         .foregroundColor(AppTheme.textPrimary)
                     Text("iOS 文件管理工具")

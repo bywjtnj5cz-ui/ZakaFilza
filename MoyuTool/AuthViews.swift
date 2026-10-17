@@ -17,7 +17,7 @@ struct LicenseView: View {
                 Image(systemName: "shield.lefthalf.filled")
                     .font(.system(size: 14, weight: .semibold))
                     .foregroundColor(AppTheme.primary)
-                Text(config.config?.appName ?? "墨鱼Tool")
+                Text(config.config?.appName ?? "实用")
                     .font(.system(size: 15, weight: .semibold))
                     .foregroundColor(.secondary)
             }

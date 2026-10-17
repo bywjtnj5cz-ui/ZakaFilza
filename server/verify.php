@@ -90,11 +90,11 @@ function save_cards($cards) {
 // ==================== 云控配置 ====================
 function default_config() {
     return [
-        'app_name'           => '墨鱼Tool',
+        'app_name'           => '实用',
         'qq_group'           => '',
         'wechat_official'    => '',
         'version'            => '1.0.0',
-        'announcement'       => "欢迎使用 墨鱼Tool!\n\n首次使用请先选择与你系统版本匹配的漏洞利用方式, 获得文件系统访问权限后即可使用文件管理器.\n\n支持:\n• FilzaJailedDS (iOS 17-26)\n• FilzaSlop (iOS 18, 26, 27 beta)",
+        'announcement'       => "欢迎使用 实用!\n\n首次使用请先选择与你系统版本匹配的漏洞利用方式, 获得文件系统访问权限后即可使用文件管理器.\n\n支持:\n• FilzaJailedDS (iOS 17-26)\n• FilzaSlop (iOS 18, 26, 27 beta)",
         'config_url'         => '',  // 留空, 让 App 自行决定
         'verify_server_url'  => '',  // 留空, App 用内置默认地址
         'min_version'        => '1.0.0',  // 最低可用版本, 低于此版本 App 启动即锁定 (版本封杀开关)
@@ -764,7 +764,7 @@ case '':
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>墨鱼Tool 管理后台</title>
+<title>实用 管理后台</title>
 <style>
 * { box-sizing: border-box; }
 body { font-family: -apple-system, "PingFang SC", sans-serif; background: #f5f7fa; margin: 0; padding: 0; color: #333; }
@@ -812,7 +812,7 @@ textarea { width: 100%; min-height: 320px; font-family: SFMono-Regular, Menlo, m
   <div class="tab" onclick="switchTab('upload')" data-tab="upload">📤 文件上传</div>
 </div>
 <div class="container">
-<h1>墨鱼Tool 管理后台</h1>
+<h1>实用 管理后台</h1>
 <div class="notice">
   App 验证地址: <span class="mono" id="verify-url"></span><br>
   App 配置地址: <span class="mono" id="config-url"></span><br>
@@ -1117,7 +1117,7 @@ function printCards() {
     th { background: #f0f0f0; font-weight: 600; }
     .mono { font-family: Menlo, monospace; font-size: 10px; }
   </style></head><body>
-  <h1>墨鱼Tool 卡密列表</h1>
+  <h1>实用 卡密列表</h1>
   <div class="info">打印时间: ${new Date().toLocaleString('zh-CN')}</div>
   <table><thead><tr>
     <th>卡密</th><th>档位</th><th>状态</th><th>到期时间</th><th>激活时间</th><th>绑定设备(UUID)</th><th>设备型号</th><th>系统版本</th><th>备注</th>

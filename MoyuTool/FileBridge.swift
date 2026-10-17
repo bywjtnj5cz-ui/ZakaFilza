@@ -52,10 +52,32 @@ enum CloudDownloader {
         return nil
     }
 
-    static func session() -> URLSession {
-        let cfg = URLSessionConfiguration.ephemeral
-        cfg.timeoutIntervalForRequest = 60
+    // 下载加速配置:
+    //   - .default (而非 .ephemeral): 全局连接池复用, 跨下载会话复用同一 host 的 TCP 连接
+    //   - httpMaximumConnectionsPerHost = 6: 单 host 并发连接数翻倍 (iOS 默认 4)
+    //   - networkServiceType = .responsiveData: 告诉系统提升优先级, 减少后台节流
+    //   - httpShouldUsePipelining = true: HTTP/1.1 流水线减少握手开销
+    //   - allowsCellularAccess = true: 允许蜂窝网络
+    //   - waitForConnectivity = true: 网络暂时断开时自动等待 (iOS 11+)
+    static func makeSession(progress: Bool = false) -> URLSession {
+        let cfg = URLSessionConfiguration.default
+        cfg.timeoutIntervalForRequest = 30
         cfg.timeoutIntervalForResource = 600
+        cfg.httpMaximumConnectionsPerHost = 6
+        cfg.networkServiceType = .responsiveData
+        cfg.httpShouldUsePipelining = true
+        cfg.allowsCellularAccess = true
+        if #available(iOS 11.0, *) {
+            cfg.waitForConnectivity = true
+        }
+        // 清空缓存: 下载的大文件只落临时文件, 不需要磁盘缓存
+        cfg.urlCache = nil
+        cfg.requestCachePolicy = .reloadIgnoringLocalCacheData
+        // 禁用 http/https cookie 持久化 (避免和下载 host 无关的 cookie 干扰)
+        cfg.httpCookieStorage = nil
+        if progress {
+            return URLSession(configuration: cfg)
+        }
         return URLSession(configuration: cfg)
     }
 
@@ -78,7 +100,7 @@ enum CloudDownloader {
 
         // 无进度回调 → 走闭包式下载 (简单路径)
         guard let progress = progress else {
-            session().downloadTask(with: link) { tempURL, _, error in
+            makeSession().downloadTask(with: link) { tempURL, _, error in
                 processDownloaded(tempURL: tempURL, error: error, name: name,
                                   targetDir: targetDir, handle: handle, unzip: unzip,
                                   completion: completion)
@@ -98,9 +120,17 @@ enum CloudDownloader {
         delegate.onFailed = { msg in
             completion(.failure(msg))
         }
-        let cfg = URLSessionConfiguration.ephemeral
-        cfg.timeoutIntervalForRequest = 60
+        // 给进度委托单独构造配置 (和 makeSession 逻辑一致, 但需要带 delegate)
+        let cfg = URLSessionConfiguration.default
+        cfg.timeoutIntervalForRequest = 30
         cfg.timeoutIntervalForResource = 600
+        cfg.httpMaximumConnectionsPerHost = 6
+        cfg.networkServiceType = .responsiveData
+        cfg.httpShouldUsePipelining = true
+        cfg.urlCache = nil
+        cfg.requestCachePolicy = .reloadIgnoringLocalCacheData
+        cfg.httpCookieStorage = nil
+        if #available(iOS 11.0, *) { cfg.waitForConnectivity = true }
         let sess = URLSession(configuration: cfg, delegate: delegate, delegateQueue: nil)
         sess.downloadTask(with: link).resume()
     }

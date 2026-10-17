@@ -50,7 +50,7 @@ struct SheetsView: View {
 
     private var aboutView: some View {
         List {
-            LabeledContent("App 名称", value: "墨鱼Tool")
+            LabeledContent("App 名称", value: "实用")
             LabeledContent("版本", value: "1.0.0")
             LabeledContent("最低系统", value: "iOS 16.0")
             Section("支持的漏洞") {
